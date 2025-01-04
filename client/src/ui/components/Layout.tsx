@@ -1,5 +1,6 @@
 import { Outlet } from "react-router-dom";
 import Sidebar from "./Sidebar";
+import ThemeToggle from "./ThemeToggle";
 
 export default function ProjectLayout() {
   return (
@@ -35,6 +36,9 @@ export default function ProjectLayout() {
                 </div>
               </label>
               Navbar
+              <div className="float-right">
+              <ThemeToggle/>
+                </div>
             </div>
 
             {/* Main Content */}
