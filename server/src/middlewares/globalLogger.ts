@@ -1,27 +1,27 @@
-import winston from 'winston';
+import { Request, Response, NextFunction } from 'express';
+import { logger } from '@utils/logger';
 
-// Configure log format
-const logFormat = winston.format.printf(({ level, message, timestamp }) => {
-  return `${timestamp} [${level.toUpperCase()}]: ${message}`;
-});
+// Log all incoming requests
+export const globalLogger = (req: Request, res: Response,
+ next: NextFunction) => {
+  logger.info(`[${req.method}] ${req.originalUrl}`);
+  
+  // Capture response details after the request is processed
+  res.on('finish', () => {
+    logger.info(`[${req.method}] ${req.originalUrl} - ${res.statusCode}`);
+  });
 
-// Create logger instance
-export const logger = winston.createLogger({
-  level: 'info',  // Log level (error, warn, info, http, debug)
-  format: winston.format.combine(
-    winston.format.timestamp(),
-    winston.format.colorize(),
-    logFormat
-  ),
-  transports: [
-    // Log to console
-    new winston.transports.Console(),
+  next();
+};
 
-    // Log errors to a file
-    new winston.transports.File({ filename: 'logs/error.log',
- level: 'error' }),
-
-    // Log all info to a separate file
-    new winston.transports.File({ filename: 'logs/app.log' }),
-  ],
-});
+// Log uncaught errors globally
+export const globalErrorLogger = (
+  err: Error,
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  logger.error(`Error: ${err.message}`);
+  logger.error(err.stack || 'No stack trace available');
+  res.status(500).json({ error: 'Something went wrong!' });
+};
