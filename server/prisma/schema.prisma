@@ -1,0 +1,32 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  password  String
+  name      String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  RefreshToken RefreshToken[]
+}
+
+model RefreshToken {
+  id          String   @id @default(uuid())
+  token       String   @unique
+  userId      String
+  user        User     @relation(fields: [userId], references: [id])
+  ipAddress   String?  // Tracks the IP address
+  userAgent   String?  // Tracks the device/user agent
+  createdAt   DateTime @default(now())
+  lastUsedAt  DateTime @updatedAt // Tracks the last used time
+  expiresAt   DateTime
+  isRevoked   Boolean  @default(false) // For granular revocation
+}
