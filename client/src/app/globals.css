@@ -19,3 +19,38 @@ body {
   background: var(--background);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+
+#sidebar {
+  height: 60px;
+  width: 100%;
+  border-right: none;
+  border-top: 1px solid var(--line-clr);
+  position: fixed;
+  bottom: 0;
+  overflow-x: scroll;
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 60px;
+  align-items: center;
+}
+ul a, ul .dropdown-btn {
+  justify-content: center;
+  width: 60px;
+  height: 60px;
+  padding: 0;
+}
+ul li span, ul li:first-child {
+  display: none;
+}
+
+ul li .sub-menu.show {
+  position: fixed;
+  bottom: 60px;
+  left: 0;
+  height: 60px;
+  width: 100%;
+  background-color: var(--hover-clr);
+  display: flex;
+  justify-content: center;
+}

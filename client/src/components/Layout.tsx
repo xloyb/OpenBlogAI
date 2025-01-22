@@ -1,46 +1,17 @@
-
+import { Sidebar } from "@/components/sidebar/Sidebar";
 
 export default function ProjectLayout() {
   return (
-    <>
-      <div className="text-base-content">
-        <div className="flex min-h-screen">
-          {/* Sidebar */}
-          <div>
-            sidebar
-          </div>
-          {/* Main Content Area */}
-          <div className="flex-1 w-auto flex flex-col">
-            {/* Navbar */}
-            <div className="sticky top-0 bg-base-100 p-4 shadow">
-              <label htmlFor="my-drawer-2" className="drawer-button md:hidden">
-                <div tabIndex={0} role="button" className="mr-2">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="h-5 w-5"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="2"
-                      d="M4 6h16M4 12h16M4 18h7"
-                    />
-                  </svg>
-                </div>
-              </label>
-              Navbar
-            </div>
-            {/* Main Content */}
-            <main className="flex-1 overflow-y-auto p-4 bg-base-200">
-             test
-            </main>
-            <div className="bg-base-300 p-4 shadow">Footer</div>
-          </div>
+    <div className="min-h-[100dvh] bg-base-100 text-base-content grid md:grid-cols-[auto,1fr] grid-cols-[1fr]">
+      <Sidebar />
+      <main className="p-[min(30px,7%)] md:p-[30px] pb-[60px]">
+        <div className="md:border md:border-neutral md:rounded-2xl md:mb-5 md:p-[min(3em,15%)] p-0 border-none">
+          <h2 className="mt-4">Main Content</h2>
+          <p className="text-neutral-content mt-5 mb-[15px]">
+            Hello xLoy
+          </p>
         </div>
-      </div>
-    </>
+      </main>
+    </div>
   );
 }
