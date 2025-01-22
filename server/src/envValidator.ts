@@ -6,6 +6,7 @@ import { config } from './config';
 // Define the schema for environment variable validation
 const envSchema = z.object({
   DATABASE_URL: z.string().url(),
+  HUGGING_FACE_API_TOKEN: z.string().min(10),
   JWT_SECRET: z.string().min(10),
   BCRYPT_SALT_ROUNDS: z.string().regex(/^[0-9]+$/),
   PORT: z.string().regex(/^[0-9]+$/),
