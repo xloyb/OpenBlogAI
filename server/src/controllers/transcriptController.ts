@@ -7,9 +7,9 @@ export const extractTranscript = async (
   next: NextFunction
 ): Promise<void> => {
   try {
-    // const { videoId } = req.params;
+    const { videoId } = req.params;
 
-    let videoId = "lVdgiuzGmdI";
+    // let videoId = "lVdgiuzGmdI";
 
     if (!videoId) {
       res.status(400).json({ error: true, message: "Video ID is required" });
@@ -21,7 +21,7 @@ export const extractTranscript = async (
 
     // Format the transcript into a single string
     const formattedTranscript = transcript.map(entry => entry.text).join(' ');
-    console.log("formattedTranscript:",formattedTranscript);
+    console.log("formattedTranscript",formattedTranscript);
 
     res.status(200).json({
       message: "Transcript extracted successfully",
