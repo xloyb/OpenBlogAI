@@ -29,6 +29,7 @@
     "tsconfig-paths": "^4.2.0",
     "winston": "^3.17.0",
     "youtube-transcript": "^1.2.1",
+    "youtubei": "^1.6.7",
     "ytdl-core": "^4.11.5",
     "zod": "^3.24.1"
   },
