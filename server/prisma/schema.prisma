@@ -16,6 +16,8 @@ model User {
   updatedAt DateTime @updatedAt
 
   RefreshToken RefreshToken[]
+
+  Video Video[]
 }
 
 model RefreshToken {
@@ -29,4 +31,46 @@ model RefreshToken {
   lastUsedAt  DateTime @updatedAt // Tracks the last used time
   expiresAt   DateTime
   isRevoked   Boolean  @default(false) // For granular revocation
+}
+
+
+model Video {
+  id         Int      @id @default(autoincrement())
+  url        String   @unique
+  title      String
+  description String?
+  uploadedAt DateTime @default(now())
+  userId     String
+  user       User     @relation(fields: [userId], references: [id])
+  transcript Transcript?
+  blog       Blog?
+
+  createdAt  DateTime @default(now())
+}
+
+model Transcript {
+  id        Int      @id @default(autoincrement())
+  content   String
+  videoId   Int      @unique
+  video     Video    @relation(fields: [videoId], references: [id])
+  createdAt DateTime @default(now())
+}
+
+model Blog {
+  id        Int        @id @default(autoincrement())
+  title     String
+  content   String
+  videoId   Int        @unique
+  video     Video      @relation(fields: [videoId], references: [id])
+  keywords  Keyword[]  @relation("BlogKeywords")
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+}
+
+model Keyword {
+  id       Int     @id @default(autoincrement())
+  word     String  @unique
+  blogs    Blog[]  @relation("BlogKeywords")
+
+  createdAt DateTime @default(now())
 }
