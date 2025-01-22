@@ -71,6 +71,5 @@ model Keyword {
   id       Int     @id @default(autoincrement())
   word     String  @unique
   blogs    Blog[]  @relation("BlogKeywords")
-
   createdAt DateTime @default(now())
 }

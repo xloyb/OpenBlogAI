@@ -9,6 +9,7 @@ import { setupCSRF } from '@src/middlewares/csrfMiddleware';
 import { globalErrorLogger, globalLogger }
 from '@src/middlewares/globalLogger';
 import { globalErrorHandler } from '@src/utils/errorHandler';
+import transcriptRoutes from './routes/transcriptRoutes';
 
 const app = express();
 
@@ -46,7 +47,7 @@ const limiter = rateLimit({
 app.use(limiter);
 
 // 5. Set up CSRF protection middleware (requires this order)
-setupCSRF(app);
+// setupCSRF(app);
 
 // 6. Define basic routes
 app.get('/', (req, res) => {
@@ -55,6 +56,8 @@ app.get('/', (req, res) => {
 
 // 7. Load application routes (organized under `/api` prefix)
 app.use('/api/auth', authRoutes);
+app.use('/api/transcript', transcriptRoutes); 
+
 
 // 8. Global error handling middleware (should be the last middleware)
 app.use(globalErrorHandler);
