@@ -1,74 +1,123 @@
 import { Request, Response, NextFunction } from "express";
-import axios from "axios";
-import { env } from 'envValidator';
+import { createOpenAI } from "@ai-sdk/openai";
+import { streamText, CoreMessage } from "ai";
+import { env } from "envValidator";
+import { CHAT_INSTRUCTIONS } from "@src/utils/instructions";
 
-
-// Hugging Face API configuration
-const API_TOKEN = env.HUGGING_FACE_API_TOKEN; 
-const API_URL = "https://api-inference.huggingface.co/models/gpt2"; 
-
-// Headers for authentication
-const headers = {
-  Authorization: `Bearer ${API_TOKEN}`,
+// Model configuration
+const MODEL_CONFIG = {
+  "gpt-4o": {
+    name: "GPT-4 Omni",
+    temperature: 1,
+    maxTokens: 4096,
+    topP: 1,
+  },
+  "llama-3.1": {
+    name: "Meta-Llama-3.1-405B-Instruct",
+    temperature: 0.8,
+    maxTokens: 2048,
+    topP: 0.1,
+  },
+  jamba: {
+    name: "AI21-Jamba-1.5-Large",
+    temperature: 0.8,
+    maxTokens: 2048,
+    topP: 0.1,
+  },
+  "phi-3.5": {
+    name: "Phi-3.5-MoE-instruct",
+    temperature: 0.8,
+    maxTokens: 2048,
+    topP: 0.1,
+  },
+  cohere: {
+    name: "Cohere-command-r-08-2024",
+    temperature: 0.8,
+    maxTokens: 2048,
+    topP: 0.1,
+  },
+  ministral: {
+    name: "Ministral-3B",
+    temperature: 0.8,
+    maxTokens: 2048,
+    topP: 0.1,
+  },
 };
 
-/**
- * Generate a blog from a transcript using the Hugging Face API.
- * @param transcript - The YouTube video transcript.
- * @param maxLength - The maximum length of the generated blog.
- * @returns The generated blog text.
- */
-export const generateBlogFromTranscript = async (transcript: string, maxLength: number = 500): Promise<string> => {
+const client = createOpenAI({
+  baseURL: "https://models.inference.ai.azure.com",
+  apiKey: env.GITHUB_API,
+});
+
+export const generateBlogFromTranscript = async (
+  modelId: keyof typeof MODEL_CONFIG,
+  transcript: string
+): Promise<string> => {
   try {
-    // Create a prompt for the model
-    const prompt = `Based on the following YouTube video transcript, create a detailed and engaging blog post:\n\n${transcript}\n\nBlog:`;
-    // Payload for the API request
-    const payload = {
-      inputs: prompt,
-      parameters: {
-        max_length: maxLength, // Maximum length of the generated text
-        temperature: 0.7, // Controls randomness (0 = deterministic, 1 = creative)
-        do_sample: true, // Enable sampling for diverse outputs
+    const model = MODEL_CONFIG[modelId];
+    const messages: CoreMessage[] = [
+      {
+        role: "system",
+        content: CHAT_INSTRUCTIONS,
       },
-    };
+      {
+        role: "user",
+        content: `Generate blog post: ${transcript.substring(0, 6000)}`,
+      },
+    ];
 
-    // Send the request to the Hugging Face API
-    const response = await axios.post(API_URL, payload, { headers });
+    const result = await streamText({
+      model: client(model.name),
+      messages,
+      temperature: model.temperature,
+      maxTokens: model.maxTokens,
+      topP: model.topP,
+    });
 
-    // Extract the generated blog text
-    const generatedBlog = response.data[0]?.generated_text;
-    if (!generatedBlog) {
-      throw new Error("Failed to generate blog: No text returned from the API.");
+    let content = "";
+    for await (const textPart of result.textStream) {
+      content += textPart;
     }
 
-    return generatedBlog;
+    return content;
   } catch (error) {
-    console.error("Error generating blog:", error);
-    throw new Error("Failed to generate blog from transcript.");
+    console.error(`Model ${modelId} error:`, error);
+    throw new Error(`Generation failed: ${(error as Error).message}`);
   }
 };
 
-/**
- * Controller to handle blog generation requests.
- */
 export const generateBlog = async (
-  req: Request,
+  req: Request<
+    {},
+    {},
+    { modelId: keyof typeof MODEL_CONFIG; transcript: string }
+  >,
   res: Response,
   next: NextFunction
 ): Promise<void> => {
   try {
-    const { transcript } = req.body;
+    const { modelId, transcript } = req.body;
 
-    if (!transcript) {
-      res.status(400).json({ error: true, message: "Transcript is required" });
+    if (!transcript?.trim()) {
+      res.status(400).json({ error: true, message: "Transcript required" });
       return;
     }
 
-    // Generate the blog from the transcript
-    const blog = await generateBlogFromTranscript(transcript);
+    if (!MODEL_CONFIG[modelId]) {
+      res.status(400).json({
+        error: true,
+        message: `Invalid model ID. Valid options: ${Object.keys(
+          MODEL_CONFIG
+        ).join(", ")}`,
+      });
+      return;
+    }
+
+    const blog = await generateBlogFromTranscript(modelId, transcript);
 
     res.status(200).json({
-      message: "Blog generated successfully",
+      success: true,
+      model: MODEL_CONFIG[modelId].name,
       blog: blog,
     });
   } catch (error) {
