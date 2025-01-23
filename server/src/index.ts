@@ -10,6 +10,7 @@ import { globalErrorLogger, globalLogger }
 from '@src/middlewares/globalLogger';
 import { globalErrorHandler } from '@src/utils/errorHandler';
 import transcriptRoutes from './routes/transcriptRoutes';
+import blogRoutes from './routes/blogRoutes';
 
 const app = express();
 
@@ -57,6 +58,8 @@ app.get('/', (req, res) => {
 // 7. Load application routes (organized under `/api` prefix)
 app.use('/api/auth', authRoutes);
 app.use('/api/transcript', transcriptRoutes); 
+app.use("/api/blog", blogRoutes); 
+
 
 
 // 8. Global error handling middleware (should be the last middleware)
