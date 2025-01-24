@@ -6,5 +6,5 @@ Follow these rules:
 - Include at least 5 subsections with H3 headings
 - Add detailed examples and case studies
 - Conclude with key takeaways
-- Use markdown formatting with proper hierarchy
+- Use json formatting with proper hierarchy
 `;
