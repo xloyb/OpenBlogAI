@@ -4,7 +4,6 @@ import { streamText, CoreMessage } from "ai";
 import { env } from "envValidator";
 import { CHAT_INSTRUCTIONS } from "@src/utils/instructions";
 
-// Model configuration
 const MODEL_CONFIG = {
   "gpt-4o": {
     name: "GPT-4 Omni",
@@ -114,13 +113,35 @@ export const generateBlog = async (
     }
 
     const blog = await generateBlogFromTranscript(modelId, transcript);
-
+    const formattedBlog = parseBlogString(blog);
     res.status(200).json({
       success: true,
       model: MODEL_CONFIG[modelId].name,
-      blog: blog,
+      blogFormatted: formattedBlog
     });
   } catch (error) {
     next(error);
   }
 };
+
+function parseBlogString(blogString: string) {
+  try {
+    // Remove any unnecessary whitespaces and escape sequences
+    const cleanString = blogString.trim();
+    
+    // Parse the string into a JSON object
+    const blogObject = JSON.parse(cleanString);
+    
+    return blogObject; // Return only the parsed JSON object
+  } catch (error) {
+    // Handle any errors during parsing
+    return {
+      error: "Invalid JSON string",
+      details: error,
+    };
+  }
+}
+
+
+
+
