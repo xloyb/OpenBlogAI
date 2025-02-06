@@ -38,7 +38,7 @@ export const extractTranscript = async (
 export const getVideoTitle = async (videoId: string) => {
   const response = await axios.get(`https://www.youtube.com/watch?v=${videoId}`);
   const html = response.data;
-
+  console.log("html:",html);
   // Extract the title from the HTML
   const titleMatch = html.match(/<title>(.*?)<\/title>/);
   if (!titleMatch) throw new Error('Title not found');

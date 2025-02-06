@@ -1,7 +1,15 @@
+"use client";
 import { Sidebar } from "@/components/sidebar/Sidebar";
+import { motion } from "framer-motion";
 
 export default function ProjectLayout() {
   return (
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: 1.3 }}
+      >
     <div className="min-h-[100dvh] bg-base-100 text-base-content grid md:grid-cols-[auto,1fr] grid-cols-[1fr]">
       <Sidebar />
       <main className="p-[min(30px,7%)] md:p-[30px] pb-[60px]">
@@ -13,5 +21,6 @@ export default function ProjectLayout() {
         </div>
       </main>
     </div>
+    </motion.div>
   );
 }

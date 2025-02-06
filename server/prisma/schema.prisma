@@ -56,16 +56,37 @@ model Transcript {
   createdAt DateTime @default(now())
 }
 
+// model Blog {
+//   id        Int        @id @default(autoincrement())
+//   title     String
+//   content   String
+//   videoId   Int        @unique
+//   video     Video      @relation(fields: [videoId], references: [id])
+//   keywords  Keyword[]  @relation("BlogKeywords")
+//   createdAt DateTime   @default(now())
+//   updatedAt DateTime   @updatedAt
+// }
+
 model Blog {
-  id        Int        @id @default(autoincrement())
-  title     String
-  content   String
-  videoId   Int        @unique
-  video     Video      @relation(fields: [videoId], references: [id])
-  keywords  Keyword[]  @relation("BlogKeywords")
-  createdAt DateTime   @default(now())
-  updatedAt DateTime   @updatedAt
+  id             Int        @id @default(autoincrement())
+  title          String     @db.VarChar(255)
+  slug           String     @unique @db.VarChar(300)
+  introduction   String     @db.Text
+  subsections    Json       @db.Json
+  conclusion     String     @db.Text
+  key_takeaways  Json       @db.Json
+  status         String     @default("DRAFT") @db.VarChar(20)
+  videoId        Int        @unique
+  video          Video      @relation(fields: [videoId], references: [id])
+  keywords       Keyword[]  @relation("BlogKeywords")
+  createdAt      DateTime   @default(now())
+  updatedAt      DateTime   @updatedAt
+  publishedAt    DateTime?
+
+  @@index([slug])
+  @@index([publishedAt])
 }
+
 
 model Keyword {
   id       Int     @id @default(autoincrement())
