@@ -130,7 +130,7 @@ model Transcript {
 model Blog {
   id        Int        @id @default(autoincrement())
   subject   String
-  content   String @db.Text
+  content   String @db.LongText
   visible   Int        @default(1) // Status of the post (1 = visible, 0 = hidden)
   videoId   Int?       @unique // Relation: A blog can have an associated video (optional)
   video     Video?     @relation(fields: [videoId], references: [id]) 
