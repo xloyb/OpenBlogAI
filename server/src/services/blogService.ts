@@ -9,13 +9,13 @@ export const createBlog = async (data: { subject: string; content: string; userI
 export const getBlogById = async (id: number) => {
   return await prisma.blog.findUnique({
     where: { id },
-    include: { user: true, video: true },
+    include: { user: false, video: true },
   });
 };
 
 export const getBlogs = async () => {
   return await prisma.blog.findMany({
-    include: { user: true, video: true },
+    include: { user: false, video: true },
     orderBy: { createdAt: "desc" },
   });
 };
