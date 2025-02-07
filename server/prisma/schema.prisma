@@ -1,3 +1,76 @@
+// generator client {
+//   provider = "prisma-client-js"
+// }
+
+// datasource db {
+//   provider = "mysql"
+//   url      = env("DATABASE_URL")
+// }
+
+// model User {
+//   id        String   @id @default(uuid())
+//   email     String   @unique
+//   password  String
+//   name      String?
+//   createdAt DateTime @default(now())
+//   updatedAt DateTime @updatedAt
+
+//   RefreshToken RefreshToken[]
+
+// }
+
+// model RefreshToken {
+//   id          String   @id @default(uuid())
+//   token       String   @unique
+//   userId      String
+//   user        User     @relation(fields: [userId], references: [id])
+//   ipAddress   String?  // Tracks the IP address
+//   userAgent   String?  // Tracks the device/user agent
+//   createdAt   DateTime @default(now())
+//   lastUsedAt  DateTime @updatedAt // Tracks the last used time
+//   expiresAt   DateTime
+//   isRevoked   Boolean  @default(false) // For granular revocation
+// }
+
+
+// model Video {
+//   id         Int      @id @default(autoincrement())
+//   url        String   @unique
+//   title      String
+//   description String?
+//   uploadedAt DateTime @default(now())
+//   userId     String
+//   transcript Transcript?
+//   blog       Blog?
+
+//   createdAt  DateTime @default(now())
+// }
+
+// model Transcript {
+//   id        Int      @id @default(autoincrement())
+//   content   String
+//   videoId   Int      @unique
+//   video     Video    @relation(fields: [videoId], references: [id])
+//   createdAt DateTime @default(now())
+// }
+
+
+// model Blog {
+//   id        Int        @id @default(autoincrement())
+//   subject     String
+//   content   String
+//    visible   Int        @default(1) // Status of the post (1 = visible, 0 = hidden)
+//   videoId   Int        @unique
+//   video     Video      @relation(fields: [videoId], references: [id])
+//   createdAt DateTime   @default(now())
+//   updatedAt DateTime   @updatedAt
+
+
+// }
+
+
+
+
 generator client {
   provider = "prisma-client-js"
 }
@@ -8,16 +81,16 @@ datasource db {
 }
 
 model User {
-  id        String   @id @default(uuid())
-  email     String   @unique
+  id        String      @id @default(uuid())
+  email     String      @unique
   password  String
   name      String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
 
   RefreshToken RefreshToken[]
-
-  Video Video[]
+  Blogs        Blog[] // Relation: One user can write many blogs
+  Videos       Video[] // Relation: One user can upload many videos
 }
 
 model RefreshToken {
@@ -33,64 +106,37 @@ model RefreshToken {
   isRevoked   Boolean  @default(false) // For granular revocation
 }
 
-
 model Video {
-  id         Int      @id @default(autoincrement())
-  url        String   @unique
+  id         Int        @id @default(autoincrement())
+  url        String     @unique
   title      String
   description String?
-  uploadedAt DateTime @default(now())
+  uploadedAt DateTime   @default(now())
   userId     String
-  user       User     @relation(fields: [userId], references: [id])
+  user       User       @relation(fields: [userId], references: [id]) // Relation: Video belongs to a user
   transcript Transcript?
-  blog       Blog?
+  blog       Blog?      // Relation: A video can have an associated blog
 
-  createdAt  DateTime @default(now())
+  createdAt  DateTime   @default(now())
 }
 
 model Transcript {
   id        Int      @id @default(autoincrement())
   content   String
   videoId   Int      @unique
-  video     Video    @relation(fields: [videoId], references: [id])
+  video     Video    @relation(fields: [videoId], references: [id]) // Relation: Transcript belongs to a video
   createdAt DateTime @default(now())
 }
-
-// model Blog {
-//   id        Int        @id @default(autoincrement())
-//   title     String
-//   content   String
-//   videoId   Int        @unique
-//   video     Video      @relation(fields: [videoId], references: [id])
-//   keywords  Keyword[]  @relation("BlogKeywords")
-//   createdAt DateTime   @default(now())
-//   updatedAt DateTime   @updatedAt
-// }
 
 model Blog {
-  id             Int        @id @default(autoincrement())
-  title          String     @db.VarChar(255)
-  slug           String     @unique @db.VarChar(300)
-  introduction   String     @db.Text
-  subsections    Json       @db.Json
-  conclusion     String     @db.Text
-  key_takeaways  Json       @db.Json
-  status         String     @default("DRAFT") @db.VarChar(20)
-  videoId        Int        @unique
-  video          Video      @relation(fields: [videoId], references: [id])
-  keywords       Keyword[]  @relation("BlogKeywords")
-  createdAt      DateTime   @default(now())
-  updatedAt      DateTime   @updatedAt
-  publishedAt    DateTime?
-
-  @@index([slug])
-  @@index([publishedAt])
-}
-
-
-model Keyword {
-  id       Int     @id @default(autoincrement())
-  word     String  @unique
-  blogs    Blog[]  @relation("BlogKeywords")
-  createdAt DateTime @default(now())
+  id        Int        @id @default(autoincrement())
+  subject   String
+  content   String
+  visible   Int        @default(1) // Status of the post (1 = visible, 0 = hidden)
+  videoId   Int?       @unique // Relation: A blog can have an associated video (optional)
+  video     Video?     @relation(fields: [videoId], references: [id]) 
+  userId    String     // Relation: Blog belongs to a user
+  user      User       @relation(fields: [userId], references: [id]) 
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
 }
