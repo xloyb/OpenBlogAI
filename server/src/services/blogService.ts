@@ -1,41 +1,34 @@
-// import prisma from "@src/utils/client";
+import prisma from "@src/utils/client";
 
-// // Create a new blog
-// export const createBlog = async (videoId: number, title: string, content: string, keywords: string[]) => {
-//   return prisma.blog.create({
-//     data: {
-//       videoId,
-//       title,
-//       content,
-//       keywords: {
-//         connectOrCreate: keywords.map((word) => ({
-//           where: { word },
-//           create: { word },
-//         })),
-//       },
-//     },
-//     include: { keywords: true },
-//   });
-// };
+export const createBlog = async (data: { subject: string; content: string; userId: string; videoId?: number; visible?: number }) => {
+  return await prisma.blog.create({
+    data,
+  });
+};
 
-// // Fetch a blog by ID
-// export const getBlogById = async (id: number) => {
-//   return prisma.blog.findUnique({
-//     where: { id },
-//     include: { keywords: true },
-//   });
-// };
+export const getBlogById = async (id: number) => {
+  return await prisma.blog.findUnique({
+    where: { id },
+    include: { user: true, video: true },
+  });
+};
 
-// // Fetch all blogs
-// export const getAllBlogs = async () => {
-//   return prisma.blog.findMany({
-//     include: { keywords: true },
-//   });
-// };
+export const getBlogs = async () => {
+  return await prisma.blog.findMany({
+    include: { user: true, video: true },
+    orderBy: { createdAt: "desc" },
+  });
+};
 
-// // Delete a blog
-// export const deleteBlog = async (id: number) => {
-//   return prisma.blog.delete({
-//     where: { id },
-//   });
-// };
+export const updateBlog = async (id: number, data: { subject?: string; content?: string; visible?: number }) => {
+  return await prisma.blog.update({
+    where: { id },
+    data,
+  });
+};
+
+export const deleteBlog = async (id: number) => {
+  return await prisma.blog.delete({
+    where: { id },
+  });
+};
