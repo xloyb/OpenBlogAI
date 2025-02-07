@@ -8,7 +8,7 @@ import { createOpenAI } from "@ai-sdk/openai";
 import { streamText, CoreMessage } from "ai";
 import { env } from "envValidator";
 import { CHAT_INSTRUCTIONS } from "@src/utils/instructions";
-import { createBlog, getBlogs } from "@src/services/blogService";
+import { createBlog, getBlogById, getBlogs } from "@src/services/blogService";
 
 const MODEL_CONFIG = {
   "gpt-4o": {
@@ -140,3 +140,26 @@ export const getAllBlogs = async (
   }
 };
 
+export const getSingleBlog = async (
+  req: Request<{ id: string }>,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    const id = parseInt(req.params.id);
+    if (isNaN(id)) {
+      res.status(400).json({ error: true, message: "Invalid blog ID" });
+      return;
+    }
+
+    const blog = await getBlogById(id);
+    if (!blog) {
+      res.status(404).json({ error: true, message: "Blog not found" });
+      return;
+    }
+
+    res.status(200).json(blog);
+  } catch (error) {
+    next(error);
+  }
+};
