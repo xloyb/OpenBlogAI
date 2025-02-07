@@ -1,30 +1,27 @@
 import prisma from "@src/utils/client";
 
-// Create a new video
-export const createVideo = async (userId: number, url: string, title: string, description?: string) => {
-  return prisma.video.create({
-    data: { userId: userId.toString(), url, title, description },
+export const createVideo = async (data: { url: string; title: string; userId: string; description?: string }) => {
+  return await prisma.video.create({
+    data,
   });
 };
 
-// Fetch a video by ID
 export const getVideoById = async (id: number) => {
-  return prisma.video.findUnique({
+  return await prisma.video.findUnique({
     where: { id },
-    include: { transcript: true, blog: true },
+    include: { user: true, transcript: true, blog: true },
   });
 };
 
-// Fetch all videos
-export const getAllVideos = async () => {
-  return prisma.video.findMany({
-    include: { transcript: true, blog: true },
+export const getVideos = async () => {
+  return await prisma.video.findMany({
+    include: { user: true, blog: true },
+    orderBy: { uploadedAt: "desc" },
   });
 };
 
-// Delete a video
 export const deleteVideo = async (id: number) => {
-  return prisma.video.delete({
+  return await prisma.video.delete({
     where: { id },
   });
 };
