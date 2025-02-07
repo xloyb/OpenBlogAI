@@ -1,7 +1,8 @@
 import { Request, Response, NextFunction } from "express";
-import { YoutubeTranscript } from 'youtube-transcript';
-import axios from 'axios';
-
+import { YoutubeTranscript } from "youtube-transcript";
+import axios from "axios";
+import { createTranscript } from "@src/services/transcriptService";
+import { createVideo } from "@src/services/videoService";
 export const extractTranscript = async (
   req: Request,
   res: Response,
@@ -9,40 +10,54 @@ export const extractTranscript = async (
 ): Promise<void> => {
   try {
     const { videoId } = req.params;
+    const { userId } = req.body; 
 
-    if (!videoId) {
-      res.status(400).json({ error: true, message: "Video ID is required" });
+    if (!videoId || !userId) {
+      res.status(400).json({ error: true, message: "Video ID and User ID are required" });
       return;
     }
-    let title = await getVideoTitle(videoId);
-    console.log("title:",title);
+
+
+
+    // Fetch the video title
+    const title = await getVideoTitle(videoId);
+    console.log("title:", title);
 
     // Fetch the transcript using the youtube-transcript package
     const transcript = await YoutubeTranscript.fetchTranscript(videoId);
-    
-    // Format the transcript into a single string
-    const formattedTranscript = transcript.map(entry => entry.text).join(' ');
-    console.log("formattedTranscript",formattedTranscript);
+    const formattedTranscript = transcript.map((entry) => entry.text).join(" ");
+    console.log("formattedTranscript:", formattedTranscript);
+
+  
+
+    const video = await createVideo({
+      url: `https://www.youtube.com/watch?v=${videoId}`,
+      title,
+      userId,
+    });
+
+
+
+    const transcriptEntry = await createTranscript(video.id, formattedTranscript);
 
     res.status(200).json({
-      message: "Transcript extracted successfully",
-      title: title,
-      transcript: formattedTranscript,
+      message: "Transcript extracted and saved successfully",
+      video,
+      transcript: transcriptEntry,
     });
   } catch (error) {
-    next(error); 
+    next(error);
   }
 };
-
 
 export const getVideoTitle = async (videoId: string) => {
   const response = await axios.get(`https://www.youtube.com/watch?v=${videoId}`);
   const html = response.data;
-  console.log("html:",html);
+
   // Extract the title from the HTML
   const titleMatch = html.match(/<title>(.*?)<\/title>/);
-  if (!titleMatch) throw new Error('Title not found');
+  if (!titleMatch) throw new Error("Title not found");
 
   // Remove " - YouTube" from the title
-  return titleMatch[1].replace(' - YouTube', '');
+  return titleMatch[1].replace(" - YouTube", "");
 };
