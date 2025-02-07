@@ -1,22 +1,26 @@
 import prisma from "@src/utils/client";
 
-// Create a new transcript
 export const createTranscript = async (videoId: number, content: string) => {
-  return prisma.transcript.create({
+  return await prisma.transcript.create({
     data: { videoId, content },
   });
 };
 
-// Fetch a transcript by video ID
 export const getTranscriptByVideoId = async (videoId: number) => {
-  return prisma.transcript.findUnique({
+  return await prisma.transcript.findUnique({
     where: { videoId },
   });
 };
 
-// Delete a transcript
-export const deleteTranscript = async (id: number) => {
-  return prisma.transcript.delete({
-    where: { id },
+export const updateTranscript = async (videoId: number, content: string) => {
+  return await prisma.transcript.update({
+    where: { videoId },
+    data: { content },
+  });
+};
+
+export const deleteTranscript = async (videoId: number) => {
+  return await prisma.transcript.delete({
+    where: { videoId },
   });
 };
