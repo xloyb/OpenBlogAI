@@ -1,6 +1,6 @@
 import prisma from "@src/utils/client";
 
-export const createVideo = async (data: { url: string; title: string; userId: string; description?: string }) => {
+export const createVideo = async (data: { url: string; title: string; userId: string }) => {
   return await prisma.video.create({
     data,
   });
