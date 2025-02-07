@@ -127,5 +127,16 @@ export const generateBlog = async (
   }
 };
 
-
+export const getAllBlogs = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    const blogs = await getBlogs();
+    res.status(200).json(blogs);
+  } catch (error) {
+    next(error);
+  }
+};
 
