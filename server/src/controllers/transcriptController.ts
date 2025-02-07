@@ -17,7 +17,15 @@ export const extractTranscript = async (
       return;
     }
 
+    // // Check if the video already exists in the database
+    // const existingVideo = await prisma.video.findUnique({
+    //   where: { url: `https://www.youtube.com/watch?v=${videoId}` },
+    // });
 
+    // if (existingVideo) {
+    //   res.status(400).json({ error: true, message: "Video already exists" });
+    //   return;
+    // }
 
     // Fetch the video title
     const title = await getVideoTitle(videoId);
@@ -27,21 +35,16 @@ export const extractTranscript = async (
     const transcript = await YoutubeTranscript.fetchTranscript(videoId);
     const formattedTranscript = transcript.map((entry) => entry.text).join(" ");
     console.log("formattedTranscript:", formattedTranscript);
-
   
-
     const video = await createVideo({
       url: `https://www.youtube.com/watch?v=${videoId}`,
       title,
       userId,
     });
 
-
-
     const transcriptEntry = await createTranscript(video.id, formattedTranscript);
 
-    res.status(200).json({
-      message: "Transcript extracted and saved successfully",
+    res.status(200).json({      message: "Transcript extracted and saved successfully",
       video,
       transcript: transcriptEntry,
     });
