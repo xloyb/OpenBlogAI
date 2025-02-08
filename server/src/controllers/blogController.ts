@@ -1,8 +1,4 @@
 
-
-
-
-
 import { Request, Response, NextFunction } from "express";
 import { createOpenAI } from "@ai-sdk/openai";
 import { streamText, CoreMessage } from "ai";
