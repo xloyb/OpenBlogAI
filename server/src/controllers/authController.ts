@@ -15,11 +15,12 @@ export const registerUser = async (
        res.status(400).json({ error: true, message: "Email and password are required" });
     }
 
-    const { user, token } = await registerUserService(email, password);
+    const { user, token,refreshToken } = await registerUserService(email, password);
 
     res.status(201).json({
       message: "User registered successfully",
       token,
+      refreshToken
     });
   } catch (error) {
     next(error); // Pass the error to the global error handler
