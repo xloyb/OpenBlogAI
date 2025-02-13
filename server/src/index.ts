@@ -15,7 +15,7 @@ import blogRoutes from './routes/blogRoutes';
 const app = express();
 
 const corsOptions = {
-  origin: 'http://localhost:3001', // Your client's URL
+  origin: ['http://localhost:3002', 'http://localhost:3001', 'https://example.com'],
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
   credentials: true,
 };
@@ -45,7 +45,7 @@ const limiter = rateLimit({
   legacyHeaders: false, // Disable the `X-RateLimit-*` headers
   message: 'Too many requests, please try again later.',
 });
-app.use(limiter);
+// app.use(limiter);
 
 // 5. Set up CSRF protection middleware (requires this order)
 // setupCSRF(app);
