@@ -102,11 +102,14 @@ import type React from "react";
 import { useState, useEffect } from "react";
 import { ToggleButton } from "./ToggleButton";
 import { SidebarItem } from "./SidebarItem";
+import { useAuth } from "@/context/AuthContext";
 
 export const Sidebar: React.FC = () => {
   const [isOpen, setIsOpen] = useState(true); // Controls whether the sidebar is open or closed
   const [collapsed, setCollapsed] = useState(false); // Controls whether the sidebar is collapsed (icons only)
   const [activeSubmenu, setActiveSubmenu] = useState<string | null>(null);
+  const { logout, isAuthenticated } = useAuth()
+
 
   // Load sidebar state from local storage on mount
   useEffect(() => {
@@ -124,6 +127,14 @@ export const Sidebar: React.FC = () => {
       setCollapsed(savedCollapsedState === "true");
     }
   }, []);
+
+  const handleLogout = async () => {
+    try {
+      await logout()
+    } catch (err) {
+      console.log("Logout Error:",err)
+    }
+  }
 
   // Toggle sidebar open/closed and collapsed/expanded
   const toggleSidebar = () => {
@@ -145,6 +156,8 @@ export const Sidebar: React.FC = () => {
       if (collapsed) setCollapsed(false); // Expand sidebar if collapsed
     }
   };
+
+
 
   return (
     <>
@@ -232,6 +245,15 @@ export const Sidebar: React.FC = () => {
             text="Profile"
             collapsed={collapsed}
           />
+          {isAuthenticated && ( 
+  <SidebarItem
+    onClick={handleLogout} 
+    icon="logout"
+    text="Logout"
+    collapsed={collapsed}
+  />
+)}
+
         </ul>
       </nav>
     </>

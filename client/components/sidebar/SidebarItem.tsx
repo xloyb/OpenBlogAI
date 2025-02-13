@@ -59,13 +59,48 @@ export const SidebarItem: React.FC<SidebarItemProps> = ({
           </ul>
         </>
       ) : (
-        <a
-          href={href}
-          className={`flex items-center gap-4 rounded-lg p-[0.85em] hover:bg-[#222533] md:w-full md:justify-start md:p-[0.85em] w-[60px] h-[60px] justify-center ${active ? "text-[#5e63ff]" : "text-[#e6e6ef]"} no-underline`}
-        >
-          <Icon name={icon} /> {/* Icon is always visible */}
-          <span className={`${collapsed ? "md:hidden" : "md:inline-block"}`}>{text}</span> {/* Text is hidden when collapsed */}
-        </a>
+        // <a
+        //   href={href}
+        //   className={`flex items-center gap-4 rounded-lg p-[0.85em] hover:bg-[#222533] md:w-full md:justify-start md:p-[0.85em] w-[60px] h-[60px] justify-center ${active ? "text-[#5e63ff]" : "text-[#e6e6ef]"} no-underline`}
+        // >
+        //   <Icon name={icon} /> {/* Icon is always visible */}
+        //   <span className={`${collapsed ? "md:hidden" : "md:inline-block"}`}>{text}</span> {/* Text is hidden when collapsed */}
+        // </a>
+
+        <>
+
+          {href ? (
+            <a
+              href={href}
+              onClick={onClick}
+              className={`flex items-center gap-4 rounded-lg p-[0.85em] hover:bg-[#222533] md:w-full md:justify-start md:p-[0.85em] w-[60px] h-[60px] justify-center ${active ? "text-[#5e63ff]" : "text-[#e6e6ef]"} no-underline`}
+            >
+              <Icon name={icon} />
+              <span className={`${collapsed ? "md:hidden" : "md:inline-block"}`}>{text}</span>
+            </a>
+          ) : (
+            <button
+              onClick={onClick}
+              className={`flex items-center gap-4 rounded-lg p-[0.85em] hover:bg-[#222533] md:w-full md:justify-start md:p-[0.85em] w-[60px] h-[60px] justify-center ${active ? "text-[#5e63ff]" : "text-[#e6e6ef]"} no-underline border-none bg-transparent cursor-pointer`}
+            >
+              <Icon name={icon} />
+              <span className={`${collapsed ? "md:hidden" : "md:inline-block"}`}>{text}</span>
+            </button>
+          )}
+
+        </>
+
+
+
+
+
+
+
+
+
+
+
+
       )}
     </li>
   )

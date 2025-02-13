@@ -27,8 +27,18 @@ export const registerUserService = async (email: string, password: string) => {
 
   // Generate JWT token for the user
   const token = signToken({ id: user.id }, "1h");
+  const refreshToken = signToken({ id: user.id }, '7d');
 
-  return { user, token };
+  // Save refresh token to database
+  await prisma.refreshToken.create({
+    data: {
+      token: refreshToken,
+      userId: user.id,
+      expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+    },
+  });
+
+  return { user, token,refreshToken };
 };
 
 
