@@ -87,6 +87,10 @@ model User {
   name      String?
   createdAt DateTime    @default(now())
   updatedAt DateTime    @updatedAt
+  isAdmin   Boolean     @default(false) 
+  isModerator Boolean    @default(false)
+  isVerifiedPoster Boolean     @default(false)
+  isBlocked Boolean      @default(false)
 
   RefreshToken RefreshToken[]
   Blogs        Blog[] // Relation: One user can write many blogs
