@@ -1,11 +1,12 @@
 import prisma from "@src/utils/client";
 import { verifyToken } from "@utils/jwt";
 import { Request, Response, NextFunction } from "express";
+import { User } from "@prisma/client";
 
 declare global {
   namespace Express {
     interface Request {
-      user?: any;
+      user?: Omit<User, "password">; 
     }
   }
 }
@@ -25,6 +26,11 @@ export const authenticateJWT = async (req: Request, res: Response, next: NextFun
     }
 
     const user = verifyToken(token);
+
+    if (user.isBlocked) {
+      return res.status(403).json({ error: "Account is blocked" });
+    }
+
     req.user = user;
     next();
   } catch {
