@@ -1,23 +1,15 @@
-
 import bcrypt from "bcrypt";
 import prisma from "@utils/client";
 import { signToken, verifyToken } from "@utils/jwt";
 import { env } from 'envValidator';
 
-
 export const registerUserService = async (email: string, password: string) => {
-
   if (!email || !password) {
     throw new Error("Email and password are required");
   }
 
-  const existingUser = await prisma.user.findUnique({
-    where: { email },
-  });
-
-  if (existingUser) {
-    throw new Error("User already registered");
-  }
+  const existingUser = await prisma.user.findUnique({ where: { email } });
+  if (existingUser) throw new Error("User already registered");
 
   const hashedPassword = await bcrypt.hash(password, 10);
 
@@ -25,11 +17,18 @@ export const registerUserService = async (email: string, password: string) => {
     data: { email, password: hashedPassword },
   });
 
-  // Generate JWT token for the user
-  const token = signToken({ id: user.id }, "1h");
-  const refreshToken = signToken({ id: user.id }, '7d');
+  // Generate tokens with user flags
+  const tokenPayload = {
+    id: user.id,
+    isAdmin: user.isAdmin,
+    isModerator: user.isModerator,
+    isVerifiedPoster: user.isVerifiedPoster,
+    isBlocked: user.isBlocked
+  };
+  
+  const token = signToken(tokenPayload, "1h");
+  const refreshToken = signToken(tokenPayload, '7d');
 
-  // Save refresh token to database
   await prisma.refreshToken.create({
     data: {
       token: refreshToken,
@@ -38,11 +37,9 @@ export const registerUserService = async (email: string, password: string) => {
     },
   });
 
-  return { user, token,refreshToken };
+  return { user, token, refreshToken };
 };
 
-
-// Login User Service
 export const loginUserService = async (email: string, password: string, ipAddress: string, userAgent: string) => {
   const user = await prisma.user.findUnique({ where: { email } });
   if (!user) throw new Error("Invalid email or password");
@@ -50,10 +47,18 @@ export const loginUserService = async (email: string, password: string, ipAddres
   const isPasswordValid = await bcrypt.compare(password, user.password);
   if (!isPasswordValid) throw new Error("Invalid email or password");
 
-  const accessToken = signToken({ id: user.id }, '1h');
-  const refreshToken = signToken({ id: user.id }, '7d');
+  // Create token payload
+  const tokenPayload = {
+    id: user.id,
+    isAdmin: user.isAdmin,
+    isModerator: user.isModerator,
+    isVerifiedPoster: user.isVerifiedPoster,
+    isBlocked: user.isBlocked
+  };
 
-  // Save refresh token to database
+  const accessToken = signToken(tokenPayload, '1h');
+  const refreshToken = signToken(tokenPayload, '7d');
+
   await prisma.refreshToken.create({
     data: {
       token: refreshToken,
@@ -66,7 +71,6 @@ export const loginUserService = async (email: string, password: string, ipAddres
 
   return { accessToken, refreshToken };
 };
-
 
 export const refreshUserTokenService = async (refreshToken: string) => {
   if (!refreshToken) throw new Error("Refresh token missing");
@@ -82,17 +86,23 @@ export const refreshUserTokenService = async (refreshToken: string) => {
   const user = await prisma.user.findUnique({ where: { id: tokenRecord.userId } });
   if (!user) throw new Error("User not found");
 
-  // Generate new tokens
-  const newAccessToken = signToken({ id: user.id }, "1h");
-  const newRefreshToken = signToken({ id: user.id }, "7d");
+  // Create updated token payload
+  const tokenPayload = {
+    id: user.id,
+    isAdmin: user.isAdmin,
+    isModerator: user.isModerator,
+    isVerifiedPoster: user.isVerifiedPoster,
+    isBlocked: user.isBlocked
+  };
 
-  // Mark the old refresh token as revoked
+  const newAccessToken = signToken(tokenPayload, "1h");
+  const newRefreshToken = signToken(tokenPayload, "7d");
+
   await prisma.refreshToken.update({
     where: { id: tokenRecord.id },
     data: { isRevoked: true },
   });
 
-  // Save the new refresh token in the database
   await prisma.refreshToken.create({
     data: {
       token: newRefreshToken,
