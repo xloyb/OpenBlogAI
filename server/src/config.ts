@@ -12,6 +12,7 @@ const required = (key: string, value?: string): string => {
     hugging_face_api_token: required('HUGGING_FACE_API_TOKEN',process.env.HUGGING_FACE_API_TOKEN),
     GITHUB_API: required('GITHUB_API', process.env.GITHUB_API),
     jwtSecret: required('JWT_SECRET', process.env.JWT_SECRET),
+    refreshSecret: required('REFRESH_SECRET', process.env.REFRESH_SECRET),
     dbUrl: required('DATABASE_URL', process.env.DATABASE_URL),
     bcryptSaltRounds: parseInt(process.env.BCRYPT_SALT_ROUNDS || '10'),
     refreshTokenExpiresIn: required('REFRESH_TOKEN_EXPIRES_IN', process.env.REFRESH_TOKEN_EXPIRES_IN),

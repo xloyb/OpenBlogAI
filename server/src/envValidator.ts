@@ -9,6 +9,7 @@ const envSchema = z.object({
   HUGGING_FACE_API_TOKEN: z.string().min(10),
   GITHUB_API: z.string().min(10),
   JWT_SECRET: z.string().min(10),
+  REFRESH_SECRET: z.string().min(10),
   BCRYPT_SALT_ROUNDS: z.string().regex(/^[0-9]+$/),
   PORT: z.string().regex(/^[0-9]+$/),
   REFRESH_TOKEN_EXPIRES_IN: z.string().regex(/^\d+[smhdw]$/), // Supports time format (e.g., 7d, 1h, etc.)
