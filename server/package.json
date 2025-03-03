@@ -33,7 +33,6 @@
     "ioredis": "^5.4.2",
     "jsonschema": "^1.5.0",
     "jsonwebtoken": "^9.0.2",
-    "prisma": "^6.2.1",
     "tsconfig-paths": "^4.2.0",
     "winston": "^3.17.0",
     "youtube-transcript": "^1.2.1",
@@ -53,6 +52,7 @@
     "@types/jsonwebtoken": "^9.0.7",
     "@types/node": "^22.10.7",
     "nodemon": "^3.1.9",
+    "prisma": "^6.4.1",
     "ts-node": "^10.9.2",
     "typescript": "^5.7.3"
   }
