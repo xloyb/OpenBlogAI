@@ -23,7 +23,7 @@ export const generateAccessToken = (user: TokenUser) => {
       isBlocked: user.isBlocked
     },
     env.JWT_SECRET,
-    { expiresIn: '2m' } // Changed from '1m' to '15m' for better usability
+    { expiresIn: '1m' } // Changed from '1m' to '15m' for better usability
   );
 };
 
@@ -52,23 +52,7 @@ export const verifyAccessToken = (token: string): JwtPayload => {
   return jwt.verify(token, env.JWT_SECRET) as JwtPayload;
 };
 
-// export const verifyRefreshToken = async (token: string) => {
-//   try {
-//     const decoded = jwt.verify(token, env.REFRESH_SECRET) as { userId: string };
 
-//     const storedToken = await prisma.refreshToken.findUnique({
-//       where: { token },
-//     });
-
-//     if (!storedToken || storedToken.isRevoked || storedToken.expiresAt < new Date()) {
-//       throw new Error('Invalid or expired refresh token');
-//     }
-
-//     return storedToken;
-//   } catch (error) {
-//     throw new Error('Invalid refresh token');
-//   }
-// };
 
 
 export const verifyRefreshToken = async (token: string) => {
@@ -81,11 +65,6 @@ export const verifyRefreshToken = async (token: string) => {
     const storedToken = await prisma.refreshToken.findUnique({
       where: { token },
     });
-
-    const storedToken2 = await prisma.refreshToken.findFirst({ where: { userId: "5405974b-c979-47df-883c-d4ceba4a670b" } });
-console.log("[DB] Stored token:", storedToken?.token, "Length:", storedToken?.token.length);
-
-    console.log("[verifyRefreshToken] Stored token from DB:", storedToken, storedToken2);
 
     if (!storedToken) {
       console.log("[verifyRefreshToken] No matching token record found");
