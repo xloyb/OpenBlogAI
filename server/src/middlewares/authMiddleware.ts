@@ -1,44 +1,15 @@
-import prisma from "@src/utils/client";
-import { verifyToken } from "@utils/jwt";
+// authMiddleware.ts
 import { Request, Response, NextFunction } from "express";
-import { User } from "@prisma/client";
+import prisma from "@src/utils/client";
+import { JwtPayload, verifyAccessToken  } from "@utils/jwt";
+
 declare global {
   namespace Express {
     interface Request {
-      user?: Omit<User, "password">; 
+      user?: JwtPayload;
     }
   }
 }
-
-// export const authenticateJWT = async (req: Request, res: Response, next: NextFunction) => {
-//   const token = req.header("Authorization")?.split(" ")[1];
-
-//   if (!token) return res.status(401).json({ error: "Unauthorized" });
-
-//   try {
-//     const tokenRecord = await prisma.refreshToken.findUnique({
-//       where: { token },
-//     });
-
-//     if (!tokenRecord || tokenRecord.isRevoked || tokenRecord.expiresAt < new Date()) {
-//       res.status(403).json({ error: "Invalid or revoked token" });
-//       return;
-//     }
-
-//     const user = verifyToken(token);
-
-//     if (user.isBlocked) {
-//       res.status(403).json({ error: "Account is blocked" });
-//       return;
-//     }
-
-//     req.user = user;
-//     next();
-//   } catch {
-//     res.status(403).json({ error: "Invalid token" });
-//     return;
-//   }
-// };
 
 export const authenticateJWT = async (
   req: Request,
@@ -48,43 +19,51 @@ export const authenticateJWT = async (
   const token = req.header("Authorization")?.split(" ")[1];
 
   if (!token) {
-    res.status(401).json({ error: "Unauthorized" });
-    return; // Explicit return after response
+    res.status(401).json({ error: "Access token required" });
+    return;
   }
 
   try {
-    const tokenRecord = await prisma.refreshToken.findUnique({
-      where: { token },
+    const decoded = verifyAccessToken (token);
+    
+    // Verify user status in database
+    const user = await prisma.user.findUnique({
+      where: { id: decoded.userId },
+      select: { id: true, isAdmin: true, isBlocked: true }
     });
 
-    if (!tokenRecord || tokenRecord.isRevoked || tokenRecord.expiresAt < new Date()) {
-      res.status(403).json({ error: "Invalid or revoked token" });
-      return; // Explicit return after response
+    if (!user) {
+      res.status(401).json({ error: "User not found" });
+      return;
     }
-
-    const user = verifyToken(token);
 
     if (user.isBlocked) {
       res.status(403).json({ error: "Account is blocked" });
-      return; // Explicit return after response
+      return;
     }
 
-    req.user = user;
+    // Attach fresh user status to request
+    req.user = {
+      userId: user.id,
+      isAdmin: user.isAdmin,
+      isBlocked: user.isBlocked
+    };
+
     next();
-  } catch {
-    res.status(403).json({ error: "Invalid token" });
-    return; // Explicit return after response
+  } catch (error) {
+    res.status(401).json({ error: "Invalid or expired token" });
   }
 };
 
-
+// authorizeAdmin remains the same
 export const authorizeAdmin = (
   req: Request,
   res: Response,
   next: NextFunction
 ) => {
   if (!req.user?.isAdmin) {
-    return res.status(403).json({ error: "Admin access required" });
+    res.status(403).json({ error: "Admin access required" });
+    return;
   }
   next();
 };
