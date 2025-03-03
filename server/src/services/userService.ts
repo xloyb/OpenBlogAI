@@ -1,9 +1,9 @@
 import bcrypt from "bcrypt";
 import prisma from "@utils/client";
-import { signToken, verifyToken } from "@utils/jwt";
-import { env } from 'envValidator';
+import { Request, Response } from "express";
+import { generateAccessToken, generateRefreshToken, verifyRefreshToken, revokeRefreshToken  } from "@utils/jwt";
 
-export const registerUserService = async (email: string, password: string) => {
+export const registerUserService = async (email: string, password: string, ipAddress?: string, userAgent?: string) => {
   if (!email || !password) {
     throw new Error("Email and password are required");
   }
@@ -15,114 +15,245 @@ export const registerUserService = async (email: string, password: string) => {
 
   const user = await prisma.user.create({
     data: { email, password: hashedPassword },
+    select: {
+      id: true,
+      name: true,
+      email: true,
+      createdAt: true,
+      password: true,
+      updatedAt: true,
+      isAdmin: true,
+      isModerator: true,
+      isVerifiedPoster: true,
+      isBlocked: true
+    }
   });
 
-  // Generate tokens with user flags
-  const tokenPayload = {
-    id: user.id,
-    isAdmin: user.isAdmin,
-    isModerator: user.isModerator,
-    isVerifiedPoster: user.isVerifiedPoster,
-    isBlocked: user.isBlocked
-  };
+  const accessToken = generateAccessToken(user);
+  const refreshToken = await generateRefreshToken(user, ipAddress, userAgent);
   
-  const token = signToken(tokenPayload, "1h");
-  const refreshToken = signToken(tokenPayload, '7d');
+  const { password: userPassword, ...safeUser } = user;
 
-  await prisma.refreshToken.create({
-    data: {
-      token: refreshToken,
-      userId: user.id,
-      expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
-    },
-  });
-
-  return { user, token, refreshToken };
+  return { user : safeUser, accessToken, refreshToken };
 };
 
-export const loginUserService = async (email: string, password: string, ipAddress: string, userAgent: string) => {
-  const user = await prisma.user.findUnique({ where: { email } });
-  if (!user) throw new Error("Invalid email or password");
 
-  const isPasswordValid = await bcrypt.compare(password, user.password);
-  if (!isPasswordValid) throw new Error("Invalid email or password");
 
-  // Create token payload
-  const tokenPayload = {
-    id: user.id,
-    isAdmin: user.isAdmin,
-    isModerator: user.isModerator,
-    isVerifiedPoster: user.isVerifiedPoster,
-    isBlocked: user.isBlocked
-  };
+// export const loginUserService = async (email: string, password: string, ipAddress?: string, userAgent?: string) => {
+//   // Ensure email and password are provided
+//   if (!email || !password) {
+//     throw new Error("Email and password are required");
+//   }
 
-  const accessToken = signToken(tokenPayload, '1h');
-  const refreshToken = signToken(tokenPayload, '7d');
+//   // Find the user by email
+//   const user = await prisma.user.findUnique({
+//     where: { email },
+//     select: {
+//       id: true,
+//       name: true,
+//       email: true,
+//       password: true, 
+//       createdAt: true,
+//       updatedAt: true,
+//       isAdmin: true,
+//       isModerator: true,
+//       isVerifiedPoster: true,
+//       isBlocked: true
+//     }
+//   });
 
-  await prisma.refreshToken.create({
-    data: {
-      token: refreshToken,
-      userId: user.id,
-      ipAddress,
-      userAgent,
-      expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
-    },
-  });
+//   // Check if user exists
+//   if (!user) {
+//     throw new Error("Invalid email or password");
+//   }
 
-  return { accessToken, refreshToken };
-};
+//   // Verify password
+//   const isPasswordValid = await bcrypt.compare(password, user.password);
+//   if (!isPasswordValid) {
+//     throw new Error("Invalid email or password");
+//   }
 
-export const refreshUserTokenService = async (refreshToken: string) => {
-  if (!refreshToken) throw new Error("Refresh token missing");
+//   // Check if account is blocked
+//   if (user.isBlocked) {
+//     throw new Error("Account is blocked");
+//   }
 
-  const tokenRecord = await prisma.refreshToken.findUnique({
-    where: { token: refreshToken },
-  });
+//   // Generate tokens
+//   const accessToken = generateAccessToken(user);
+//   const refreshToken = await generateRefreshToken(user, ipAddress, userAgent);
 
-  if (!tokenRecord || tokenRecord.isRevoked || tokenRecord.expiresAt < new Date()) {
-    throw new Error("Invalid or expired refresh token");
+//   return { accessToken, refreshToken, user };
+// };
+
+
+export const loginUserService = async (email: string, password: string, ipAddress?: string, userAgent?: string) => {
+  if (!email || !password) {
+    throw new Error("Email and password are required");
   }
 
-  const user = await prisma.user.findUnique({ where: { id: tokenRecord.userId } });
-  if (!user) throw new Error("User not found");
-
-  // Create updated token payload
-  const tokenPayload = {
-    id: user.id,
-    isAdmin: user.isAdmin,
-    isModerator: user.isModerator,
-    isVerifiedPoster: user.isVerifiedPoster,
-    isBlocked: user.isBlocked
-  };
-
-  const newAccessToken = signToken(tokenPayload, "1h");
-  const newRefreshToken = signToken(tokenPayload, "7d");
-
-  await prisma.refreshToken.update({
-    where: { id: tokenRecord.id },
-    data: { isRevoked: true },
+  const user = await prisma.user.findUnique({
+    where: { email },
+    select: {
+      id: true,
+      name: true,
+      email: true,
+      password: true, 
+      createdAt: true,
+      updatedAt: true,
+      isAdmin: true,
+      isModerator: true,
+      isVerifiedPoster: true,
+      isBlocked: true
+    }
   });
 
-  await prisma.refreshToken.create({
-    data: {
-      token: newRefreshToken,
-      userId: user.id,
-      ipAddress: tokenRecord.ipAddress,
-      userAgent: tokenRecord.userAgent,
-      expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
-    },
-  });
+  if (!user) {
+    throw new Error("Invalid email or password");
+  }
 
-  return { newAccessToken, newRefreshToken };
+  const isPasswordValid = await bcrypt.compare(password, user.password);
+  if (!isPasswordValid) {
+    throw new Error("Invalid email or password");
+  }
+
+  if (user.isBlocked) {
+    throw new Error("Account is blocked");
+  }
+
+  const accessToken = generateAccessToken(user);
+  const refreshToken = await generateRefreshToken(user, ipAddress, userAgent);
+
+  return { accessToken, refreshToken, user };
 };
 
 
 export const logoutUserService = async (refreshToken: string) => {
   if (!refreshToken) throw new Error("No refresh token provided");
+  await revokeRefreshToken(refreshToken);
+};
 
-  // Mark the refresh token as revoked
-  await prisma.refreshToken.updateMany({
-    where: { token: refreshToken },
-    data: { isRevoked: true },
+
+
+
+// export const refreshUserTokenService = async (
+//   refreshToken: string,
+//   ipAddress?: string,
+//   userAgent?: string
+// ) => {
+//   if (!refreshToken) throw new Error("Refresh token missing");
+
+//   const tokenRecord = await verifyRefreshToken(refreshToken);
+
+//   const user = await prisma.user.findUnique({
+//     where: { id: tokenRecord.userId },
+//     select: {
+//       id: true,
+//       name: true,
+//       email: true,
+//       password: false,
+//       createdAt: true,
+//       updatedAt: true,
+//       isAdmin: true,
+//       isModerator: true,
+//       isVerifiedPoster: true,
+//       isBlocked: true
+//     }
+//   });
+
+//   if (!user) throw new Error("User not found");
+//   if (user.isBlocked) throw new Error("Account is blocked");
+
+//   const newAccessToken = generateAccessToken(user);
+//   // Use current ipAddress and userAgent instead of old tokenRecord values
+//   const newRefreshToken = await generateRefreshToken(user, ipAddress, userAgent);
+
+//   await prisma.refreshToken.update({
+//     where: { id: tokenRecord.id },
+//     data: { isRevoked: true }
+//   });
+
+//   return { newAccessToken, newRefreshToken };
+// };
+
+
+export const refreshUserTokenService = async (
+  refreshToken: string,
+  ipAddress?: string,
+  userAgent?: string
+) => {
+  console.log("[refreshUserTokenService] Starting token refresh process");
+  console.log("[refreshUserTokenService] Provided refresh token:", refreshToken);
+  console.log("[refreshUserTokenService] IP Address:", ipAddress);
+  console.log("[refreshUserTokenService] User Agent:", userAgent);
+
+  if (!refreshToken) {
+    console.log("[refreshUserTokenService] No refresh token provided");
+    throw new Error("Refresh token missing");
+  }
+
+  console.log("[refreshUserTokenService] Verifying refresh token...");
+  const tokenRecord = await verifyRefreshToken(refreshToken);
+  console.log("[refreshUserTokenService] Token record:", tokenRecord);
+
+  console.log("[refreshUserTokenService] Fetching user with ID:", tokenRecord.userId);
+  const user = await prisma.user.findUnique({
+    where: { id: tokenRecord.userId },
+    select: {
+      id: true,
+      name: true,
+      email: true,
+      password: false,
+      createdAt: true,
+      updatedAt: true,
+      isAdmin: true,
+      isModerator: true,
+      isVerifiedPoster: true,
+      isBlocked: true
+    }
   });
+  console.log("[refreshUserTokenService] Retrieved user:", user);
+
+  if (!user) {
+    console.log("[refreshUserTokenService] User not found for ID:", tokenRecord.userId);
+    throw new Error("User not found");
+  }
+  if (user.isBlocked) {
+    console.log("[refreshUserTokenService] User is blocked:", user.id);
+    throw new Error("Account is blocked");
+  }
+
+  console.log("[refreshUserTokenService] Generating new access token...");
+  const newAccessToken = generateAccessToken(user);
+  console.log("[refreshUserTokenService] New access token generated:", newAccessToken);
+
+  console.log("[refreshUserTokenService] Generating new refresh token...");
+  const newRefreshToken = await generateRefreshToken(user, ipAddress, userAgent);
+  console.log("[refreshUserTokenService] New refresh token generated:", newRefreshToken);
+
+  console.log("[refreshUserTokenService] Revoking old refresh token ID:", tokenRecord.id);
+  await prisma.refreshToken.update({
+    where: { id: tokenRecord.id },
+    data: { isRevoked: true }
+  });
+  console.log("[refreshUserTokenService] Old refresh token revoked");
+
+  console.log("[refreshUserTokenService] Returning new tokens");
+  return { newAccessToken, newRefreshToken };
+};
+
+export const logoutUser = async (req: Request, res: Response) => {
+  const authHeader = req.headers.authorization;
+
+  if (!authHeader || !authHeader.startsWith("Bearer ")) {
+    return res.status(400).json({ error: "Refresh token missing" });
+  }
+
+  const refreshToken = authHeader.split(" ")[1];
+
+  try {
+    await logoutUserService(refreshToken);
+    res.json({ message: "Logged out successfully" });
+  } catch (error) {
+    res.status(500).json({ error: "Failed to log out" });
+  }
 };
