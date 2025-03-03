@@ -38,54 +38,6 @@ export const registerUserService = async (email: string, password: string, ipAdd
 };
 
 
-
-// export const loginUserService = async (email: string, password: string, ipAddress?: string, userAgent?: string) => {
-//   // Ensure email and password are provided
-//   if (!email || !password) {
-//     throw new Error("Email and password are required");
-//   }
-
-//   // Find the user by email
-//   const user = await prisma.user.findUnique({
-//     where: { email },
-//     select: {
-//       id: true,
-//       name: true,
-//       email: true,
-//       password: true, 
-//       createdAt: true,
-//       updatedAt: true,
-//       isAdmin: true,
-//       isModerator: true,
-//       isVerifiedPoster: true,
-//       isBlocked: true
-//     }
-//   });
-
-//   // Check if user exists
-//   if (!user) {
-//     throw new Error("Invalid email or password");
-//   }
-
-//   // Verify password
-//   const isPasswordValid = await bcrypt.compare(password, user.password);
-//   if (!isPasswordValid) {
-//     throw new Error("Invalid email or password");
-//   }
-
-//   // Check if account is blocked
-//   if (user.isBlocked) {
-//     throw new Error("Account is blocked");
-//   }
-
-//   // Generate tokens
-//   const accessToken = generateAccessToken(user);
-//   const refreshToken = await generateRefreshToken(user, ipAddress, userAgent);
-
-//   return { accessToken, refreshToken, user };
-// };
-
-
 export const loginUserService = async (email: string, password: string, ipAddress?: string, userAgent?: string) => {
   if (!email || !password) {
     throw new Error("Email and password are required");
@@ -131,49 +83,6 @@ export const logoutUserService = async (refreshToken: string) => {
   if (!refreshToken) throw new Error("No refresh token provided");
   await revokeRefreshToken(refreshToken);
 };
-
-
-
-
-// export const refreshUserTokenService = async (
-//   refreshToken: string,
-//   ipAddress?: string,
-//   userAgent?: string
-// ) => {
-//   if (!refreshToken) throw new Error("Refresh token missing");
-
-//   const tokenRecord = await verifyRefreshToken(refreshToken);
-
-//   const user = await prisma.user.findUnique({
-//     where: { id: tokenRecord.userId },
-//     select: {
-//       id: true,
-//       name: true,
-//       email: true,
-//       password: false,
-//       createdAt: true,
-//       updatedAt: true,
-//       isAdmin: true,
-//       isModerator: true,
-//       isVerifiedPoster: true,
-//       isBlocked: true
-//     }
-//   });
-
-//   if (!user) throw new Error("User not found");
-//   if (user.isBlocked) throw new Error("Account is blocked");
-
-//   const newAccessToken = generateAccessToken(user);
-//   // Use current ipAddress and userAgent instead of old tokenRecord values
-//   const newRefreshToken = await generateRefreshToken(user, ipAddress, userAgent);
-
-//   await prisma.refreshToken.update({
-//     where: { id: tokenRecord.id },
-//     data: { isRevoked: true }
-//   });
-
-//   return { newAccessToken, newRefreshToken };
-// };
 
 
 export const refreshUserTokenService = async (
