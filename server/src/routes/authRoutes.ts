@@ -14,7 +14,7 @@ const loginLimiter = rateLimit({
 // Apply only to the login route
 router.post('/register', registerUser as any);
 router.post('/login', loginLimiter, loginUser as any);
-router.post('/refresh', refreshToken as any);  
+router.post('/refresh', refreshToken as any);
 router.post('/logout', logoutUser as any);
 
 export default router;
