@@ -38,36 +38,6 @@ export const registerUser = async (req: Request, res: Response, next: NextFuncti
 };
 
 // Login User
-// export const loginUser = async (req: Request, res: Response, next: NextFunction) => {
-//   try {
-//     const { email, password } = req.body;
-//     if (!email || !password) {
-//       return res.status(400).json({ error: "Email and password are required" });
-//     }
-
-//     const ipAddress = req.ip || 'unknown';
-//     const userAgent = req.headers['user-agent'] || 'unknown';
-
-//     const { accessToken, refreshToken, user } = await loginUserService(email, password, ipAddress, userAgent);
-
-//     res.json({ 
-//       message: "Login successful", 
-//       accessToken, 
-//       refreshToken, 
-//       user 
-//     });
-//   } catch (error) {
-//     if ((error as Error).message === "Invalid email or password") {
-//       return res.status(401).json({ error: "Invalid email or password" });
-//     }
-//     if ((error as Error).message === "Account is blocked") {
-//       return res.status(403).json({ error: "Your account is blocked" });
-//     }
-//     next(error);
-//   }
-// };
-
-
 export const loginUser = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { email, password } = req.body;
@@ -98,38 +68,6 @@ export const loginUser = async (req: Request, res: Response, next: NextFunction)
 };
 
 // Refresh Token
-
-// export const refreshToken = async (req: Request, res: Response) => {
-//   const authHeader = req.headers.authorization;
-
-//   if (!authHeader || !authHeader.startsWith("Bearer ")) {
-//     return res.status(401).json({ error: "Authorization header missing or invalid" });
-//   }
-
-//   const refreshToken = authHeader.split(" ")[1];
-//   const ipAddress = req.ip || 'unknown';
-//   const userAgent = req.headers['user-agent'] || 'unknown';
-
-//   try {
-//     // Pass current ipAddress and userAgent to the service
-//     const { newAccessToken, newRefreshToken } = await refreshUserTokenService(
-//       refreshToken,
-//       ipAddress,
-//       userAgent
-//     );
-//     res.json({ accessToken: newAccessToken, refreshToken: newRefreshToken });
-//   } catch (error) {
-//     if ((error as Error).message === "Invalid or expired refresh token") {
-//       return res.status(403).json({ error: "Invalid or expired refresh token" });
-//     }
-//     if ((error as Error).message === "Account is blocked") {
-//       return res.status(403).json({ error: "Your account is blocked" });
-//     }
-//     res.status(500).json({ error: "Failed to refresh token" });
-//   }
-// };
-
-
 export const refreshToken = async (req: Request, res: Response) => {
   console.log("[refreshToken] Received POST /api/auth/refresh request");
   console.log("[refreshToken] Request headers:", req.headers);
