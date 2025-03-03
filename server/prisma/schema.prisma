@@ -99,7 +99,7 @@ model User {
 
 model RefreshToken {
   id          String   @id @default(uuid())
-  token       String   @unique
+  token       String   @unique(length: 255) @db.Text
   userId      String
   user        User     @relation(fields: [userId], references: [id])
   ipAddress   String?  // Tracks the IP address
@@ -107,7 +107,8 @@ model RefreshToken {
   createdAt   DateTime @default(now())
   lastUsedAt  DateTime @updatedAt // Tracks the last used time
   expiresAt   DateTime
-  isRevoked   Boolean  @default(false) // For granular revocation
+  isRevoked   Boolean  @default(false) 
+  revokedAt   DateTime? // Timestamp for revocation tracking
 }
 
 model Video {
