@@ -1,74 +1,191 @@
-import { NextFunction, Request, Response } from "express";
-import { registerUserService, loginUserService, refreshUserTokenService, logoutUserService } from "@services/userService";
 
-// Register User Controller
-export const registerUser = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-): Promise<void> => {
+
+import { Request, Response, NextFunction } from "express";
+import { 
+  registerUserService, 
+  loginUserService, 
+  refreshUserTokenService, 
+  logoutUserService 
+} from "@services/userService";
+
+
+
+export const registerUser = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { email, password } = req.body;
 
-    // Validate input
     if (!email || !password) {
-       res.status(400).json({ error: true, message: "Email and password are required" });
+      return res.status(400).json({ error: "Email and password are required" });
     }
 
-    const { user, token,refreshToken } = await registerUserService(email, password);
+    const ipAddress = req.ip || 'unknown';
+    const userAgent = req.headers['user-agent'] || 'unknown';
+
+    const { user, accessToken, refreshToken } = await registerUserService(email, password, ipAddress, userAgent);
 
     res.status(201).json({
       message: "User registered successfully",
-      token,
-      refreshToken
+      accessToken,
+      refreshToken,
+      user
     });
   } catch (error) {
-    next(error); // Pass the error to the global error handler
+    if ((error as Error).message === "User already registered") {
+      return res.status(409).json({ error: "User already exists" });
+    }
+    next(error);
   }
 };
 
-// Login User Controller
-export const loginUser = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-): Promise<void> => {
+// Login User
+// export const loginUser = async (req: Request, res: Response, next: NextFunction) => {
+//   try {
+//     const { email, password } = req.body;
+//     if (!email || !password) {
+//       return res.status(400).json({ error: "Email and password are required" });
+//     }
+
+//     const ipAddress = req.ip || 'unknown';
+//     const userAgent = req.headers['user-agent'] || 'unknown';
+
+//     const { accessToken, refreshToken, user } = await loginUserService(email, password, ipAddress, userAgent);
+
+//     res.json({ 
+//       message: "Login successful", 
+//       accessToken, 
+//       refreshToken, 
+//       user 
+//     });
+//   } catch (error) {
+//     if ((error as Error).message === "Invalid email or password") {
+//       return res.status(401).json({ error: "Invalid email or password" });
+//     }
+//     if ((error as Error).message === "Account is blocked") {
+//       return res.status(403).json({ error: "Your account is blocked" });
+//     }
+//     next(error);
+//   }
+// };
+
+
+export const loginUser = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { email, password } = req.body;
-    const ipAddress = req.ip || 'unknown'; 
-    const userAgent = req.headers['user-agent'] || 'unknown'; // Extract the user's device/user agent
+    if (!email || !password) {
+      return res.status(400).json({ error: "Email and password are required" });
+    }
 
-    const { accessToken, refreshToken } = await loginUserService(email, password, ipAddress, userAgent);
+    const ipAddress = req.ip || 'unknown';
+    const userAgent = req.headers['user-agent'] || 'unknown';
 
-    res.json({ message: 'Login successful', accessToken, refreshToken });
+    const { accessToken, refreshToken, user } = await loginUserService(email, password, ipAddress, userAgent);
+
+    res.json({ 
+      message: "Login successful", 
+      accessToken, 
+      refreshToken, 
+      user 
+    });
   } catch (error) {
-    next(error); // Pass the error to the global error handler
+    if ((error as Error).message === "Invalid email or password") {
+      return res.status(401).json({ error: "Invalid email or password" });
+    }
+    if ((error as Error).message === "Account is blocked") {
+      return res.status(403).json({ error: "Your account is blocked" });
+    }
+    next(error);
   }
 };
 
-// Refresh Token Controller
-export const refreshToken = async (req: Request, res: Response) => {
-  const { refreshToken } = req.body;
+// Refresh Token
 
-  if (!refreshToken) {
-    return res.status(401).json({ error: 'Refresh token missing' });
+// export const refreshToken = async (req: Request, res: Response) => {
+//   const authHeader = req.headers.authorization;
+
+//   if (!authHeader || !authHeader.startsWith("Bearer ")) {
+//     return res.status(401).json({ error: "Authorization header missing or invalid" });
+//   }
+
+//   const refreshToken = authHeader.split(" ")[1];
+//   const ipAddress = req.ip || 'unknown';
+//   const userAgent = req.headers['user-agent'] || 'unknown';
+
+//   try {
+//     // Pass current ipAddress and userAgent to the service
+//     const { newAccessToken, newRefreshToken } = await refreshUserTokenService(
+//       refreshToken,
+//       ipAddress,
+//       userAgent
+//     );
+//     res.json({ accessToken: newAccessToken, refreshToken: newRefreshToken });
+//   } catch (error) {
+//     if ((error as Error).message === "Invalid or expired refresh token") {
+//       return res.status(403).json({ error: "Invalid or expired refresh token" });
+//     }
+//     if ((error as Error).message === "Account is blocked") {
+//       return res.status(403).json({ error: "Your account is blocked" });
+//     }
+//     res.status(500).json({ error: "Failed to refresh token" });
+//   }
+// };
+
+
+export const refreshToken = async (req: Request, res: Response) => {
+  console.log("[refreshToken] Received POST /api/auth/refresh request");
+  console.log("[refreshToken] Request headers:", req.headers);
+
+  const authHeader = req.headers.authorization;
+  console.log("[refreshToken] Authorization header:", authHeader);
+
+  if (!authHeader || !authHeader.startsWith("Bearer ")) {
+    console.log("[refreshToken] Missing or invalid Authorization header");
+    return res.status(401).json({ error: "Authorization header missing or invalid" });
   }
+
+  const refreshToken = authHeader.split(" ")[1];
+  console.log("[refreshToken] Extracted refresh token:", refreshToken);
+
+  const ipAddress = req.ip || 'unknown';
+  const userAgent = req.headers['user-agent'] || 'unknown';
+  console.log("[refreshToken] IP Address:", ipAddress);
+  console.log("[refreshToken] User Agent:", userAgent);
 
   try {
-    const { newAccessToken, newRefreshToken } = await refreshUserTokenService(refreshToken);
-    res.json({ newAccessToken, newRefreshToken });
+    console.log("[refreshToken] Calling refreshUserTokenService...");
+    const { newAccessToken, newRefreshToken } = await refreshUserTokenService(
+      refreshToken,
+      ipAddress,
+      userAgent
+    );
+    console.log("[refreshToken] Successfully refreshed tokens:");
+    console.log("[refreshToken] New Access Token:", newAccessToken);
+    console.log("[refreshToken] New Refresh Token:", newRefreshToken);
+
+    res.json({ accessToken: newAccessToken, refreshToken: newRefreshToken });
   } catch (error) {
-    res.status(403).json({ error: 'Invalid refresh token' });
+    console.error("[refreshToken] Error in refreshUserTokenService:", error);
+
+    if ((error as Error).message === "Invalid or expired refresh token") {
+      console.log("[refreshToken] Detected invalid or expired refresh token");
+      return res.status(403).json({ error: "Invalid or expired refresh token" });
+    }
+    if ((error as Error).message === "Account is blocked") {
+      console.log("[refreshToken] Detected blocked account");
+      return res.status(403).json({ error: "Your account is blocked" });
+    }
+    console.log("[refreshToken] Unhandled error, returning 500");
+    res.status(500).json({ error: "Failed to refresh token" });
   }
 };
 
-// Logout User Controller
 export const logoutUser = async (req: Request, res: Response) => {
-  const { refreshToken } = req.body;
+  const authHeader = req.headers.authorization;
 
-  if (!refreshToken) {
-    return res.status(400).json({ error: 'Refresh token missing' });
+  if (!authHeader || !authHeader.startsWith("Bearer ")) {
+    return res.status(400).json({ error: "Refresh token missing" });
   }
+
+  const refreshToken = authHeader.split(" ")[1];
 
   try {
     await logoutUserService(refreshToken);
