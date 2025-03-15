@@ -1,0 +1,62 @@
+name: Monorepo Deployment
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  test-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: 18
+
+    # Client steps
+    - name: Install client dependencies
+      working-directory: ./client
+      run: npm ci
+
+    - name: Build client
+      working-directory: ./client
+      run: npm run build
+
+    - name: Test client
+      working-directory: ./client
+      run: npm test
+
+    # Server steps
+    - name: Install server dependencies
+      working-directory: ./server
+      run: npm ci
+
+    - name: Test server
+      working-directory: ./server
+      run: npm test
+
+    # Deployment
+    - name: Deploy to VPS
+      uses: appleboy/ssh-action@v1.3.1
+      with:
+        host: ${{ secrets.VPS_IP }}
+        username: ${{ secrets.VPS_USER }}
+        key: ${{ secrets.VPS_SSH_KEY }}
+        script: |
+          cd /var/www/your-project
+          git pull origin main
+          
+          # Client setup
+          cd client
+          npm ci --production
+          npm run build
+          
+          # Server setup
+          cd ../server
+          npm ci --production
+          
+          # Restart services
+          pm2 reload ecosystem.config.js
