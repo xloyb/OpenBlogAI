@@ -8,8 +8,6 @@ import {
   logoutUserService 
 } from "@services/userService";
 
-
-
 export const registerUser = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { email, password } = req.body;

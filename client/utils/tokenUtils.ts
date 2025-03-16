@@ -2,7 +2,10 @@ import { jwtDecode } from "jwt-decode"
 
 export interface DecodedToken {
   exp: number
-  // Add other properties from your JWT payload
+  id: string
+  isAdmin: boolean
+  isModerator: boolean
+  isBlocked: boolean
 }
 
 export const isTokenExpired = (token: string): boolean => {
