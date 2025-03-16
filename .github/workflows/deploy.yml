@@ -34,16 +34,18 @@ jobs:
           cd server
           npx prisma migrate deploy
 
-      - name: Deploy to Server
-        uses: appleboy/ssh-action@v1
-        with:
-          host: ${{ secrets.SERVER_IP }}
-          username: ${{ secrets.SERVER_USER }}
-          key: ${{ secrets.SERVER_SSH_KEY }}
-          script: |
-            cd /var/www/openblogai
-            git pull origin main
-            cd server
-            npm ci --production
-            npx prisma generate
-            pm2 reload ecosystem.config.js
+          - name: Deploy to Server
+          uses: appleboy/ssh-action@v1
+          with:
+            host: ${{ secrets.SERVER_IP }}
+            username: ${{ secrets.SERVER_USER }}
+            key: ${{ secrets.SERVER_SSH_KEY }}
+            script: |
+              echo "Successfully connected to the server"
+              cd /var/www/openblogai
+              git pull origin main
+              cd server
+              npm ci --production
+              npx prisma generate
+              pm2 reload ecosystem.config.js
+        
