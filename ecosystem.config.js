@@ -1,26 +1,15 @@
 module.exports = {
-  apps: [
-    {
-      name: 'client',
-      cwd: './client',
-      script: 'npm',
-      args: 'start',
-      env: {
-        NODE_ENV: 'production',
-        PORT: 3000
-      },
-      watch: false
+  apps: [{
+    name: 'openblogai-server',
+    script: 'npm',
+    args: 'start',
+    env: {
+      NODE_ENV: 'production',
+      DATABASE_URL: process.env.DATABASE_URL,
     },
-    {
-      name: 'server',
-      cwd: './server',
-      script: 'npm',
-      args: 'start',
-      env: {
-        NODE_ENV: 'production',
-        PORT: 3001
-      },
-      watch: false
-    }
-  ]
+    error_file: '/var/log/openblogai/err.log',
+    out_file: '/var/log/openblogai/out.log',
+    merge_logs: true,
+    time: true
+  }]
 };
