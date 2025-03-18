@@ -33,7 +33,12 @@ jobs:
         run: |
           cd server
           npx prisma migrate deploy
-
+      - name: Debug SSH Connection
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SERVER_SSH_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_IP }} "echo 'SSH Connection successful'"
       - name: Deploy to Server
         uses: appleboy/ssh-action@v1
         with:
