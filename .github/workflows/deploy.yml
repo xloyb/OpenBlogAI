@@ -24,21 +24,24 @@ jobs:
           cd server
           npm ci
 
-      - name: Build server
+      - name: Build server (if necessary)
         run: |
           cd server
-          npm run build
+          npm run build # Only if your app requires a build step
 
       - name: Run Prisma migrations
         run: |
           cd server
-          npx prisma migrate deploy
+          echo "Running Prisma migrations..."
+          npx prisma migrate deploy # Ensure DATABASE_URL is properly set
+
       - name: Debug SSH Connection
         run: |
           mkdir -p ~/.ssh
           echo "${{ secrets.SERVER_SSH_KEY }}" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
           ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_IP }} "echo 'SSH Connection successful'"
+
       - name: Deploy to Server
         uses: appleboy/ssh-action@v1
         with:
@@ -47,6 +50,11 @@ jobs:
           key: ${{ secrets.SERVER_SSH_KEY }}
           script: |
             echo "Successfully connected to the server"
+            # Ensure the repository exists first on the server
+            if [ ! -d "/var/www/openblogai" ]; then
+              echo "Repository not found, cloning..."
+              git clone https://github.com/yourusername/openblogai.git /var/www/openblogai
+            fi
             cd /var/www/openblogai
             git pull origin main
             cd server
