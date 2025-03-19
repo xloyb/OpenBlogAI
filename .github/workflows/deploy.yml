@@ -43,24 +43,24 @@ jobs:
           ssh-keyscan -H ${{ secrets.SERVER_IP }} >> ~/.ssh/known_hosts # Avoids SSH authenticity prompt
           ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_IP }} "echo 'SSH Connection successful'"
 
-      - name: Deploy to Server
-        uses: appleboy/ssh-action@v1
-        with:
-          host: ${{ secrets.SERVER_IP }}
-          username: ${{ secrets.SERVER_USER }}
-          key: ${{ secrets.SERVER_SSH_KEY }}
-          script: |
-            echo "Successfully connected to the server"
-            # Ensure the repository exists first on the server
-            if [ ! -d "/var/www/openblogai" ]; then
-              echo "Repository not found, cloning..."
-              git clone https://github.com/xloyb/OpenBlogAI.git /var/www/openblogai
-            fi
-            cd /var/www/openblogai
-            git pull origin main
-            cd server
-            npm ci --production
-            npx prisma generate
-            pm2 reload ecosystem.config.js
-        env:
-          SERVER_SSH_KEY: ${{ secrets.SERVER_SSH_KEY }}
+          - name: Deploy to Server
+          uses: appleboy/ssh-action@v1
+          with:
+            host: ${{ secrets.SERVER_HOST }}
+            username: ${{ secrets.SERVER_USER }}
+            key: ${{ secrets.SERVER_SSH_KEY }}
+            script: |
+              echo "Successfully connected to the server"
+              if [ ! -d "/var/www/openblogai" ]; then
+                echo "Repository not found, cloning..."
+                git clone git@github.com:xloyb/openblogai.git /var/www/openblogai 
+              fi
+              cd /var/www/openblogai
+              git pull origin main
+              cd /var/www/openblogai/server
+              npm ci --production
+              npx prisma generate
+              pm2 reload /var/www/openblogai/ecosystem.config.js
+          env:
+            DATABASE_URL: ${{ secrets.DATABASE_URL }}
+        
