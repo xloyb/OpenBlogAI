@@ -1,4 +1,4 @@
-name: Deploy Server to VPS
+name: Node.js Production Deployment
 
 on:
   push:
@@ -16,29 +16,15 @@ jobs:
         with:
           node-version: '18.x'
 
-      - name: Set up environment variables
-        run: echo "DATABASE_URL=${{ secrets.DATABASE_URL }}" >> $GITHUB_ENV
-
       - name: Install dependencies
-        run: |
-          cd server
-          npm ci
+        run: npm ci
 
-      - name: Build server
-        run: |
-          cd server
-          npm run build
+      - name: Build project
+        run: npm run build
 
       - name: Run Prisma migrations
-        run: |
-          cd server
-          npx prisma migrate deploy
-      - name: Debug SSH Connection
-        run: |
-          mkdir -p ~/.ssh
-          echo "${{ secrets.SERVER_SSH_KEY }}" > ~/.ssh/id_rsa
-          chmod 600 ~/.ssh/id_rsa
-          ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_IP }} "echo 'SSH Connection successful'"
+        run: npx prisma migrate deploy
+
       - name: Deploy to Server
         uses: appleboy/ssh-action@v1
         with:
@@ -46,12 +32,8 @@ jobs:
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SERVER_SSH_KEY }}
           script: |
-            echo "Successfully connected to the server"
-            cd /var/www/openblogai
+            cd /var/www/your_project
             git pull origin main
-            cd server
             npm ci --production
             npx prisma generate
             pm2 reload ecosystem.config.js
-        env:
-          SERVER_SSH_KEY: ${{ secrets.SERVER_SSH_KEY }}
