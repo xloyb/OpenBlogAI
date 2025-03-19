@@ -40,6 +40,7 @@ jobs:
           mkdir -p ~/.ssh
           echo "${{ secrets.SERVER_SSH_KEY }}" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -H ${{ secrets.SERVER_IP }} >> ~/.ssh/known_hosts # Avoids SSH authenticity prompt
           ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_IP }} "echo 'SSH Connection successful'"
 
       - name: Deploy to Server
@@ -53,7 +54,7 @@ jobs:
             # Ensure the repository exists first on the server
             if [ ! -d "/var/www/openblogai" ]; then
               echo "Repository not found, cloning..."
-              git clone https://github.com/yourusername/openblogai.git /var/www/openblogai
+              git clone https://github.com/xloyb/OpenBlogAI.git /var/www/openblogai
             fi
             cd /var/www/openblogai
             git pull origin main
