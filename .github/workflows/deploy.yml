@@ -28,15 +28,24 @@ jobs:
         run: |
           cd server
           npm run build # Only if your app requires a build step
+
       - name: Debug Prisma Connection
         run: |
-         echo "Testing Prisma database connection..."
-         npx prisma db pull || (echo "Failed to connect!" && exit 1)
+          cd server
+          export DATABASE_URL=${{ secrets.DATABASE_URL }}
+          echo "Testing Prisma database connection..."
+          npx prisma db pull || (echo "Failed to connect!" && exit 1)
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+
       - name: Run Prisma migrations
         run: |
           cd server
+          export DATABASE_URL=${{ secrets.DATABASE_URL }}
           echo "Running Prisma migrations..."
-          npx prisma migrate deploy # Ensure DATABASE_URL is properly set
+          npx prisma migrate deploy
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
 
       - name: Debug SSH Connection
         run: |
@@ -63,7 +72,4 @@ jobs:
             cd /var/www/openblogai/server
             npm ci --production
             npx prisma generate
-            pm2 reload /var/www/openblogai/ecosystem.config.js
-
-    env:
-      DATABASE_URL: ${{ secrets.DATABASE_URL }}
+            pm2 reload openblogai-server --update-env
