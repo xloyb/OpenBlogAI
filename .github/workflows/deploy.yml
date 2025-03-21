@@ -28,7 +28,10 @@ jobs:
         run: |
           cd server
           npm run build # Only if your app requires a build step
-
+      - name: Debug Prisma Connection
+        run: |
+         echo "Testing Prisma database connection..."
+         npx prisma db pull || (echo "Failed to connect!" && exit 1)
       - name: Run Prisma migrations
         run: |
           cd server
