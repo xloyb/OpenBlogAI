@@ -16,9 +16,6 @@ jobs:
         with:
           node-version: '18.x'
 
-      - name: Set up environment variables
-        run: echo "DATABASE_URL=${{ secrets.DATABASE_URL }}" >> $GITHUB_ENV
-
       - name: Install dependencies
         run: |
           cd server
@@ -32,7 +29,6 @@ jobs:
       - name: Debug Prisma Connection
         run: |
           cd server
-          export DATABASE_URL=${{ secrets.DATABASE_URL }}
           echo "Testing Prisma database connection..."
           npx prisma db pull || (echo "Failed to connect!" && exit 1)
         env:
@@ -41,7 +37,6 @@ jobs:
       - name: Run Prisma migrations
         run: |
           cd server
-          export DATABASE_URL=${{ secrets.DATABASE_URL }}
           echo "Running Prisma migrations..."
           npx prisma migrate deploy
         env:
@@ -72,4 +67,6 @@ jobs:
             cd /var/www/openblogai/server
             npm ci --production
             npx prisma generate
-            pm2 reload openblogai-server --update-env
+            pm2 reload /var/www/openblogai/ecosystem.config.js
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
