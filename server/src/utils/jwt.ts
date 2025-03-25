@@ -11,16 +11,24 @@ export interface JwtPayload {
 
 export type TokenUser = {
   id: string;
+  name: string | null;
+  email: string;
   isAdmin: boolean;
   isBlocked: boolean;
+  isModerator: boolean;
+  isVerifiedPoster: boolean;
 };
 
 export const generateAccessToken = (user: TokenUser) => {
   return jwt.sign(
     {
       userId: user.id,
+      name: user.name,
+      email: user.email,
       isAdmin: user.isAdmin,
-      isBlocked: user.isBlocked
+      isBlocked: user.isBlocked,
+      isModerator: user.isModerator,
+      isVerifiedPoster: user.isVerifiedPoster
     },
     env.JWT_SECRET,
     { expiresIn: '1m' } // Changed from '1m' to '15m' for better usability
@@ -51,8 +59,6 @@ export const generateRefreshToken = async (user: { id: string }, ipAddress?: str
 export const verifyAccessToken = (token: string): JwtPayload => {
   return jwt.verify(token, env.JWT_SECRET) as JwtPayload;
 };
-
-
 
 
 export const verifyRefreshToken = async (token: string) => {
