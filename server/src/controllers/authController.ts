@@ -51,8 +51,7 @@ export const loginUser = async (req: Request, res: Response, next: NextFunction)
     res.json({ 
       message: "Login successful", 
       accessToken, 
-      refreshToken, 
-      user 
+      refreshToken
     });
   } catch (error) {
     if ((error as Error).message === "Invalid email or password") {
