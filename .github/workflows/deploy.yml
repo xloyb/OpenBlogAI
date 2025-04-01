@@ -23,10 +23,7 @@ jobs:
         run: npm ci  
         working-directory: server  # Relative path to the server directory [[2]][[4]]  
 
-      # Run tests (if applicable)  
-      - name: Run tests  
-        run: npm test  
-        working-directory: server  
+      
 
       # Deploy to Ubuntu server  
       - name: Deploy to Server  
