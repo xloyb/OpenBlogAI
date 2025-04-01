@@ -10,8 +10,8 @@ jobs:
       # Checkout code  
       - uses: actions/checkout@v4  
         with:  
-          repository: xloyb/OpenBlogAI  # Specify your private repo [[3]][[7]]  
-          ssh-key: ${{ secrets.SSH_PRIVATE_KEY }}  # Use the private key for cloning [[5]][[7]]  
+          repository: xloyb/OpenBlogAI  
+          ssh-key: ${{ secrets.SSH_PRIVATE_KEY }}  
 
       # Set up Node.js  
       - uses: actions/setup-node@v4  
@@ -21,9 +21,7 @@ jobs:
       # Install dependencies in the "server" directory  
       - name: Install dependencies  
         run: npm ci  
-        working-directory: server  # Relative path to the server directory [[2]][[4]]  
-
-      
+        working-directory: server  
 
       # Deploy to Ubuntu server  
       - name: Deploy to Server  
@@ -33,7 +31,7 @@ jobs:
           username: ${{ secrets.USER }}  
           key: ${{ secrets.SSH_PRIVATE_KEY }}  
           script: |  
-            # Install Node.js and PM2 if missing [[7]]  
+            # Install Node.js and PM2 if missing  
             if ! command -v node &> /dev/null; then  
               curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -  
               sudo apt-get install -y nodejs  
@@ -42,21 +40,37 @@ jobs:
               npm install pm2 -g  
             fi  
 
-            # Clone private repo if not exists (uses SSH key) [[3]][[7]]  
+            # Clone repo if not exists  
             if [ ! -d "/var/www/OpenBlogAI" ]; then  
               git clone git@github.com:xloyb/OpenBlogAI.git /var/www/OpenBlogAI  
             fi  
 
             # Navigate to server directory and update code  
-            cd /var/www/OpenBlogAI/server  # Absolute path to your server directory  
+            cd /var/www/OpenBlogAI/server  
             git pull origin main  
 
-            # Install dependencies and regenerate Prisma Client [[8]][[9]]  
+            # Install dependencies and regenerate Prisma Client  
             npm install --production  
             npx prisma generate  
 
-            # Run database migrations (if using Prisma Migrate) [[9]]  
+            # Run database migrations  
             npx prisma migrate deploy  
 
-            # Restart the app with PM2 [[7]]  
+            # Add connection test using Prisma Client [[1]][[10]]  
+            echo "Testing database connection..."  
+            node -e "  
+              const { PrismaClient } = require('@prisma/client');  
+              const prisma = new PrismaClient();  
+              prisma.$connect()  
+                .then(() => {  
+                  console.log('✅ Database connection successful!');  
+                  process.exit(0);  
+                })  
+                .catch((err) => {  
+                  console.error('❌ Database connection failed:', err);  
+                  process.exit(1);  
+                });  
+            " || exit 1  
+
+            # Restart the app  
             pm2 restart app.js  
