@@ -1,40 +1,65 @@
-name: Node.js CI/CD SETUP
-on:
-  push:
-    branches: [main]
+name: Node.js CI/CD with Prisma  
+on:  
+  push:  
+    branches: [main]  
 
-jobs:
-  build-and-deploy:
-    runs-on: ubuntu-latest
-    steps:
-      # Checkout code
-      - uses: actions/checkout@v4
+jobs:  
+  build-and-deploy:  
+    runs-on: ubuntu-latest  
+    steps:  
+      # Checkout code  
+      - uses: actions/checkout@v4  
+        with:  
+          repository: xloyb/OpenBlogAI  # Specify your private repo [[3]][[7]]  
+          ssh-key: ${{ secrets.SSH_PRIVATE_KEY }}  # Use the private key for cloning [[5]][[7]]  
 
-      # Set up Node.js
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20 
+      # Set up Node.js  
+      - uses: actions/setup-node@v4  
+        with:  
+          node-version: 20  
 
-      # Install dependencies in the "server" directory
-      - name: Install dependencies
-        run: npm ci
-        working-directory: ./server
+      # Install dependencies in the "server" directory  
+      - name: Install dependencies  
+        run: npm ci  
+        working-directory: server  # Relative path to the server directory [[2]][[4]]  
 
-      # Run tests (if applicable)
-      - name: Run tests
-        run: npm test
-        working-directory: ./server
+      # Run tests (if applicable)  
+      - name: Run tests  
+        run: npm test  
+        working-directory: server  
 
-      # Deploy to Ubuntu server
-      - name: Deploy to Server
-        uses: appleboy/ssh-action@v1.0.0
-        with:
-          host: ${{ secrets.SERVER_IP }}
-          username: ${{ secrets.USER }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          script: |
-            cd ~/OpenBlogAI/server
-            git pull origin main
-            npm install --production
-            npx prisma generate
-            pm2 restart app.js
+      # Deploy to Ubuntu server  
+      - name: Deploy to Server  
+        uses: appleboy/ssh-action@v1.0.0  
+        with:  
+          host: ${{ secrets.SERVER_IP }}  
+          username: ${{ secrets.USER }}  
+          key: ${{ secrets.SSH_PRIVATE_KEY }}  
+          script: |  
+            # Install Node.js and PM2 if missing [[7]]  
+            if ! command -v node &> /dev/null; then  
+              curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -  
+              sudo apt-get install -y nodejs  
+            fi  
+            if ! command -v pm2 &> /dev/null; then  
+              npm install pm2 -g  
+            fi  
+
+            # Clone private repo if not exists (uses SSH key) [[3]][[7]]  
+            if [ ! -d "/var/www/OpenBlogAI" ]; then  
+              git clone git@github.com:xloyb/OpenBlogAI.git /var/www/OpenBlogAI  
+            fi  
+
+            # Navigate to server directory and update code  
+            cd /var/www/OpenBlogAI/server  # Absolute path to your server directory  
+            git pull origin main  
+
+            # Install dependencies and regenerate Prisma Client [[8]][[9]]  
+            npm install --production  
+            npx prisma generate  
+
+            # Run database migrations (if using Prisma Migrate) [[9]]  
+            npx prisma migrate deploy  
+
+            # Restart the app with PM2 [[7]]  
+            pm2 restart app.js  
