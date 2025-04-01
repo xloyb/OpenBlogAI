@@ -31,59 +31,21 @@ jobs:
           username: ${{ secrets.USER }}  
           key: ${{ secrets.SERVER_SSH_PRIVATE_KEY }}  # Separate key for server access [[7]][[9]]  
           use_insecure_cipher: true  # For older cipher compatibility [[7]]  
-          script: |  
-            set -e  # Fail on errors [[7]]  
+          script: |
+            set -e  
+            # Write the private key to a file  
+            echo "${{ secrets.SERVER_SSH_PRIVATE_KEY }}" > ~/.ssh/github_deploy_key  
+            chmod 600 ~/.ssh/github_deploy_key  # [[3]][[4]]  
 
-            # Ensure SSH agent is running and add deploy key for GitHub  
-            eval "$(ssh-agent -s)"  
-            echo "${{ secrets.GITHUB_DEPLOY_KEY }}" > ~/.ssh/github_deploy_key  
-            chmod 600 ~/.ssh/github_deploy_key  
-            ssh-add ~/.ssh/github_deploy_key  # [[7]]  
+            # Use the key for Git operations  
+            GIT_SSH_COMMAND="ssh -i ~/.ssh/github_deploy_key"  
+            export GIT_SSH_COMMAND  # [[7]]  
 
-            # Install Node.js and PM2 if missing  
-            if ! command -v node &> /dev/null; then  
-              curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -  
-              sudo apt-get install -y nodejs  
-            fi  
-            if ! command -v pm2 &> /dev/null; then  
-              npm install pm2 -g  
-            fi  
-
-            # Clone repo if not exists (uses GitHub deploy key)  
+            # Clone repo if not exists  
             if [ ! -d "/var/www/OpenBlogAI" ]; then  
-              GIT_SSH_COMMAND="ssh -i ~/.ssh/github_deploy_key" git clone git@github.com:xloyb/OpenBlogAI.git /var/www/OpenBlogAI  
+              git clone git@github.com:xloyb/OpenBlogAI.git /var/www/OpenBlogAI  
             fi  
 
             # Navigate to server directory and update code  
             cd /var/www/OpenBlogAI/server  
-            GIT_SSH_COMMAND="ssh -i ~/.ssh/github_deploy_key" git pull origin main  
-
-            # Install dependencies and regenerate Prisma Client  
-            npm install --production  
-            npx prisma generate --schema=./prisma/schema.prisma --no-engine  # [[7]][[9]]  
-
-            # Run database migrations  
-            npx prisma migrate deploy  
-
-            # Test database connection  
-            echo "Testing database connection..."  
-            node -e "  
-              const { PrismaClient } = require('@prisma/client');  
-              const prisma = new PrismaClient();  
-              prisma.$connect()  
-                .then(() => {  
-                  console.log('✅ Database connection successful!');  
-                  process.exit(0);  
-                })  
-                .catch((err) => {  
-                  console.error('❌ Database connection failed:', err);  
-                  process.exit(1);  
-                });  
-              setTimeout(() => {  
-                console.error('❌ Connection timed out');  
-                process.exit(1);  
-              }, 10000);  
-            " || exit 1  
-
-            # Restart the app  
-            pm2 restart app.js  
+            git pull origin main   
