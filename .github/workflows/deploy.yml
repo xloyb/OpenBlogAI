@@ -1,72 +1,40 @@
-name: Deploy Server to VPS
-
+name: Node.js CI/CD SETUP
 on:
   push:
     branches: [main]
 
 jobs:
-  deploy:
+  build-and-deploy:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+      # Checkout code
+      - uses: actions/checkout@v4
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v3
+      # Set up Node.js
+      - uses: actions/setup-node@v4
         with:
-          node-version: '18.x'
+          node-version: 20 
 
+      # Install dependencies in the "server" directory
       - name: Install dependencies
-        run: |
-          cd server
-          npm ci
+        run: npm ci
+        working-directory: ./server
 
-      - name: Build server (if necessary)
-        run: |
-          cd server
-          npm run build # Only if your app requires a build step
+      # Run tests (if applicable)
+      - name: Run tests
+        run: npm test
+        working-directory: ./server
 
-      - name: Debug Prisma Connection
-        run: |
-          cd server
-          echo "Testing Prisma database connection..."
-          npx prisma db pull || (echo "Failed to connect!" && exit 1)
-        env:
-          DATABASE_URL: ${{ secrets.DATABASE_URL }}
-
-      - name: Run Prisma migrations
-        run: |
-          cd server
-          echo "Running Prisma migrations..."
-          npx prisma migrate deploy
-        env:
-          DATABASE_URL: ${{ secrets.DATABASE_URL }}
-
-      - name: Debug SSH Connection
-        run: |
-          mkdir -p ~/.ssh
-          echo "${{ secrets.SERVER_SSH_KEY }}" > ~/.ssh/id_rsa
-          chmod 600 ~/.ssh/id_rsa
-          ssh-keyscan -H ${{ secrets.SERVER_IP }} >> ~/.ssh/known_hosts # Avoids SSH authenticity prompt
-          ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_IP }} "echo 'SSH Connection successful'"
-
+      # Deploy to Ubuntu server
       - name: Deploy to Server
-        uses: appleboy/ssh-action@v1
+        uses: appleboy/ssh-action@v1.0.0
         with:
           host: ${{ secrets.SERVER_IP }}
-          username: ${{ secrets.SERVER_USER }}
-          key: ${{ secrets.SERVER_SSH_KEY }}
+          username: ${{ secrets.USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
-            echo "Successfully connected to the server"
-            if [ ! -d "/var/www/openblogai" ]; then
-              echo "Repository not found, cloning..."
-              git clone https://github.com/xloyb/openblogai.git /var/www/openblogai 
-            fi
-            cd /var/www/openblogai
+            cd ~/OpenBlogAI/server
             git pull origin main
-            cd /var/www/openblogai/server
-            npm ci --production
+            npm install --production
             npx prisma generate
-            pm2 reload /var/www/openblogai/ecosystem.config.js
-        env:
-          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+            pm2 restart app.js
