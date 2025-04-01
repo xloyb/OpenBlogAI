@@ -13,17 +13,24 @@ jobs:
           repository: xloyb/OpenBlogAI  
           ssh-key: ${{ secrets.SSH_PRIVATE_KEY }}  
 
+      # Cache dependencies  
+      - name: Cache node_modules  
+        uses: actions/cache@v3  
+        with:  
+          path: server/node_modules  
+          key: node-modules-${{ hashFiles('server/package-lock.json') }}  
+
       # Set up Node.js  
       - uses: actions/setup-node@v4  
         with:  
           node-version: 20  
 
-      # Install dependencies in the "server" directory  
+      # Install dependencies  
       - name: Install dependencies  
         run: npm ci  
         working-directory: server  
 
-      # Deploy to Ubuntu server  
+      # Deploy to Server  
       - name: Deploy to Server  
         uses: appleboy/ssh-action@v1.0.0  
         with:  
@@ -31,6 +38,7 @@ jobs:
           username: ${{ secrets.USER }}  
           key: ${{ secrets.SSH_PRIVATE_KEY }}  
           script: |  
+            set -e  # Fail fast [[6]]  
             # Install Node.js and PM2 if missing  
             if ! command -v node &> /dev/null; then  
               curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -  
@@ -51,12 +59,12 @@ jobs:
 
             # Install dependencies and regenerate Prisma Client  
             npm install --production  
-            npx prisma generate  
+            npx prisma generate --schema=./prisma/schema.prisma --no-engine  # [[10]]  
 
             # Run database migrations  
-            npx prisma migrate deploy  
+            npx prisma migrate deploy  # [[1]]  
 
-            # Add connection test using Prisma Client [[1]][[10]]  
+            # Test database connection with timeout [[1]][[5]]  
             echo "Testing database connection..."  
             node -e "  
               const { PrismaClient } = require('@prisma/client');  
@@ -70,6 +78,10 @@ jobs:
                   console.error('❌ Database connection failed:', err);  
                   process.exit(1);  
                 });  
+              setTimeout(() => {  
+                console.error('❌ Connection timed out');  
+                process.exit(1);  
+              }, 10000);  
             " || exit 1  
 
             # Restart the app  
