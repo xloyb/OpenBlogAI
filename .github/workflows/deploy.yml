@@ -1,51 +1,29 @@
-name: Node.js CI/CD with Prisma  
+name: Test SSH Clone  
 on:  
   push:  
     branches: [main]  
+  workflow_dispatch:  # Allows manual triggering [[10]]  
 
 jobs:  
-  build-and-deploy:  
+  test-clone:  
     runs-on: ubuntu-latest  
     steps:  
-      # Checkout code  
-      - uses: actions/checkout@v4  
-        with:  
-          repository: xloyb/OpenBlogAI  
-          ssh-key: ${{ secrets.SSH_PRIVATE_KEY }}  # Key for GitHub repo access [[7]]  
+      - name: Install SSH key  
+        run: |
+          install -m 600 -D /dev/null ~/.ssh/id_rsa  
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa  # Server’s private key [[10]]  
+          ssh-keyscan -H ${{ secrets.SERVER_IP }} >> ~/.ssh/known_hosts  # Trust the server [[10]]  
 
-      # Set up Node.js  
-      - uses: actions/setup-node@v4  
-        with:  
-          node-version: 20  
-
-      # Install dependencies in the "server" directory  
-      - name: Install dependencies  
-        run: npm ci  
-        working-directory: server  
-
-      # Deploy to Ubuntu server  
-      - name: Deploy to Server  
-        uses: appleboy/ssh-action@v1.0.0  
-        with:  
-          host: ${{ secrets.SERVER_IP }}  
-          username: ${{ secrets.USER }}  
-          key: ${{ secrets.SERVER_SSH_PRIVATE_KEY }}  # Separate key for server access [[7]][[9]]  
-          use_insecure_cipher: true  # For older cipher compatibility [[7]]  
-          script: |
-            set -e  
-            # Write the private key to a file  
-            echo "${{ secrets.SERVER_SSH_PRIVATE_KEY }}" > ~/.ssh/github_deploy_key  
-            chmod 600 ~/.ssh/github_deploy_key  # [[3]][[4]]  
-
-            # Use the key for Git operations  
-            GIT_SSH_COMMAND="ssh -i ~/.ssh/github_deploy_key"  
-            export GIT_SSH_COMMAND  # [[7]]  
-
-            # Clone repo if not exists  
-            if [ ! -d "/var/www/OpenBlogAI" ]; then  
+      - name: Connect and clone repo  
+        run: |
+          ssh ${{ secrets.USER }}@${{ secrets.SERVER_IP }} "  
+            if [ ! -d '/var/www/OpenBlogAI' ]; then  
               git clone git@github.com:xloyb/OpenBlogAI.git /var/www/OpenBlogAI  
+            else  
+              echo 'Repo already exists'  
             fi  
-
-            # Navigate to server directory and update code  
-            cd /var/www/OpenBlogAI/server  
-            git pull origin main   
+          "  
+        env:  
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}  
+          USER: ${{ secrets.USER }}  
+          SERVER_IP: ${{ secrets.SERVER_IP }}  
