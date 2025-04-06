@@ -82,14 +82,14 @@ export const Sidebar: React.FC = () => {
         </div>
         <ul className="list-none p-0 flex md:flex-col md:overflow-hidden overflow-x-auto">
           {/* Updated li element */}
-          <li className="mb:flex mb:justify-end mb:items-center mb-4">
+          {/* <li className="mb:flex mb:justify-end mb:items-center mb-4">
             <span className={`font-semibold ${collapsed ? "md:!hidden" : ""}`}>
               OpenBlogAI
             </span>
             <span className="md:hidden">test</span>{" "}
-            {/* Hide "test" on medium screens and above */}
+            
             <ToggleButton onClick={toggleSidebar} isOpen={isOpen} />
-          </li>
+          </li> */}
           <SidebarItem
             href="index.html"
             icon="home"
