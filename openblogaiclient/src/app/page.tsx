@@ -1,10 +1,9 @@
-import Layout from "@/components/Layout";
+// import Layout from "@/components/Layout";
 
 export default function HomePage() {
   return (
     <div>
-      <Layout/>
-      
+      <h1 className="text-2xl font-bold">Welcome to the Home Page</h1>
     </div>
   );
 }
