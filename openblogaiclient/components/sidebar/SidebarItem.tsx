@@ -1,18 +1,17 @@
-
-"use client"
-import type React from "react"
-import { Icon } from "./Icon"
+"use client";
+import type React from "react";
+import { Icon } from "./Icon";
 
 interface SidebarItemProps {
-  href?: string
-  icon: string
-  text: string
-  isSubmenu?: boolean
-  isOpen?: boolean
-  active?: boolean
-  onClick?: () => void
-  submenuItems?: Array<{ href: string; text: string }>
-  collapsed?: boolean
+  href?: string;
+  icon: string;
+  text: string;
+  isSubmenu?: boolean;
+  isOpen?: boolean;
+  active?: boolean;
+  onClick?: () => void;
+  submenuItems?: Array<{ href: string; text: string }>;
+  collapsed?: boolean;
 }
 
 export const SidebarItem: React.FC<SidebarItemProps> = ({
@@ -24,7 +23,7 @@ export const SidebarItem: React.FC<SidebarItemProps> = ({
   active,
   onClick,
   submenuItems,
-  collapsed = false, // Default to false
+  collapsed = false,
 }) => {
   return (
     <li className={`group ${active ? "text-[#5e63ff]" : "text-[#e6e6ef]"}`}>
@@ -34,11 +33,11 @@ export const SidebarItem: React.FC<SidebarItemProps> = ({
             onClick={onClick}
             className={`w-full text-left bg-transparent border-none font-inherit cursor-pointer flex items-center gap-4 rounded-lg p-[0.85em] hover:bg-[#222533] md:w-full md:justify-start md:p-[0.85em] h-[60px] justify-center ${isOpen ? "rotate" : ""}`}
           >
-            <Icon name={icon} /> {/* Icon is always visible */}
-            <span className={`${collapsed ? "md:hidden" : "md:inline-block"}`}>{text}</span> {/* Text is hidden when collapsed */}
+            <Icon name={icon} />
+            <span className={collapsed ? "hidden" : "hidden md:inline-block"}>{text}</span>
             <Icon
               name="chevron-down"
-              className={`${collapsed ? "md:hidden" : "md:inline-block"} ml-auto`} // Chevron is hidden when collapsed
+              className={`${collapsed ? "hidden" : "hidden md:inline-block"} ml-auto`}
             />
           </button>
           <ul
@@ -59,16 +58,7 @@ export const SidebarItem: React.FC<SidebarItemProps> = ({
           </ul>
         </>
       ) : (
-        // <a
-        //   href={href}
-        //   className={`flex items-center gap-4 rounded-lg p-[0.85em] hover:bg-[#222533] md:w-full md:justify-start md:p-[0.85em] w-[60px] h-[60px] justify-center ${active ? "text-[#5e63ff]" : "text-[#e6e6ef]"} no-underline`}
-        // >
-        //   <Icon name={icon} /> {/* Icon is always visible */}
-        //   <span className={`${collapsed ? "md:hidden" : "md:inline-block"}`}>{text}</span> {/* Text is hidden when collapsed */}
-        // </a>
-
         <>
-
           {href ? (
             <a
               href={href}
@@ -76,7 +66,7 @@ export const SidebarItem: React.FC<SidebarItemProps> = ({
               className={`flex items-center gap-4 rounded-lg p-[0.85em] hover:bg-[#222533] md:w-full md:justify-start md:p-[0.85em] w-[60px] h-[60px] justify-center ${active ? "text-[#5e63ff]" : "text-[#e6e6ef]"} no-underline`}
             >
               <Icon name={icon} />
-              <span className={`${collapsed ? "md:hidden" : "md:inline-block"}`}>{text}</span>
+              <span className={collapsed ? "hidden" : "hidden md:inline-block"}>{text}</span>
             </a>
           ) : (
             <button
@@ -84,24 +74,11 @@ export const SidebarItem: React.FC<SidebarItemProps> = ({
               className={`flex items-center gap-4 rounded-lg p-[0.85em] hover:bg-[#222533] md:w-full md:justify-start md:p-[0.85em] w-[60px] h-[60px] justify-center ${active ? "text-[#5e63ff]" : "text-[#e6e6ef]"} no-underline border-none bg-transparent cursor-pointer`}
             >
               <Icon name={icon} />
-              <span className={`${collapsed ? "md:hidden" : "md:inline-block"}`}>{text}</span>
+              <span className={collapsed ? "hidden" : "hidden md:inline-block"}>{text}</span>
             </button>
           )}
-
         </>
-
-
-
-
-
-
-
-
-
-
-
-
       )}
     </li>
-  )
-}
+  );
+};
