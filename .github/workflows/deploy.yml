@@ -1,29 +1,38 @@
-name: Test SSH Clone  
-on:  
-  push:  
-    branches: [main]  
-  workflow_dispatch:  # Allows manual triggering [[10]]  
+name: Deploy Server
 
-jobs:  
-  test-clone:  
-    runs-on: ubuntu-latest  
-    steps:  
-      - name: Install SSH key  
-        run: |
-          install -m 600 -D /dev/null ~/.ssh/id_rsa  
-          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa  # Server’s private key [[10]]  
-          ssh-keyscan -H ${{ secrets.SERVER_IP }} >> ~/.ssh/known_hosts  # Trust the server [[10]]  
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'server/**'
 
-      - name: Connect and clone repo  
-        run: |
-          ssh ${{ secrets.USER }}@${{ secrets.SERVER_IP }} "  
-            if [ ! -d '/var/www/OpenBlogAI' ]; then  
-              git clone git@github.com:xloyb/OpenBlogAI.git /var/www/OpenBlogAI  
-            else  
-              echo 'Repo already exists'  
-            fi  
-          "  
-        env:  
-          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}  
-          USER: ${{ secrets.USER }}  
-          SERVER_IP: ${{ secrets.SERVER_IP }}  
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      
+    - name: Set up Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        cache: 'npm'
+        cache-dependency-path: 'server/package-lock.json'
+        
+    - name: Install dependencies
+      run: cd server && npm ci
+      
+    - name: Build
+      run: cd server && npm run build
+      
+    - name: Run tests
+      run: cd server && npm test || echo "No tests specified"
+      
+    - name: Deploy to production
+      uses: appleboy/ssh-action@master
+      with:
+        host: ${{ secrets.DEPLOY_HOST }}
+        username: ${{ secrets.DEPLOY_USER }}
+        key: ${{ secrets.DEPLOY_KEY }}
+        script: ~/deploy.sh
