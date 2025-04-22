@@ -1,4 +1,4 @@
-name: Deploy 
+name: Deploy Server
 
 on:
   push:
@@ -6,25 +6,27 @@ on:
       - main
 
 jobs:
-  build-and-deploy:
+  deploy-server:
     runs-on: ubuntu-latest
-    
+
     steps:
     - name: Checkout code
       uses: actions/checkout@v3
-      
+
     - name: Setup Node.js
       uses: actions/setup-node@v3
       with:
-        node-version: '18'  # Adjust version as needed
-        
-    - name: Install dependencies
+        node-version: '18'
+
+    - name: Install server dependencies
+      working-directory: server
       run: npm ci
-      
-    - name: Build
-      run: npm run build  # Modify if your build command is different
-      
-    - name: Deploy to server
+
+    - name: Build server
+      working-directory: server
+      run: npm run build
+
+    - name: Deploy to Ubuntu Server
       uses: appleboy/ssh-action@master
       with:
         host: ${{ secrets.HOST }}
@@ -32,7 +34,7 @@ jobs:
         key: ${{ secrets.SSH_PRIVATE_KEY }}
         script: |
           cd /home/openblogai/server
-          git pull
+          git pull origin main
           npm ci
           npm run build
-          pm2 restart ecosystem.config.js  # Adjust if your PM2 command is different
+          pm2 restart ecosystem.config.js

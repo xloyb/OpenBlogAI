@@ -13,6 +13,7 @@ export default function LoginPage() {
           Register
         </Link>
       </p>
+      testing something
     </div>
   );
 }
