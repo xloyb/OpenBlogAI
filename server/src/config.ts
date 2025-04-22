@@ -1,4 +1,7 @@
 
+import dotenv from 'dotenv';
+dotenv.config();
+
 const required = (key: string, value?: string): string => {
     if (!value) {
       console.error(`Missing required environment variable: ${key}`);
