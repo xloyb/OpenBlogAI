@@ -100,7 +100,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body className="antialiased">
         <SessionProvider>
           <SessionUpdater />
-         
           <Layout>{children}</Layout>
         </SessionProvider>
       </body>
