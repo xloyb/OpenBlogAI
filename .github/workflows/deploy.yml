@@ -1,38 +1,38 @@
-name: Deploy Server
+name: Deploy 
 
 on:
   push:
-    branches: [ main ]
-    paths:
-      - 'server/**'
+    branches:
+      - master
 
 jobs:
-  deploy:
+  build-and-deploy:
     runs-on: ubuntu-latest
+    
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v4
+    - name: Checkout code
+      uses: actions/checkout@v3
       
-    - name: Set up Node.js
-      uses: actions/setup-node@v4
+    - name: Setup Node.js
+      uses: actions/setup-node@v3
       with:
-        node-version: '20'
-        cache: 'npm'
-        cache-dependency-path: 'server/package-lock.json'
+        node-version: '18'  # Adjust version as needed
         
     - name: Install dependencies
-      run: cd server && npm ci
+      run: npm ci
       
     - name: Build
-      run: cd server && npm run build
+      run: npm run build  # Modify if your build command is different
       
-    - name: Run tests
-      run: cd server && npm test || echo "No tests specified"
-      
-    - name: Deploy to production
+    - name: Deploy to server
       uses: appleboy/ssh-action@master
       with:
-        host: ${{ secrets.DEPLOY_HOST }}
-        username: ${{ secrets.DEPLOY_USER }}
-        key: ${{ secrets.DEPLOY_KEY }}
-        script: ~/deploy.sh
+        host: ${{ secrets.HOST }}
+        username: ${{ secrets.USERNAME }}
+        key: ${{ secrets.SSH_PRIVATE_KEY }}
+        script: |
+          cd /home/openblogai/server
+          git pull
+          npm ci
+          npm run build
+          pm2 restart ecosystem.config.js  # Adjust if your PM2 command is different
