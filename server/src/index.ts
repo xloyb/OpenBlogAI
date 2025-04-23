@@ -67,6 +67,6 @@ app.use("/api/blog", blogRoutes);
 app.use(globalErrorHandler);
 
 // 9. Start the server
-app.listen(3011, () => {
+app.listen(3000, () => {
   console.log('Server running on port 3000 - http://localhost:3000');
 });
