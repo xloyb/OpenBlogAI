@@ -3,7 +3,8 @@ import express from 'express';
 import rateLimit from 'express-rate-limit';
 import helmet from 'helmet';
 import cors from 'cors'; 
-
+import dotenv from 'dotenv';
+dotenv.config();
 import authRoutes from '@routes/authRoutes';
 import { setupCSRF } from '@src/middlewares/csrfMiddleware';
 import { globalErrorLogger, globalLogger }
