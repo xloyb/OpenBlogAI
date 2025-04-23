@@ -68,5 +68,5 @@ app.use(globalErrorHandler);
 
 // 9. Start the server
 app.listen(8082,'0.0.0.0', () => {
-  console.log('Server running on port 8081 - http://0.0.0.0:8081');
+  console.log('Server running on port 8082 - http://0.0.0.0:8082');
 });
