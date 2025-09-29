@@ -22,6 +22,15 @@
     "paths": {
       "@/*": [
         "./*"
+      ],
+      "@/components/*": [
+        "./components/*"
+      ],
+      "@/actions/*": [
+        "./actions/*"
+      ],
+      "@/auth/*": [
+        "./auth/*"
       ]
     },
     "plugins": [
