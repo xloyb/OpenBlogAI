@@ -40,7 +40,7 @@ export const ThemeToggle: React.FC = () => {
             >
                 <FiMoon className="w-5 h-5 text-blue-400" />
             </motion.div>
-            
+
             {/* Invisible content for sizing */}
             <div className="invisible">
                 <FiSun className="w-5 h-5" />
@@ -81,24 +81,34 @@ export const ThemeToggleMenuItem: React.FC = () => {
     const { theme, setTheme } = useTheme();
 
     return (
-        <div className="form-control">
-            <label className="label cursor-pointer justify-start gap-3">
-                <div className="flex items-center gap-2">
+        <div className="px-4 py-2">
+            <label className="flex cursor-pointer justify-between items-center">
+                <div className="flex items-center gap-2 text-sm">
                     {theme === 'light' ? (
-                        <FiSun className="w-4 h-4" />
+                        <FiSun className="w-4 h-4 text-yellow-500" />
                     ) : (
-                        <FiMoon className="w-4 h-4" />
+                        <FiMoon className="w-4 h-4 text-blue-400" />
                     )}
-                    <span className="label-text">
+                    <span className="text-gray-700 dark:text-gray-300">
                         {theme === 'light' ? 'Light Theme' : 'Dark Theme'}
                     </span>
                 </div>
-                <input
-                    type="checkbox"
-                    checked={theme === 'dark'}
-                    onChange={(e) => setTheme(e.target.checked ? 'dark' : 'light')}
-                    className="toggle toggle-primary toggle-sm"
-                />
+                <div className="relative w-8 h-5">
+                    <div className="absolute inset-0 bg-gray-200 dark:bg-gray-700 rounded-full transition-colors"></div>
+                    <motion.div
+                        className="absolute top-0.5 left-0.5 w-4 h-4 bg-white dark:bg-gray-900 rounded-full shadow-sm transition-all"
+                        animate={{
+                            x: theme === 'dark' ? 12 : 0,
+                        }}
+                        transition={{ duration: 0.2, ease: "easeInOut" }}
+                    ></motion.div>
+                    <input
+                        type="checkbox"
+                        checked={theme === 'dark'}
+                        onChange={(e) => setTheme(e.target.checked ? 'dark' : 'light')}
+                        className="absolute inset-0 opacity-0 cursor-pointer"
+                    />
+                </div>
             </label>
         </div>
     );
