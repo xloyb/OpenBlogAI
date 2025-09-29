@@ -2,13 +2,13 @@
 import express from 'express';
 import rateLimit from 'express-rate-limit';
 import helmet from 'helmet';
-import cors from 'cors'; 
+import cors from 'cors';
 import dotenv from 'dotenv';
 dotenv.config();
 import authRoutes from '@routes/authRoutes';
 import { setupCSRF } from '@src/middlewares/csrfMiddleware';
 import { globalErrorLogger, globalLogger }
-from '@src/middlewares/globalLogger';
+  from '@src/middlewares/globalLogger';
 import { globalErrorHandler } from '@src/utils/errorHandler';
 import transcriptRoutes from './routes/transcriptRoutes';
 import blogRoutes from './routes/blogRoutes';
@@ -42,14 +42,14 @@ const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
   max: 100, // Limit each IP to 100 requests per windowMs
   standardHeaders: true,
-// Return rate limit info in the `RateLimit-*`headers
+  // Return rate limit info in the `RateLimit-*`headers
   legacyHeaders: false, // Disable the `X-RateLimit-*` headers
   message: 'Too many requests, please try again later.',
 });
-// app.use(limiter);
+app.use(limiter);
 
 // 5. Set up CSRF protection middleware (requires this order)
-// setupCSRF(app);
+setupCSRF(app);
 
 // 6. Define basic routes
 app.get('/', (req, res) => {
@@ -58,8 +58,8 @@ app.get('/', (req, res) => {
 
 // 7. Load application routes (organized under `/api` prefix)
 app.use('/api/auth', authRoutes);
-app.use('/api/transcript', transcriptRoutes); 
-app.use("/api/blog", blogRoutes); 
+app.use('/api/transcript', transcriptRoutes);
+app.use("/api/blog", blogRoutes);
 
 
 
@@ -67,6 +67,6 @@ app.use("/api/blog", blogRoutes);
 app.use(globalErrorHandler);
 
 // 9. Start the server
-app.listen(8082,'0.0.0.0', () => {
+app.listen(8082, '0.0.0.0', () => {
   console.log('Server running on port 8082 - http://0.0.0.0:8082');
 });
