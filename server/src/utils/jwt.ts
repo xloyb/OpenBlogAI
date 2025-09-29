@@ -31,7 +31,7 @@ export const generateAccessToken = (user: TokenUser) => {
       isVerifiedPoster: user.isVerifiedPoster
     },
     env.JWT_SECRET,
-    { expiresIn: '1m' } // Changed from '1m' to '15m' for better usability
+    { expiresIn: '15m' } // Increased from 1m to 15m for better UX and performance
   );
 };
 
