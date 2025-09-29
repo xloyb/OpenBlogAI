@@ -1,9 +1,9 @@
 import bcrypt from "bcrypt";
 import prisma from "@utils/client";
 import { Request, Response } from "express";
-import { generateAccessToken, generateRefreshToken, verifyRefreshToken, revokeRefreshToken  } from "@utils/jwt";
+import { generateAccessToken, generateRefreshToken, verifyRefreshToken, revokeRefreshToken } from "@utils/jwt";
 
-export const registerUserService = async (email: string, password: string, ipAddress?: string, userAgent?: string) => {
+export const registerUserService = async (name: string | null, email: string, password: string, ipAddress?: string, userAgent?: string) => {
   if (!email || !password) {
     throw new Error("Email and password are required");
   }
@@ -14,7 +14,7 @@ export const registerUserService = async (email: string, password: string, ipAdd
   const hashedPassword = await bcrypt.hash(password, 10);
 
   const user = await prisma.user.create({
-    data: { email, password: hashedPassword },
+    data: { name, email, password: hashedPassword },
     select: {
       id: true,
       name: true,
@@ -31,10 +31,10 @@ export const registerUserService = async (email: string, password: string, ipAdd
 
   const accessToken = generateAccessToken(user);
   const refreshToken = await generateRefreshToken(user, ipAddress, userAgent);
-  
+
   const { password: userPassword, ...safeUser } = user;
 
-  return { user : safeUser, accessToken, refreshToken };
+  return { user: safeUser, accessToken, refreshToken };
 };
 
 
@@ -49,7 +49,7 @@ export const loginUserService = async (email: string, password: string, ipAddres
       id: true,
       name: true,
       email: true,
-      password: true, 
+      password: true,
       createdAt: true,
       updatedAt: true,
       isAdmin: true,

@@ -1,16 +1,16 @@
 
 
 import { Request, Response, NextFunction } from "express";
-import { 
-  registerUserService, 
-  loginUserService, 
-  refreshUserTokenService, 
-  logoutUserService 
+import {
+  registerUserService,
+  loginUserService,
+  refreshUserTokenService,
+  logoutUserService
 } from "@services/userService";
 
 export const registerUser = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const { email, password } = req.body;
+    const { name, email, password } = req.body;
 
     if (!email || !password) {
       return res.status(400).json({ error: "Email and password are required" });
@@ -19,7 +19,7 @@ export const registerUser = async (req: Request, res: Response, next: NextFuncti
     const ipAddress = req.ip || 'unknown';
     const userAgent = req.headers['user-agent'] || 'unknown';
 
-    const { user, accessToken, refreshToken } = await registerUserService(email, password, ipAddress, userAgent);
+    const { user, accessToken, refreshToken } = await registerUserService(name, email, password, ipAddress, userAgent);
 
     res.status(201).json({
       message: "User registered successfully",
@@ -48,9 +48,9 @@ export const loginUser = async (req: Request, res: Response, next: NextFunction)
 
     const { accessToken, refreshToken, user } = await loginUserService(email, password, ipAddress, userAgent);
 
-    res.json({ 
-      message: "Login successful", 
-      accessToken, 
+    res.json({
+      message: "Login successful",
+      accessToken,
       refreshToken
     });
   } catch (error) {
