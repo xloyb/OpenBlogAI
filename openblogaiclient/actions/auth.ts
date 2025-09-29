@@ -8,7 +8,34 @@ export async function doSocialLogin(formData: FormData) {
 }
 
 export async function doLogout() {
-  await signOut({ redirectTo: '/' });
+  try {
+    // First try to call server logout endpoint to revoke refresh token
+    try {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_SERVER_BASE_URL || 'http://localhost:8082'}/api/auth/logout`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          // Note: In a real implementation, you'd need to get the refresh token from session
+          // For now, we'll let NextAuth handle the cleanup
+        },
+      });
+
+      if (response.ok) {
+        console.log('✅ Server logout successful');
+      } else {
+        console.warn('⚠️ Server logout failed, continuing with client logout');
+      }
+    } catch (serverError) {
+      console.warn('⚠️ Server logout request failed:', serverError);
+    }
+
+    // Always call NextAuth signOut to clear client session
+    await signOut({ redirectTo: '/login' });
+  } catch (error) {
+    console.error('❌ Logout error:', error);
+    // Force redirect to login even if there's an error
+    window.location.href = '/login';
+  }
 }
 
 export async function doCredentialLogin(formData: FormData) {
