@@ -15,7 +15,7 @@
 // //       <body className="antialiased">
 // //         <SessionProvider>
 // //           <SessionUpdater />
-          
+
 
 
 // //           <motion.div
@@ -63,7 +63,7 @@
 //       <body className="">
 //         <SessionProvider>
 //           <SessionUpdater />
-        
+
 //             <div className="min-h-[100dvh] bg-base-100 text-base-content grid md:grid-cols-[auto,1fr] grid-cols-[1fr]">
 //               <Sidebar />
 //               <main className="p-[min(30px,7%)] md:p-[30px] pb-[60px]">
@@ -76,7 +76,7 @@
 //                 {children}
 //               </main>
 //             </div>
-      
+
 //         </SessionProvider>
 //       </body>
 //     </html>
@@ -85,6 +85,7 @@
 
 import { SessionProvider } from 'next-auth/react';
 import SessionUpdater from '@/components/SessionUpdater';
+import { ThemeProvider } from '@/components/ThemeProvider';
 import './globals.css';
 import Layout from '@/components/Layout';
 // import { Sidebar } from '@/components/sidebar/Sidebar';
@@ -98,10 +99,12 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en">
       <body className="antialiased">
-        <SessionProvider>
-          <SessionUpdater />
-          <Layout>{children}</Layout>
-        </SessionProvider>
+        <ThemeProvider>
+          <SessionProvider>
+            <SessionUpdater />
+            <Layout>{children}</Layout>
+          </SessionProvider>
+        </ThemeProvider>
       </body>
     </html>
   );

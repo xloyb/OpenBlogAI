@@ -1,24 +1,46 @@
 @import "tailwindcss";
-@plugin "daisyui";
+@import "daisyui";
 
+/* DaisyUI Theme Configuration */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --rounded-box: 1rem;
+  --rounded-btn: 0.5rem;
+  --rounded-badge: 1.9rem;
+  --animation-btn: 0.25s;
+  --animation-input: 0.2s;
+  --btn-focus-scale: 0.95;
+  --border-btn: 1px;
+  --tab-border: 1px;
+  --tab-radius: 0.5rem;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+/* Custom theme transitions */
+* {
+  transition: background-color 0.3s ease, color 0.3s ease,
+    border-color 0.3s ease;
+}
+
+/* Light theme (default) */
+[data-theme="light"] {
+  color-scheme: light;
+}
+
+/* Dark theme */
+[data-theme="dark"] {
+  color-scheme: dark;
+}
+
+/* Smooth theme transitions */
+html {
+  transition: color-scheme 0.3s ease;
 }
 
 body {
-  color: var(--foreground);
-  background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+    "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif,
+    "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+  line-height: 1.6;
 }
-
 
 /* 
 

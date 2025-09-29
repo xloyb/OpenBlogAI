@@ -1,0 +1,77 @@
+const config = {
+    content: [
+        './src/pages/**/*.{js,ts,jsx,tsx,mdx}',
+        './src/components/**/*.{js,ts,jsx,tsx,mdx}',
+        './src/app/**/*.{js,ts,jsx,tsx,mdx}',
+        './components/**/*.{js,ts,jsx,tsx,mdx}',
+    ],
+    theme: {
+        extend: {
+            animation: {
+                'theme-transition': 'theme-transition 0.3s ease',
+            },
+        },
+    },
+    plugins: ["daisyui"],
+    daisyui: {
+        themes: [
+            {
+                light: {
+                    "primary": "#570df8",
+                    "primary-focus": "#4506cb",
+                    "primary-content": "#ffffff",
+                    "secondary": "#f000b8",
+                    "secondary-focus": "#bd0091",
+                    "secondary-content": "#ffffff",
+                    "accent": "#37cdbe",
+                    "accent-focus": "#2aa79b",
+                    "accent-content": "#ffffff",
+                    "neutral": "#3d4451",
+                    "neutral-focus": "#2a2e37",
+                    "neutral-content": "#ffffff",
+                    "base-100": "#ffffff",
+                    "base-200": "#f9fafb",
+                    "base-300": "#d1d5db",
+                    "base-content": "#1f2937",
+                    "info": "#3abff8",
+                    "success": "#36d399",
+                    "warning": "#fbbd23",
+                    "error": "#f87272",
+                },
+            },
+            {
+                dark: {
+                    "primary": "#661ae6",
+                    "primary-focus": "#4506cb",
+                    "primary-content": "#ffffff",
+                    "secondary": "#f000b8",
+                    "secondary-focus": "#bd0091",
+                    "secondary-content": "#ffffff",
+                    "accent": "#37cdbe",
+                    "accent-focus": "#2aa79b",
+                    "accent-content": "#ffffff",
+                    "neutral": "#2a2e37",
+                    "neutral-focus": "#16181d",
+                    "neutral-content": "#ffffff",
+                    "base-100": "#1d232a",
+                    "base-200": "#191e24",
+                    "base-300": "#15191e",
+                    "base-content": "#a6adbb",
+                    "info": "#3abff8",
+                    "success": "#36d399",
+                    "warning": "#fbbd23",
+                    "error": "#f87272",
+                },
+            },
+        ],
+        darkTheme: "dark",
+        base: true,
+        styled: true,
+        utils: true,
+        prefix: "",
+        logs: true,
+        themeRoot: ":root",
+    },
+};
+
+export default config;

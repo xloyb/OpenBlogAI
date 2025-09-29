@@ -4,6 +4,7 @@ import type React from "react";
 import { useState, useEffect } from "react";
 import { ToggleButton } from "./ToggleButton";
 import { SidebarItem } from "./SidebarItem";
+import { ThemeToggleCompact } from "../ThemeToggle";
 
 export const Sidebar: React.FC = () => {
   const [isOpen, setIsOpen] = useState(true); // Controls whether the sidebar is open or closed
@@ -125,6 +126,18 @@ export const Sidebar: React.FC = () => {
             collapsed={collapsed}
           />
 
+          {/* Theme Toggle */}
+          <li className="mt-auto pt-4 border-t border-base-300">
+            <div className="flex items-center justify-center p-3">
+              {!collapsed && (
+                <div className="flex items-center justify-between w-full">
+                  <span className="text-sm text-base-content/70">Theme</span>
+                  <ThemeToggleCompact />
+                </div>
+              )}
+              {collapsed && <ThemeToggleCompact />}
+            </div>
+          </li>
 
         </ul>
       </nav>
