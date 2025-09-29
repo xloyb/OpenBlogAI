@@ -48,8 +48,8 @@ const limiter = rateLimit({
 });
 app.use(limiter);
 
-// 5. Set up CSRF protection middleware (requires this order)
-setupCSRF(app);
+// 5. Set up CSRF protection middleware (requires this order) - DISABLED FOR DEVELOPMENT
+// setupCSRF(app);
 
 // 6. Define basic routes
 app.get('/', (req, res) => {
@@ -67,6 +67,7 @@ app.use("/api/blog", blogRoutes);
 app.use(globalErrorHandler);
 
 // 9. Start the server
-app.listen(8082, '0.0.0.0', () => {
-  console.log('Server running on port 8082 - http://0.0.0.0:8082');
+const PORT = parseInt(process.env.PORT || '8082', 10);
+app.listen(PORT, '0.0.0.0', () => {
+  console.log(`Server running on port ${PORT} - http://0.0.0.0:${PORT}`);
 });
