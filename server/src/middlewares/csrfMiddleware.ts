@@ -10,10 +10,18 @@ export const setupCSRF = (app: Application) => {
 
   // Apply CSRF conditionally
   app.use((req: Request, res: Response, next: NextFunction) => {
-    const excludedRoutes = ['/api/auth/login', '/api/auth/register'];
+    const excludedRoutes = [
+      '/api/auth/login',
+      '/api/auth/register',
+      '/api/transcript',
+      '/api/blog/generate-blog'
+    ];
 
-    if (excludedRoutes.includes(req.path)) {
-      return next();  // Skip CSRF for login and register
+    // Check if the request path starts with any excluded route
+    const isExcluded = excludedRoutes.some(route => req.path.startsWith(route));
+
+    if (isExcluded) {
+      return next();  // Skip CSRF for excluded routes
     }
 
     csrfProtection(req, res, next);
