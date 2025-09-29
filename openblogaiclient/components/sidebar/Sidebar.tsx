@@ -123,42 +123,7 @@ export const Sidebar: React.FC = () => {
             collapsed={collapsed}
           />
           <SidebarItem
-            icon="create"
-            text="Create"
-            isSubmenu
-            isOpen={activeSubmenu === "create"}
-            onClick={() => toggleSubmenu("create")}
-            submenuItems={[
-              { href: "#", text: "Folder" },
-              { href: "#", text: "Document" },
-              { href: "#", text: "Project" },
-            ]}
-            collapsed={collapsed}
-          />
-          <SidebarItem
-            icon="todo"
-            text="Todo-Lists"
-            isSubmenu
-            isOpen={activeSubmenu === "todo"}
-            onClick={() => toggleSubmenu("todo")}
-            submenuItems={[
-              { href: "#", text: "Work" },
-              { href: "#", text: "Private" },
-              { href: "#", text: "Coding" },
-              { href: "#", text: "Gardening" },
-              { href: "#", text: "School" },
-            ]}
-            collapsed={collapsed}
-          />
-          <SidebarItem
-            href="calendar.html"
-            icon="calendar"
-            text="Calendar"
-            active
-            collapsed={collapsed}
-          />
-          <SidebarItem
-            href="profile.html"
+            href="/profile"
             icon="profile"
             text="Profile"
             collapsed={collapsed}
