@@ -181,9 +181,9 @@ export default function TranscriptExtraction({
                     >
                         <div className="flex items-center gap-2">
                             <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-primary-600"></div>
-                            <span className="text-sm text-gray-700 dark:text-gray-300">Connecting to YouTube...</span>
+                            <span className="text-sm text-base-content/70">Connecting to YouTube...</span>
                         </div>
-                        <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+                        <div className="w-full bg-base-300 rounded-full h-2">
                             <div className="bg-primary-600 h-2 rounded-full animate-pulse" style={{ width: '60%' }}></div>
                         </div>
                     </motion.div>
@@ -193,13 +193,13 @@ export default function TranscriptExtraction({
                     <motion.div
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
-                        className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4 flex items-center gap-3"
+                        className="alert alert-error"
                     >
-                        <FiAlertCircle className="w-5 h-5 text-red-600 dark:text-red-400" />
-                        <span className="text-red-800 dark:text-red-200 flex-1">{error}</span>
+                        <FiAlertCircle className="w-5 h-5" />
+                        <span className="flex-1">{error}</span>
                         <button
                             onClick={extractTranscript}
-                            className="px-4 py-2 border border-red-300 dark:border-red-700 text-red-700 dark:text-red-300 rounded-md hover:bg-red-100 dark:hover:bg-red-800/30 transition-colors text-sm"
+                            className="btn btn-sm btn-outline btn-error"
                             disabled={isLoading}
                         >
                             Retry
@@ -217,13 +217,13 @@ export default function TranscriptExtraction({
                     className="bg-base-200 rounded-xl p-6"
                 >
                     <div className="flex items-center justify-between mb-4">
-                        <h3 className="font-bold flex items-center gap-2 text-gray-900 dark:text-white">
-                            <FiCheck className="w-5 h-5 text-green-600 dark:text-green-400" />
+                        <h3 className="font-bold flex items-center gap-2 text-base-content">
+                            <FiCheck className="w-5 h-5 text-success" />
                             Transcript Ready
                         </h3>
                         <div className="flex items-center gap-2">
-                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-400">{getWordCount(transcript)} words</span>
-                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800 dark:bg-purple-900/20 dark:text-purple-400">{getEstimatedReadTime(transcript)} min read</span>
+                            <span className="badge badge-info badge-sm">{getWordCount(transcript)} words</span>
+                            <span className="badge badge-secondary badge-sm">{getEstimatedReadTime(transcript)} min read</span>
                         </div>
                     </div>
 

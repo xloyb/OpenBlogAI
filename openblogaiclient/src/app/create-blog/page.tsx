@@ -111,10 +111,10 @@ export default function CreateBlogPage() {
 
     if (!session) {
         return (
-            <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 via-white to-gray-100 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
-                <div className="text-center bg-white dark:bg-gray-800 p-8 rounded-2xl shadow-xl border border-gray-200 dark:border-gray-700">
-                    <h1 className="text-2xl font-bold mb-4 text-gray-900 dark:text-white">Please log in to create blogs</h1>
-                    <a href="/login" className="inline-flex items-center px-6 py-3 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-lg transition-colors">Go to Login</a>
+            <div className="min-h-screen flex items-center justify-center bg-base-200">
+                <div className="text-center bg-base-100 p-8 rounded-2xl shadow-xl border border-base-300">
+                    <h1 className="text-2xl font-bold mb-4 text-base-content">Please log in to create blogs</h1>
+                    <a href="/login" className="btn btn-primary btn-lg">Go to Login</a>
                 </div>
             </div>
         );
@@ -132,7 +132,7 @@ export default function CreateBlogPage() {
                     <h1 className="text-4xl font-bold mb-2 bg-gradient-to-r from-primary-600 to-secondary-600 bg-clip-text text-transparent">
                         Create AI Blog from YouTube
                     </h1>
-                    <p className="text-gray-600 dark:text-gray-400">
+                    <p className="text-base-content/70">
                         Transform YouTube videos into engaging blog posts with AI
                     </p>
                 </motion.div>
@@ -158,9 +158,9 @@ export default function CreateBlogPage() {
                                         <div
                                             className={`
                         w-12 h-12 rounded-full flex items-center justify-center mb-2 transition-all duration-300
-                        ${isCompleted ? 'bg-green-500 text-white' : ''}
-                        ${isActive ? 'bg-primary-600 text-white shadow-lg' : ''}
-                        ${isUpcoming ? 'bg-gray-200 dark:bg-gray-700 text-gray-500 dark:text-gray-400' : ''}
+                        ${isCompleted ? 'bg-success text-success-content' : ''}
+                        ${isActive ? 'bg-primary text-primary-content shadow-lg' : ''}
+                        ${isUpcoming ? 'bg-base-300 text-base-content/60' : ''}
                       `}
                                         >
                                             {isCompleted ? (
@@ -170,10 +170,10 @@ export default function CreateBlogPage() {
                                             )}
                                         </div>
                                         <div className="text-center">
-                                            <div className={`text-sm font-medium ${isActive ? 'text-primary-600 dark:text-primary-400' : isCompleted ? 'text-green-600 dark:text-green-400' : 'text-gray-500 dark:text-gray-400'}`}>
+                                            <div className={`text-sm font-medium ${isActive ? 'text-primary' : isCompleted ? 'text-success' : 'text-base-content/60'}`}>
                                                 {step.title}
                                             </div>
-                                            <div className="text-xs text-gray-500 dark:text-gray-400">
+                                            <div className="text-xs text-base-content/60">
                                                 {step.description}
                                             </div>
                                         </div>
@@ -182,9 +182,9 @@ export default function CreateBlogPage() {
                                     {/* Connector Line */}
                                     {index < STEPS.length - 1 && (
                                         <div className="flex-1 h-px mx-4 relative">
-                                            <div className="absolute inset-0 bg-gray-200 dark:bg-gray-700"></div>
+                                            <div className="absolute inset-0 bg-base-300"></div>
                                             <motion.div
-                                                className="absolute inset-0 bg-gradient-to-r from-primary-600 to-secondary-600"
+                                                className="absolute inset-0 bg-gradient-to-r from-primary to-secondary"
                                                 initial={{ scaleX: 0 }}
                                                 animate={{ scaleX: isCompleted ? 1 : 0 }}
                                                 style={{ transformOrigin: "left" }}
@@ -200,7 +200,7 @@ export default function CreateBlogPage() {
 
                 {/* Step Content */}
                 <motion.div
-                    className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-3xl shadow-2xl p-8 min-h-[600px]"
+                    className="bg-base-100 border border-base-300 rounded-3xl shadow-2xl p-8 min-h-[600px]"
                     layout
                 >
                     <AnimatePresence mode="wait">
@@ -229,11 +229,11 @@ export default function CreateBlogPage() {
                                 initial={{ scale: 0.8, opacity: 0 }}
                                 animate={{ scale: 1, opacity: 1 }}
                                 exit={{ scale: 0.8, opacity: 0 }}
-                                className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl p-8 text-center shadow-2xl"
+                                className="bg-base-100 border border-base-300 rounded-2xl p-8 text-center shadow-2xl"
                             >
-                                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600 mx-auto mb-4"></div>
-                                <h3 className="text-xl font-bold mb-2 text-gray-900 dark:text-white">Processing...</h3>
-                                <p className="text-gray-600 dark:text-gray-400">Please wait while we work our magic</p>
+                                <div className="loading loading-spinner loading-lg text-primary mb-4"></div>
+                                <h3 className="text-xl font-bold mb-2 text-base-content">Processing...</h3>
+                                <p className="text-base-content/70">Please wait while we work our magic</p>
                             </motion.div>
                         </motion.div>
                     )}
