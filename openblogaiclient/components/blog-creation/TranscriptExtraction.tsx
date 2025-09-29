@@ -66,7 +66,18 @@ export default function TranscriptExtraction({
             }
 
         } catch (err) {
-            const errorMessage = err instanceof Error ? err.message : "Failed to extract transcript";
+            let errorMessage = "Failed to extract transcript";
+
+            if (err instanceof Error) {
+                if (err.message.includes('not available') || err.message.includes('captions')) {
+                    errorMessage = "This video doesn't have captions or transcripts available. Please try a different video that has captions enabled.";
+                } else if (err.message.includes('unavailable') || err.message.includes('private')) {
+                    errorMessage = "This video is unavailable or private. Please check the video URL and try again.";
+                } else {
+                    errorMessage = err.message;
+                }
+            }
+
             setError(errorMessage);
             setExtractionStatus("error");
         } finally {
