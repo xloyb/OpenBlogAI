@@ -26,7 +26,7 @@ export default function ThemeSettingsPage() {
                         </h1>
                     </div>
                     <p className="text-base-content/70 text-lg max-w-2xl mx-auto">
-                        Customize your experience with our collection of beautiful themes. 
+                        Customize your experience with our collection of beautiful themes.
                         Choose from professional, colorful, and dark themes to match your style.
                     </p>
                 </motion.div>
@@ -89,7 +89,7 @@ export default function ThemeSettingsPage() {
                                 Easy Switching
                             </h3>
                             <p className="text-base-content/70">
-                                Switch between themes instantly with live preview. 
+                                Switch between themes instantly with live preview.
                                 Your preference is saved automatically.
                             </p>
                         </div>
@@ -107,7 +107,7 @@ export default function ThemeSettingsPage() {
                                 Rich Collection
                             </h3>
                             <p className="text-base-content/70">
-                                From professional corporate themes to vibrant colorful options, 
+                                From professional corporate themes to vibrant colorful options,
                                 find the perfect match for your taste.
                             </p>
                         </div>
@@ -125,7 +125,7 @@ export default function ThemeSettingsPage() {
                                 Live Preview
                             </h3>
                             <p className="text-base-content/70">
-                                Hover over any theme to see how it looks. 
+                                Hover over any theme to see how it looks.
                                 No need to apply first - preview before you decide.
                             </p>
                         </div>

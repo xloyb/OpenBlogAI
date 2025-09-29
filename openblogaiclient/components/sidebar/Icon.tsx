@@ -19,7 +19,7 @@ export const Icon: React.FC<IconProps> = ({ name, className = "" }) => {
     profile: <FaUser className={className} />,
     blog: <FaBlog className={className} />,
     palette: <FaPalette className={className} />,
-    logout: <IoLogOut  className={className} />,
+    logout: <IoLogOut className={className} />,
 
   };
 
