@@ -8,16 +8,16 @@ datasource db {
 }
 
 model User {
-  id        String      @id @default(uuid())
-  email     String      @unique
-  password  String
-  name      String?
-  createdAt DateTime    @default(now())
-  updatedAt DateTime    @updatedAt
-  isAdmin   Boolean     @default(false) 
-  isModerator Boolean    @default(false)
-  isVerifiedPoster Boolean     @default(false)
-  isBlocked Boolean      @default(false)
+  id               String   @id @default(uuid())
+  email            String   @unique
+  password         String
+  name             String?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+  isAdmin          Boolean  @default(false)
+  isModerator      Boolean  @default(false)
+  isVerifiedPoster Boolean  @default(false)
+  isBlocked        Boolean  @default(false)
 
   RefreshToken RefreshToken[]
   Blogs        Blog[] // Relation: One user can write many blogs
@@ -25,49 +25,49 @@ model User {
 }
 
 model RefreshToken {
-  id          String   @id @default(uuid())
-  token       String   @unique(length: 255) @db.Text
-  userId      String
-  user        User     @relation(fields: [userId], references: [id])
-  ipAddress   String?  // Tracks the IP address
-  userAgent   String?  // Tracks the device/user agent
-  createdAt   DateTime @default(now())
-  lastUsedAt  DateTime @updatedAt // Tracks the last used time
-  expiresAt   DateTime
-  isRevoked   Boolean  @default(false) 
-  revokedAt   DateTime? // Timestamp for revocation tracking
+  id         String    @id @default(uuid())
+  token      String    @unique(length: 255) @db.Text
+  userId     String
+  user       User      @relation(fields: [userId], references: [id])
+  ipAddress  String? // Tracks the IP address
+  userAgent  String? // Tracks the device/user agent
+  createdAt  DateTime  @default(now())
+  lastUsedAt DateTime  @updatedAt // Tracks the last used time
+  expiresAt  DateTime
+  isRevoked  Boolean   @default(false)
+  revokedAt  DateTime? // Timestamp for revocation tracking
 }
 
 model Video {
-  id         Int        @id @default(autoincrement())
-  url        String     @unique
+  id         Int         @id @default(autoincrement())
+  url        String      @unique
   title      String
-  uploadedAt DateTime   @default(now())
+  uploadedAt DateTime    @default(now())
   userId     String
-  user       User       @relation(fields: [userId], references: [id]) // Relation: Video belongs to a user
+  user       User        @relation(fields: [userId], references: [id]) // Relation: Video belongs to a user
   transcript Transcript?
-  blog       Blog?      // Relation: A video can have an associated blog
+  blog       Blog? // Relation: A video can have an associated blog
 
-  createdAt  DateTime   @default(now())
+  createdAt DateTime @default(now())
 }
 
 model Transcript {
   id        Int      @id @default(autoincrement())
-  content   String @db.Text
-  videoId   Int     @unique
+  content   String   @db.Text
+  videoId   Int      @unique
   video     Video    @relation(fields: [videoId], references: [id]) // Relation: Transcript belongs to a video
   createdAt DateTime @default(now())
 }
 
 model Blog {
-  id        Int        @id @default(autoincrement())
+  id        Int      @id @default(autoincrement())
   subject   String
-  content   String @db.LongText
-  visible   Int        @default(1) // Status of the post (1 = visible, 0 = hidden)
-  videoId   Int?       @unique // Relation: A blog can have an associated video (optional)
-  video     Video?     @relation(fields: [videoId], references: [id]) 
-  userId    String     // Relation: Blog belongs to a user
-  user      User       @relation(fields: [userId], references: [id]) 
-  createdAt DateTime   @default(now())
-  updatedAt DateTime   @updatedAt
+  content   String   @db.LongText
+  visible   Int      @default(1) // Status of the post (1 = visible, 0 = hidden)
+  videoId   Int?     @unique // Relation: A blog can have an associated video (optional)
+  video     Video?   @relation(fields: [videoId], references: [id])
+  userId    String // Relation: Blog belongs to a user
+  user      User     @relation(fields: [userId], references: [id])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
