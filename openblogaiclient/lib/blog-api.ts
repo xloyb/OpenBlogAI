@@ -55,6 +55,17 @@ interface TranscriptResponse {
 interface BlogGenerationResponse {
     success: boolean;
     blog: string;
+    blogId?: number;
+    model?: string;
+    title?: string;
+}
+
+interface AvailableModel {
+    id: string;
+    name: string;
+    description: string;
+    maxTokens: number;
+    provider: string;
 }
 
 class BlogCreationAPI {
@@ -175,6 +186,19 @@ class BlogCreationAPI {
             throw new Error(`Failed to delete blog: ${response.statusText}`);
         }
     }
+
+    /**
+     * Get available AI models
+     */
+    async getAvailableModels(): Promise<AvailableModel[]> {
+        const response = await fetch(`${this.baseUrl}/api/blog/models`, {
+            method: 'GET',
+            headers: this.getAuthHeaders()
+        });
+
+        const data = await this.handleResponse<{ models: AvailableModel[] }>(response);
+        return data.models;
+    }
 }
 
 // Export singleton instance
@@ -186,5 +210,6 @@ export type {
     TranscriptResponse,
     BlogGenerationResponse,
     Blog,
-    BlogUpdateData
+    BlogUpdateData,
+    AvailableModel
 };
