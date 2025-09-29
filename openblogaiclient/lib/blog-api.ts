@@ -2,9 +2,21 @@
 
 interface ApiResponse<T = unknown> {
     success?: boolean;
-    data?: T;
-    error?: boolean;
-    message?: string;
+         const response = await fetch(`${this.baseUrl}/api/blog/generate-blog`, {
+        method: 'POST',
+        headers: this.getHeaders(accessToken),
+        body: JSON.stringify({
+            model,
+            transcript,
+            userId
+        })
+    }); T;
+error ?: boolean;
+    messa        const response = await fetch(`${this.baseUrl}/api/blog/blogs/${id}`, {
+    method: 'PATCH',
+    headers: this.getHeaders(accessToken),
+    body: JSON.stringify(data)
+}); string;
 }
 
 interface Blog {
@@ -125,7 +137,7 @@ class BlogCreationAPI {
      * Get all blogs
      */
     async getBlogs(accessToken: string): Promise<Blog[]> {
-        const response = await fetch(`${this.baseUrl}/blog/blogs`, {
+        const response = await fetch(`${this.baseUrl}/api/blog/blogs`, {
             method: 'GET',
             headers: this.getAuthHeaders(accessToken)
         });
@@ -137,7 +149,7 @@ class BlogCreationAPI {
      * Get single blog by ID
      */
     async getBlog(id: number, accessToken?: string): Promise<Blog> {
-        const response = await fetch(`${this.baseUrl}/blog/blogs/${id}`, {
+        const response = await fetch(`${this.baseUrl}/api/blog/blogs/${id}`, {
             method: 'GET',
             headers: this.getAuthHeaders(accessToken)
         });
@@ -166,7 +178,7 @@ class BlogCreationAPI {
      * Delete blog
      */
     async deleteBlog(id: number, accessToken: string): Promise<void> {
-        const response = await fetch(`${this.baseUrl}/blog/blogs/${id}`, {
+        const response = await fetch(`${this.baseUrl}/api/blog/blogs/${id}`, {
             method: 'DELETE',
             headers: this.getAuthHeaders(accessToken)
         });
