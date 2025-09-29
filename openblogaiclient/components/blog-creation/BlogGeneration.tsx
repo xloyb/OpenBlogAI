@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { motion } from "framer-motion";
 import { FiEdit, FiArrowRight, FiArrowLeft, FiCheck, FiAlertCircle, FiCopy, FiDownload, FiEye } from "react-icons/fi";
 import { useSession } from "next-auth/react";
@@ -37,20 +37,23 @@ export default function BlogGeneration({
     const streamingRef = useRef<HTMLDivElement>(null);
     const isModerator = session?.user?.isModerator || session?.user?.isAdmin;
 
-    useEffect(() => {
-        if (transcript && selectedModel && generationStatus === "idle") {
-            generateBlog();
-        }
-    }, [transcript, selectedModel, generationStatus]);
+    const simulateStreaming = useCallback(async (fullText: string) => {
+        const words = fullText.split(' ');
+        const totalWords = words.length;
+        let currentText = "";
 
-    useEffect(() => {
-        // Auto-scroll to bottom during streaming
-        if (streamingRef.current) {
-            streamingRef.current.scrollTop = streamingRef.current.scrollHeight;
-        }
-    }, [streamingText]);
+        for (let i = 0; i < words.length; i++) {
+            currentText += (i > 0 ? ' ' : '') + words[i];
+            setStreamingText(currentText);
+            setGenerationProgress((i + 1) / totalWords * 100);
 
-    const generateBlog = async () => {
+            // Variable delay for more realistic streaming
+            const delay = Math.random() * 50 + 10;
+            await new Promise(resolve => setTimeout(resolve, delay));
+        }
+    }, []);
+
+    const generateBlog = useCallback(async () => {
         if (!transcript || !selectedModel || !session?.user?.id) return;
 
         setIsLoading(true);
@@ -88,23 +91,20 @@ export default function BlogGeneration({
         } finally {
             setIsLoading(false);
         }
-    };
+    }, [transcript, selectedModel, session?.user?.id, session?.accessToken, onBlogGenerated, setIsLoading, isModerator, simulateStreaming]);
 
-    const simulateStreaming = async (fullText: string) => {
-        const words = fullText.split(' ');
-        const totalWords = words.length;
-        let currentText = "";
-
-        for (let i = 0; i < words.length; i++) {
-            currentText += (i > 0 ? ' ' : '') + words[i];
-            setStreamingText(currentText);
-            setGenerationProgress((i + 1) / totalWords * 100);
-
-            // Variable delay for more realistic streaming
-            const delay = Math.random() * 50 + 10;
-            await new Promise(resolve => setTimeout(resolve, delay));
+    useEffect(() => {
+        if (transcript && selectedModel && generationStatus === "idle") {
+            generateBlog();
         }
-    };
+    }, [transcript, selectedModel, generationStatus, generateBlog]);
+
+    useEffect(() => {
+        // Auto-scroll to bottom during streaming
+        if (streamingRef.current) {
+            streamingRef.current.scrollTop = streamingRef.current.scrollHeight;
+        }
+    }, [streamingText]);
 
     const handleModeratorAction = (action: "approved" | "rejected") => {
         setModeratorApproval(action);
