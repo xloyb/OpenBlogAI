@@ -6,6 +6,8 @@ import { useSession } from "next-auth/react";
 import { doCredentialLogin } from "@/actions/auth";
 import { motion } from "framer-motion";
 import { FaEnvelope, FaLock, FaEye, FaEyeSlash, FaSpinner } from "react-icons/fa";
+import { Button } from "./ui";
+import { Alert } from "./ui/components";
 
 interface FormErrors {
   email?: string;
@@ -104,12 +106,10 @@ export default function LoginForm() {
       className="space-y-6"
     >
       {/* Email Field */}
-      <div className="form-control">
-        <label className="label">
-          <span className="label-text font-medium flex items-center gap-2">
-            <FaEnvelope className="text-primary" />
-            Email Address
-          </span>
+      <div className="space-y-2">
+        <label className="text-sm font-medium text-gray-700 dark:text-gray-300 flex items-center gap-2">
+          <FaEnvelope className="text-primary-500" />
+          Email Address
         </label>
         <input
           type="email"
@@ -117,23 +117,22 @@ export default function LoginForm() {
           value={formData.email}
           onChange={handleInputChange}
           placeholder="Enter your email"
-          className={`input input-bordered w-full ${fieldErrors.email ? 'input-error' : ''}`}
+          className={`w-full px-3 py-2 border rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-colors ${fieldErrors.email
+            ? 'border-error-500 focus:ring-error-500'
+            : 'border-gray-300 dark:border-gray-600'
+            }`}
           required
         />
         {fieldErrors.email && (
-          <label className="label">
-            <span className="label-text-alt text-error">{fieldErrors.email}</span>
-          </label>
+          <p className="text-sm text-error-500">{fieldErrors.email}</p>
         )}
       </div>
 
       {/* Password Field */}
-      <div className="form-control">
-        <label className="label">
-          <span className="label-text font-medium flex items-center gap-2">
-            <FaLock className="text-primary" />
-            Password
-          </span>
+      <div className="space-y-2">
+        <label className="text-sm font-medium text-gray-700 dark:text-gray-300 flex items-center gap-2">
+          <FaLock className="text-primary-500" />
+          Password
         </label>
         <div className="relative">
           <input
@@ -142,31 +141,35 @@ export default function LoginForm() {
             value={formData.password}
             onChange={handleInputChange}
             placeholder="Enter your password"
-            className={`input input-bordered w-full pr-12 ${fieldErrors.password ? 'input-error' : ''}`}
+            className={`w-full px-3 py-2 pr-12 border rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-colors ${fieldErrors.password
+              ? 'border-error-500 focus:ring-error-500'
+              : 'border-gray-300 dark:border-gray-600'
+              }`}
             required
           />
           <button
             type="button"
             onClick={() => setShowPassword(!showPassword)}
-            className="absolute right-3 top-1/2 transform -translate-y-1/2 text-base-content/60 hover:text-base-content"
+            className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 transition-colors"
           >
             {showPassword ? <FaEyeSlash /> : <FaEye />}
           </button>
         </div>
         {fieldErrors.password && (
-          <label className="label">
-            <span className="label-text-alt text-error">{fieldErrors.password}</span>
-          </label>
+          <p className="text-sm text-error-500">{fieldErrors.password}</p>
         )}
       </div>
 
       {/* Remember Me & Forgot Password */}
       <div className="flex items-center justify-between">
-        <label className="label cursor-pointer">
-          <input type="checkbox" className="checkbox checkbox-primary checkbox-sm mr-2" />
-          <span className="label-text text-sm">Remember me</span>
+        <label className="flex items-center cursor-pointer">
+          <input
+            type="checkbox"
+            className="w-4 h-4 text-primary-600 bg-gray-100 border-gray-300 rounded focus:ring-primary-500 dark:focus:ring-primary-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600 mr-2"
+          />
+          <span className="text-sm text-gray-700 dark:text-gray-300">Remember me</span>
         </label>
-        <a href="/forgot-password" className="link link-primary text-sm">
+        <a href="/forgot-password" className="text-sm text-primary-600 hover:text-primary-500 dark:text-primary-400 dark:hover:text-primary-300 transition-colors">
           Forgot password?
         </a>
       </div>
@@ -176,12 +179,8 @@ export default function LoginForm() {
         <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
-          className="alert alert-error"
         >
-          <svg xmlns="http://www.w3.org/2000/svg" className="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
-          </svg>
-          <span>{error}</span>
+          <Alert variant="error">{error}</Alert>
         </motion.div>
       )}
 
@@ -190,20 +189,17 @@ export default function LoginForm() {
         <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
-          className="alert alert-success"
         >
-          <svg xmlns="http://www.w3.org/2000/svg" className="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-          </svg>
-          <span>{success}</span>
+          <Alert variant="success">{success}</Alert>
         </motion.div>
       )}
 
       {/* Submit Button */}
-      <button
+      <Button
         type="submit"
         disabled={isLoading}
-        className="btn btn-primary w-full text-lg"
+        className="w-full text-lg"
+        size="lg"
       >
         {isLoading ? (
           <>
@@ -213,7 +209,7 @@ export default function LoginForm() {
         ) : (
           "Sign In"
         )}
-      </button>
+      </Button>
     </motion.form>
   );
 }

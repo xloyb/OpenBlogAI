@@ -11,7 +11,7 @@ export const ThemeToggle: React.FC = () => {
     return (
         <motion.button
             onClick={toggleTheme}
-            className="btn btn-ghost btn-circle swap swap-rotate"
+            className="relative p-2 rounded-full bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             transition={{ duration: 0.2 }}
@@ -24,9 +24,9 @@ export const ThemeToggle: React.FC = () => {
                     opacity: theme === 'dark' ? 0 : 1,
                 }}
                 transition={{ duration: 0.3 }}
-                className="swap-off absolute"
+                className="absolute inset-0 flex items-center justify-center"
             >
-                <FiSun className="w-5 h-5" />
+                <FiSun className="w-5 h-5 text-yellow-500" />
             </motion.div>
 
             <motion.div
@@ -36,10 +36,15 @@ export const ThemeToggle: React.FC = () => {
                     opacity: theme === 'light' ? 0 : 1,
                 }}
                 transition={{ duration: 0.3 }}
-                className="swap-on absolute"
+                className="absolute inset-0 flex items-center justify-center"
             >
-                <FiMoon className="w-5 h-5" />
+                <FiMoon className="w-5 h-5 text-blue-400" />
             </motion.div>
+            
+            {/* Invisible content for sizing */}
+            <div className="invisible">
+                <FiSun className="w-5 h-5" />
+            </div>
         </motion.button>
     );
 };
@@ -49,21 +54,25 @@ export const ThemeToggleCompact: React.FC = () => {
     const { theme, toggleTheme } = useTheme();
 
     return (
-        <motion.label
-            className="flex cursor-pointer gap-2 items-center"
+        <motion.div
+            className="flex cursor-pointer gap-2 items-center text-sm"
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
+            onClick={toggleTheme}
         >
-            <FiSun className="w-4 h-4" />
-            <input
-                type="checkbox"
-                checked={theme === 'dark'}
-                onChange={toggleTheme}
-                className="toggle toggle-sm"
-                aria-label="Toggle theme"
-            />
-            <FiMoon className="w-4 h-4" />
-        </motion.label>
+            <FiSun className={`w-4 h-4 transition-colors ${theme === 'light' ? 'text-yellow-500' : 'text-gray-400'}`} />
+            <div className="relative w-8 h-5">
+                <div className="absolute inset-0 bg-gray-200 dark:bg-gray-700 rounded-full transition-colors"></div>
+                <motion.div
+                    className="absolute top-0.5 left-0.5 w-4 h-4 bg-white dark:bg-gray-900 rounded-full shadow-sm transition-all"
+                    animate={{
+                        x: theme === 'dark' ? 12 : 0,
+                    }}
+                    transition={{ duration: 0.2, ease: "easeInOut" }}
+                ></motion.div>
+            </div>
+            <FiMoon className={`w-4 h-4 transition-colors ${theme === 'dark' ? 'text-blue-400' : 'text-gray-400'}`} />
+        </motion.div>
     );
 };
 
