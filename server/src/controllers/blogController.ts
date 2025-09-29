@@ -1,213 +1,285 @@
+// Updated blog controller with OpenRouter free models integration
 
 import { Request, Response, NextFunction } from "express";
 import { createOpenAI } from "@ai-sdk/openai";
 import { streamText, CoreMessage } from "ai";
-import { env } from "envValidator";
 import { CHAT_INSTRUCTIONS } from "@src/utils/instructions";
 import { createBlog, deleteBlog, getBlogById, getBlogs, updateBlog } from "@src/services/blogService";
 
-const MODEL_CONFIG = {
-  "gpt-4o": {
-    name: "GPT-4 Omni",
-    temperature: 1,
-    maxTokens: 4096,
-    topP: 1,
-  },
-  "llama-3.1": {
-    name: "Meta-Llama-3.1-405B-Instruct",
-    temperature: 0.8,
-    maxTokens: 2048,
-    topP: 0.1,
-  },
-  jamba: {
-    name: "AI21-Jamba-1.5-Large",
-    temperature: 0.8,
-    maxTokens: 2048,
-    topP: 0.1,
-  },
-  "phi-3.5": {
-    name: "Phi-3.5-MoE-instruct",
-    temperature: 0.8,
-    maxTokens: 2048,
-    topP: 0.1,
-  },
-  cohere: {
-    name: "Cohere-command-r-08-2024",
-    temperature: 0.8,
-    maxTokens: 2048,
-    topP: 0.1,
-  },
-  ministral: {
-    name: "Ministral-3B",
-    temperature: 0.8,
-    maxTokens: 2048,
-    topP: 0.1,
-  },
+// OpenRouter Free Models Configuration
+const FREE_MODEL_CONFIG = {
+    // Free models available on OpenRouter (these are commonly free)
+    "mistral-7b-instruct": {
+        name: "mistralai/mistral-7b-instruct",
+        displayName: "Mistral 7B Instruct",
+        temperature: 0.8,
+        maxTokens: 2048,
+        topP: 0.9,
+    },
+    "mixtral-8x7b-instruct": {
+        name: "mistralai/mixtral-8x7b-instruct",
+        displayName: "Mixtral 8x7B Instruct",
+        temperature: 0.8,
+        maxTokens: 2048,
+        topP: 0.9,
+    },
+    "llama-3.1-8b-instruct": {
+        name: "meta-llama/llama-3.1-8b-instruct",
+        displayName: "Llama 3.1 8B Instruct",
+        temperature: 0.8,
+        maxTokens: 2048,
+        topP: 0.9,
+    },
+    "llama-3.1-70b-instruct": {
+        name: "meta-llama/llama-3.1-70b-instruct",
+        displayName: "Llama 3.1 70B Instruct",
+        temperature: 0.8,
+        maxTokens: 2048,
+        topP: 0.9,
+    },
+    "gemma-2-9b-it": {
+        name: "google/gemma-2-9b-it",
+        displayName: "Gemma 2 9B IT",
+        temperature: 0.8,
+        maxTokens: 2048,
+        topP: 0.9,
+    },
+    "qwen-2-7b-instruct": {
+        name: "qwen/qwen-2-7b-instruct",
+        displayName: "Qwen 2 7B Instruct",
+        temperature: 0.8,
+        maxTokens: 2048,
+        topP: 0.9,
+    },
+    "phi-3-mini-128k-instruct": {
+        name: "microsoft/phi-3-mini-128k-instruct",
+        displayName: "Phi-3 Mini 128K Instruct",
+        temperature: 0.8,
+        maxTokens: 2048,
+        topP: 0.9,
+    },
+    "hermes-2-pro-mistral-7b": {
+        name: "nousresearch/hermes-2-pro-mistral-7b",
+        displayName: "Hermes 2 Pro Mistral 7B",
+        temperature: 0.8,
+        maxTokens: 2048,
+        topP: 0.9,
+    }
 };
 
-const client = createOpenAI({
-  baseURL: "https://models.inference.ai.azure.com",
-  apiKey: env.GITHUB_API,
+// OpenRouter client configuration
+const openRouterClient = createOpenAI({
+    baseURL: "https://openrouter.ai/api/v1",
+    apiKey: process.env.OPENROUTER_API_KEY, // Add this to your .env file
 });
 
 export const generateBlogFromTranscript = async (
-  modelId: keyof typeof MODEL_CONFIG,
-  transcript: string,
-  
+    modelId: keyof typeof FREE_MODEL_CONFIG,
+    transcript: string,
 ): Promise<string> => {
-  try {
-    const model = MODEL_CONFIG[modelId];
-    const messages: CoreMessage[] = [
-      {
-        role: "system",
-        content: CHAT_INSTRUCTIONS,
-      },
-      {
-        role: "user",
-        content: `Generate blog post: ${transcript.substring(0, 6000)}`,
-      },
-    ];
+    try {
+        const model = FREE_MODEL_CONFIG[modelId];
 
-    const result = await streamText({
-      model: client(model.name),
-      messages,
-      temperature: model.temperature,
-      maxTokens: model.maxTokens,
-      topP: model.topP,
-    });
+        if (!model) {
+            throw new Error(`Model ${modelId} not found in free models configuration`);
+        }
 
-    let content = "";
-    for await (const textPart of result.textStream) {
-      content += textPart;
+        const messages: CoreMessage[] = [
+            {
+                role: "system",
+                content: CHAT_INSTRUCTIONS,
+            },
+            {
+                role: "user",
+                content: `Generate a comprehensive blog post based on this transcript: ${transcript.substring(0, 6000)}`,
+            },
+        ];
+
+        const result = await streamText({
+            model: openRouterClient(model.name),
+            messages,
+            temperature: model.temperature,
+            maxTokens: model.maxTokens,
+            topP: model.topP,
+            // OpenRouter specific headers (optional but recommended)
+            headers: {
+                "HTTP-Referer": process.env.YOUR_SITE_URL || "http://localhost:3000",
+                "X-Title": process.env.YOUR_SITE_NAME || "OpenBlogAI",
+            }
+        });
+
+        let content = "";
+        for await (const textPart of result.textStream) {
+            content += textPart;
+        }
+
+        return content;
+    } catch (error) {
+        console.error(`OpenRouter model ${modelId} error:`, error);
+        throw new Error(`Blog generation failed with ${modelId}: ${(error as Error).message}`);
     }
-
-    return content;
-  } catch (error) {
-    console.error(`Model ${modelId} error:`, error);
-    throw new Error(`Generation failed: ${(error as Error).message}`);
-  }
 };
-
-
 
 export const generateBlog = async (
-  req: Request<{}, {}, { modelId: keyof typeof MODEL_CONFIG; transcript: string, uid: string }>,
-  res: Response,
-  next: NextFunction
+    req: Request<{}, {}, { modelId: keyof typeof FREE_MODEL_CONFIG; transcript: string; uid: string }>,
+    res: Response,
+    next: NextFunction
 ): Promise<void> => {
-  try {
-    const { modelId, transcript, uid } = req.body;
+    try {
+        const { modelId, transcript, uid } = req.body;
 
-    if (!transcript?.trim()) {
-      res.status(400).json({ error: true, message: "Transcript required" });
-      return;
+        if (!transcript?.trim()) {
+            res.status(400).json({ error: true, message: "Transcript is required" });
+            return;
+        }
+
+        if (!FREE_MODEL_CONFIG[modelId]) {
+            res.status(400).json({
+                error: true,
+                message: `Invalid model ID. Available models: ${Object.keys(FREE_MODEL_CONFIG).join(', ')}`
+            });
+            return;
+        }
+
+        console.log(`Generating blog with model: ${FREE_MODEL_CONFIG[modelId].displayName}`);
+
+        const rawBlog = await generateBlogFromTranscript(modelId, transcript);
+
+        // Extract title from the generated blog (first line or first heading)
+        const lines = rawBlog.split('\n');
+        const title = lines.find(line => line.trim().startsWith('#'))?.replace(/^#+\s*/, '') ||
+            lines.find(line => line.trim().length > 0)?.substring(0, 100) ||
+            "Generated Blog Post";
+
+        // Save the blog to the database
+        const newBlog = await createBlog({
+            subject: title,
+            content: rawBlog,
+            visible: 1,
+            userId: uid,
+        });
+
+        res.status(200).json({
+            success: true,
+            blog: rawBlog,
+            blogId: newBlog.id,
+            model: FREE_MODEL_CONFIG[modelId].displayName,
+            title: title
+        });
+    } catch (error) {
+        next(error);
     }
-
-    const rawBlog = await generateBlogFromTranscript(modelId, transcript);
-    
-
-    // Save the blog to the database
-    const newBlog = await createBlog({
-      subject:"test blog",
-      content: rawBlog,
-      visible: 1,
-      userId: uid,
-    });
-
-    res.status(200).json({
-      success: true,
-      blog: rawBlog,
-    });
-  } catch (error) {
-    next(error);
-  }
 };
 
-export const getAllBlogs = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
+// Get available free models
+export const getAvailableModels = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
 ): Promise<void> => {
-  try {
-    const blogs = await getBlogs();
-    res.status(200).json(blogs);
-  } catch (error) {
-    next(error);
-  }
+    try {
+        const models = Object.entries(FREE_MODEL_CONFIG).map(([key, config]) => ({
+            id: key,
+            name: config.displayName,
+            description: `Free model: ${config.name}`,
+            maxTokens: config.maxTokens,
+            provider: "OpenRouter"
+        }));
+
+        res.status(200).json({
+            success: true,
+            models,
+            total: models.length
+        });
+    } catch (error) {
+        next(error);
+    }
+};
+
+// Keep existing CRUD operations unchanged
+export const getAllBlogs = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+): Promise<void> => {
+    try {
+        const blogs = await getBlogs();
+        res.status(200).json(blogs);
+    } catch (error) {
+        next(error);
+    }
 };
 
 export const getSingleBlog = async (
-  req: Request<{ id: string }>,
-  res: Response,
-  next: NextFunction
+    req: Request<{ id: string }>,
+    res: Response,
+    next: NextFunction
 ): Promise<void> => {
-  try {
-    const id = parseInt(req.params.id);
-    if (isNaN(id)) {
-      res.status(400).json({ error: true, message: "Invalid blog ID" });
-      return;
-    }
+    try {
+        const id = parseInt(req.params.id);
+        if (isNaN(id)) {
+            res.status(400).json({ error: true, message: "Invalid blog ID" });
+            return;
+        }
 
-    const blog = await getBlogById(id);
-    if (!blog) {
-      res.status(404).json({ error: true, message: "Blog not found" });
-      return;
-    }
+        const blog = await getBlogById(id);
+        if (!blog) {
+            res.status(404).json({ error: true, message: "Blog not found" });
+            return;
+        }
 
-    res.status(200).json(blog);
-  } catch (error) {
-    next(error);
-  }
+        res.status(200).json(blog);
+    } catch (error) {
+        next(error);
+    }
 };
-
 
 export const updateExistingBlog = async (
-  req: Request<{ id: string }, {}, { subject?: string; content?: string; visible?: number }>,
-  res: Response,
-  next: NextFunction
+    req: Request<{ id: string }, {}, { subject?: string; content?: string; visible?: number }>,
+    res: Response,
+    next: NextFunction
 ): Promise<void> => {
-  try {
-    const id = parseInt(req.params.id);
-    if (isNaN(id)) {
-      res.status(400).json({ error: true, message: "Invalid blog ID" });
-      return;
-    }
+    try {
+        const id = parseInt(req.params.id);
+        if (isNaN(id)) {
+            res.status(400).json({ error: true, message: "Invalid blog ID" });
+            return;
+        }
 
-    const existingBlog = await getBlogById(id);
-    if (!existingBlog) {
-      res.status(404).json({ error: true, message: "Blog not found" });
-      return;
-    }
+        const existingBlog = await getBlogById(id);
+        if (!existingBlog) {
+            res.status(404).json({ error: true, message: "Blog not found" });
+            return;
+        }
 
-    const updatedBlog = await updateBlog(id, req.body);
-    res.status(200).json(updatedBlog);
-  } catch (error) {
-    next(error);
-  }
+        const updatedBlog = await updateBlog(id, req.body);
+        res.status(200).json(updatedBlog);
+    } catch (error) {
+        next(error);
+    }
 };
 
-
 export const deleteExistingBlog = async (
-  req: Request<{ id: string }>,
-  res: Response,
-  next: NextFunction
+    req: Request<{ id: string }>,
+    res: Response,
+    next: NextFunction
 ): Promise<void> => {
-  try {
-    const id = parseInt(req.params.id);
-    if (isNaN(id)) {
-      res.status(400).json({ error: true, message: "Invalid blog ID" });
-      return;
-    }
+    try {
+        const id = parseInt(req.params.id);
+        if (isNaN(id)) {
+            res.status(400).json({ error: true, message: "Invalid blog ID" });
+            return;
+        }
 
-    const existingBlog = await getBlogById(id);
-    if (!existingBlog) {
-      res.status(404).json({ error: true, message: "Blog not found" });
-      return;
-    }
+        const existingBlog = await getBlogById(id);
+        if (!existingBlog) {
+            res.status(404).json({ error: true, message: "Blog not found" });
+            return;
+        }
 
-    await deleteBlog(id);
-    res.status(204).send();
-  } catch (error) {
-    next(error);
-  }
+        await deleteBlog(id);
+        res.status(204).send();
+    } catch (error) {
+        next(error);
+    }
 };
