@@ -99,15 +99,27 @@ export const Sidebar: React.FC = () => {
             <ToggleButton onClick={toggleSidebar} isOpen={isOpen} />
           </li> */}
           <SidebarItem
-            href="index.html"
+            href="/"
             icon="home"
             text="Home"
             collapsed={collapsed}
           />
           <SidebarItem
-            href="dashboard.html"
+            href="/dashboard"
             icon="dashboard"
             text="Dashboard"
+            collapsed={collapsed}
+          />
+          <SidebarItem
+            href="/create-blog"
+            icon="create"
+            text="Create Blog"
+            collapsed={collapsed}
+          />
+          <SidebarItem
+            href="/blogs"
+            icon="blog"
+            text="My Blogs"
             collapsed={collapsed}
           />
           <SidebarItem
