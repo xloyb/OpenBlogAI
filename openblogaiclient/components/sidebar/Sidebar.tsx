@@ -30,9 +30,17 @@ export const Sidebar: React.FC = () => {
 
   const handleLogout = async () => {
     try {
-      await console.log("Logout clicked");
+      console.log("🔄 Logout process started");
+
+      // Import and call the logout action
+      const { doLogout } = await import('@/actions/auth');
+      await doLogout();
+
+      console.log("✅ Logout completed");
     } catch (err) {
-      console.log("Logout Error:", err)
+      console.error("❌ Logout Error:", err);
+      // Fallback: redirect to login page
+      window.location.href = '/login';
     }
   }
 
