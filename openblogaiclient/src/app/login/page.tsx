@@ -13,7 +13,6 @@ export default function LoginPage() {
         className="w-full max-w-md"
       >
         <div className="bg-base-100 rounded-2xl shadow-2xl border border-base-300 overflow-hidden">
-          {/* Header Section */}
           <div className="bg-gradient-to-r from-primary to-secondary p-8 text-center">
             <motion.div
               initial={{ opacity: 0, y: -20 }}
@@ -28,18 +27,14 @@ export default function LoginPage() {
               </p>
             </motion.div>
           </div>
-
-          {/* Form Section */}
           <div className="p-8">
             <LoginForm />
-            
             <div className="divider my-6">
               <span className="text-base-content/60 text-sm">New to OpenBlogAI?</span>
             </div>
-            
             <div className="text-center">
-              <Link 
-                href="/register" 
+              <Link
+                href="/register"
                 className="btn btn-outline btn-primary w-full"
               >
                 Create New Account
@@ -47,36 +42,17 @@ export default function LoginPage() {
             </div>
           </div>
         </div>
-
-        {/* Footer Links */}
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.4, duration: 0.5 }}
           className="text-center text-base-content/60 text-sm mt-6 space-x-4"
         >
           <a href="/forgot-password" className="link link-primary">Forgot Password?</a>
-          <span>•</span>
+          <span></span>
           <a href="/help" className="link link-primary">Need Help?</a>
         </motion.div>
       </motion.div>
-    </div>
-  );
-}t Link from 'next/link';
-import LoginForm from '@/components/LoginForm';
-
-export default function LoginPage() {
-  return (
-    <div className="flex flex-col justify-center items-center m-4">
-      <h1 className="text-3xl my-3">Hey, time to Sign In</h1>
-      <LoginForm />
-      <p className="my-3">
-        Don’t have an account?{' '}
-        <Link href="/register" className="mx-2 underline">
-          Register
-        </Link>
-      </p>
-      testing something
     </div>
   );
 }
