@@ -8,7 +8,7 @@ import { SidebarItem } from "./SidebarItem";
 export const Sidebar: React.FC = () => {
   const [isOpen, setIsOpen] = useState(true); // Controls whether the sidebar is open or closed
   const [collapsed, setCollapsed] = useState(false); // Controls whether the sidebar is collapsed (icons only)
-  const [activeSubmenu, setActiveSubmenu] = useState<string | null>(null);
+
 
 
   // Load sidebar state from local storage on mount
@@ -49,20 +49,9 @@ export const Sidebar: React.FC = () => {
     const newState = !isOpen;
     setIsOpen(newState);
     setCollapsed(!collapsed); // Toggle collapsed state
-    setActiveSubmenu(null);
     localStorage.setItem("sidebarOpen", newState.toString());
     localStorage.setItem("sidebarCollapsed", (!collapsed).toString()); // Save collapsed state
     console.log("Toggled sidebar. Open:", newState, "Collapsed:", !collapsed); // Debug log
-  };
-
-  const toggleSubmenu = (submenu: string) => {
-    if (activeSubmenu === submenu) {
-      setActiveSubmenu(null);
-    } else {
-      setActiveSubmenu(submenu);
-      if (!isOpen) setIsOpen(true);
-      if (collapsed) setCollapsed(false); // Expand sidebar if collapsed
-    }
   };
 
 
