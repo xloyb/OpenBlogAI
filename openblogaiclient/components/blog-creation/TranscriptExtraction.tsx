@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { motion } from "framer-motion";
 import { FiFileText, FiArrowRight, FiArrowLeft, FiCheck, FiAlertCircle, FiEye } from "react-icons/fi";
 import { useSession } from "next-auth/react";
@@ -32,11 +32,17 @@ export default function TranscriptExtraction({
     const [showFullTranscript, setShowFullTranscript] = useState(false);
     const [moderatorApproval, setModeratorApproval] = useState<"pending" | "approved" | "rejected">("pending");
 
+    const isExtracting = useRef(false);
     const isModerator = session?.user?.isModerator || session?.user?.isAdmin;
 
-    const extractTranscript = async () => {
-        if (!videoId || !session?.user?.id) return;
+    const extractTranscript = useCallback(async () => {
+        if (!videoId || !session?.user?.id || isExtracting.current) {
+            console.log('Extraction skipped:', { videoId, userId: session?.user?.id, isExtracting: isExtracting.current });
+            return;
+        }
 
+        console.log('Starting transcript extraction for:', videoId);
+        isExtracting.current = true;
         setIsLoading(true);
         setExtractionStatus("extracting");
         setError("");
@@ -65,14 +71,35 @@ export default function TranscriptExtraction({
             setExtractionStatus("error");
         } finally {
             setIsLoading(false);
+            isExtracting.current = false;
         }
-    };
+    }, [videoId, session?.user?.id, session?.accessToken, isModerator, setIsLoading, onTranscript]);
 
     useEffect(() => {
-        if (videoId && extractionStatus === "idle") {
-            extractTranscript();
+        if (videoId && extractionStatus === "idle" && !transcript && session?.user?.id && session?.accessToken) {
+            console.log('useEffect trigger extraction for:', videoId);
+            // Add a small delay to prevent race conditions
+            const timeoutId = setTimeout(() => {
+                extractTranscript();
+            }, 100);
+
+            return () => clearTimeout(timeoutId);
         }
-    }, [videoId, extractionStatus]);
+    }, [videoId, extractionStatus, extractTranscript, transcript, session?.user?.id, session?.accessToken]);
+
+    // Reset extraction status when videoId changes
+    useEffect(() => {
+        if (videoId) {
+            setExtractionStatus("idle");
+            setTranscript("");
+            setError("");
+            setModeratorApproval("pending");
+            isExtracting.current = false;
+        }
+        return () => {
+            isExtracting.current = false;
+        };
+    }, [videoId]);
 
     const handleModeratorAction = (action: "approved" | "rejected") => {
         setModeratorApproval(action);
@@ -124,8 +151,8 @@ export default function TranscriptExtraction({
             >
                 <div className="flex items-center gap-4 mb-4">
                     <div className={`w-3 h-3 rounded-full ${extractionStatus === "extracting" ? "bg-warning animate-pulse" :
-                            extractionStatus === "success" ? "bg-success" :
-                                extractionStatus === "error" ? "bg-error" : "bg-base-300"
+                        extractionStatus === "success" ? "bg-success" :
+                            extractionStatus === "error" ? "bg-error" : "bg-base-300"
                         }`}></div>
                     <span className="font-medium">
                         {extractionStatus === "idle" && "Ready to extract"}
