@@ -7,34 +7,34 @@ import { cn } from '../../lib/utils';
 
 // Button variants using CVA for better type safety and consistency
 const buttonVariants = cva(
-    // Base styles
-    "inline-flex items-center justify-center rounded-lg font-medium transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none",
+    // Base styles - Enhanced for login page aesthetic
+    "inline-flex items-center justify-center rounded-lg font-medium transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-white dark:focus:ring-offset-gray-800 disabled:opacity-50 disabled:pointer-events-none hover:scale-[1.02] active:scale-[0.98] shadow-sm hover:shadow-md",
     {
         variants: {
             variant: {
-                // Primary button with gradient
-                primary: "bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-lg hover:shadow-xl focus:ring-blue-500",
+                // Primary button - Enhanced gradient like login page
+                primary: "bg-gradient-to-r from-primary-600 to-secondary-600 hover:from-primary-700 hover:to-secondary-700 text-white shadow-lg hover:shadow-xl focus:ring-primary-500 dark:shadow-2xl dark:hover:shadow-primary-500/25",
 
-                // Secondary button with subtle styling
-                secondary: "bg-gray-100 hover:bg-gray-200 text-gray-900 dark:bg-gray-800 dark:hover:bg-gray-700 dark:text-gray-100 focus:ring-gray-500",
+                // Secondary button - Refined dark theme styling
+                secondary: "bg-gray-100 hover:bg-gray-200 text-gray-900 border border-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-gray-100 dark:border-gray-600 focus:ring-gray-500 dark:shadow-lg",
 
-                // Outline button
-                outline: "border-2 border-gray-300 hover:border-gray-400 bg-transparent hover:bg-gray-50 text-gray-700 dark:border-gray-600 dark:hover:border-gray-500 dark:hover:bg-gray-800 dark:text-gray-300 focus:ring-gray-500",
+                // Outline button - Login page inspired styling
+                outline: "border-2 border-gray-300 hover:border-primary-400 bg-transparent hover:bg-gray-50 text-gray-700 dark:border-gray-600 dark:hover:border-primary-400 dark:hover:bg-gray-700/50 dark:text-gray-300 focus:ring-primary-500 dark:shadow-lg dark:hover:shadow-primary-500/10",
 
-                // Ghost button
-                ghost: "hover:bg-gray-100 text-gray-700 dark:hover:bg-gray-800 dark:text-gray-300 focus:ring-gray-500",
+                // Ghost button - Enhanced hover states
+                ghost: "hover:bg-gray-100 text-gray-700 dark:hover:bg-gray-700/50 dark:text-gray-300 focus:ring-gray-500 dark:hover:shadow-lg",
 
-                // Destructive button
-                destructive: "bg-red-600 hover:bg-red-700 text-white shadow-lg hover:shadow-xl focus:ring-red-500",
+                // Destructive button - Enhanced shadows
+                destructive: "bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white shadow-lg hover:shadow-xl focus:ring-red-500 dark:shadow-2xl dark:hover:shadow-red-500/25",
 
-                // Success button
-                success: "bg-green-600 hover:bg-green-700 text-white shadow-lg hover:shadow-xl focus:ring-green-500",
+                // Success button - Enhanced styling
+                success: "bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white shadow-lg hover:shadow-xl focus:ring-green-500 dark:shadow-2xl dark:hover:shadow-green-500/25",
             },
             size: {
-                sm: "h-8 px-3 text-sm",
-                md: "h-10 px-4 text-sm",
-                lg: "h-12 px-6 text-base",
-                xl: "h-14 px-8 text-lg",
+                sm: "h-8 px-3 text-sm font-medium",
+                md: "h-10 px-4 text-sm font-medium",
+                lg: "h-12 px-6 text-base font-semibold tracking-wide",
+                xl: "h-14 px-8 text-lg font-semibold tracking-wide",
             },
         },
         defaultVariants: {
