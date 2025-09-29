@@ -2,7 +2,7 @@ import { Request, Response, NextFunction } from "express";
 import { YoutubeTranscript } from "youtube-transcript";
 import axios from "axios";
 import { createTranscript } from "@src/services/transcriptService";
-import { createVideo } from "@src/services/videoService";
+import { findOrCreateVideo } from "@src/services/videoService";
 export const extractTranscript = async (
   req: Request,
   res: Response,
@@ -10,7 +10,7 @@ export const extractTranscript = async (
 ): Promise<void> => {
   try {
     const { videoId } = req.params;
-    const { userId } = req.body; 
+    const { userId } = req.body;
 
     if (!videoId || !userId) {
       res.status(400).json({ error: true, message: "Video ID and User ID are required" });
@@ -35,16 +35,25 @@ export const extractTranscript = async (
     const transcript = await YoutubeTranscript.fetchTranscript(videoId);
     const formattedTranscript = transcript.map((entry) => entry.text).join(" ");
     console.log("formattedTranscript:", formattedTranscript);
-  
-    const video = await createVideo({
+
+    const video = await findOrCreateVideo({
       url: `https://www.youtube.com/watch?v=${videoId}`,
       title,
       userId,
     });
 
-    const transcriptEntry = await createTranscript(video.id, formattedTranscript);
+    // Check if transcript already exists for this video
+    let transcriptEntry;
+    if (video.transcript && Array.isArray(video.transcript) && video.transcript.length > 0) {
+      // Use existing transcript
+      transcriptEntry = video.transcript[0];
+    } else {
+      // Create new transcript
+      transcriptEntry = await createTranscript(video.id, formattedTranscript);
+    }
 
-    res.status(200).json({      message: "Transcript extracted and saved successfully",
+    res.status(200).json({
+      message: "Transcript extracted and saved successfully",
       video,
       transcript: transcriptEntry,
     });
