@@ -16,7 +16,7 @@ interface FormErrors {
 
 export default function RegisterForm() {
     const router = useRouter();
-    const { data: session, status } = useSession();
+    const { status } = useSession();
     const [error, setError] = useState<string | null>(null);
     const [success, setSuccess] = useState<string | null>(null);
     const [isLoading, setIsLoading] = useState(false);
