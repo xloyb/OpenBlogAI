@@ -1,40 +1,45 @@
 "use client";
 
 import React from 'react';
-import { motion } from 'framer-motion';
+
 import { cva, type VariantProps } from 'class-variance-authority';
 import { cn } from '../../lib/utils';
 
-// Button variants using CVA for better type safety and consistency
+// Button variants using DaisyUI classes with enhanced styling
 const buttonVariants = cva(
-    // Base styles - Enhanced for login page aesthetic
-    "inline-flex items-center justify-center rounded-lg font-medium transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-white dark:focus:ring-offset-gray-800 disabled:opacity-50 disabled:pointer-events-none hover:scale-[1.02] active:scale-[0.98] shadow-sm hover:shadow-md",
+    "btn transition-all duration-300 shadow-lg hover:shadow-xl focus:outline-offset-2",
     {
         variants: {
             variant: {
-                // Primary button - Enhanced gradient like login page
-                primary: "bg-gradient-to-r from-primary-600 to-secondary-600 hover:from-primary-700 hover:to-secondary-700 text-white shadow-lg hover:shadow-xl focus:ring-primary-500 dark:shadow-2xl dark:hover:shadow-primary-500/25",
+                // Primary button - DaisyUI primary with gradient enhancement
+                primary: "btn-primary bg-gradient-to-r from-primary to-secondary hover:from-primary hover:to-secondary",
 
-                // Secondary button - Refined dark theme styling
-                secondary: "bg-gray-100 hover:bg-gray-200 text-gray-900 border border-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-gray-100 dark:border-gray-600 focus:ring-gray-500 dark:shadow-lg",
+                // Secondary button - DaisyUI secondary
+                secondary: "btn-secondary",
 
-                // Outline button - Login page inspired styling
-                outline: "border-2 border-gray-300 hover:border-primary-400 bg-transparent hover:bg-gray-50 text-gray-700 dark:border-gray-600 dark:hover:border-primary-400 dark:hover:bg-gray-700/50 dark:text-gray-300 focus:ring-primary-500 dark:shadow-lg dark:hover:shadow-primary-500/10",
+                // Outline button - DaisyUI outline primary
+                outline: "btn-outline btn-primary",
 
-                // Ghost button - Enhanced hover states
-                ghost: "hover:bg-gray-100 text-gray-700 dark:hover:bg-gray-700/50 dark:text-gray-300 focus:ring-gray-500 dark:hover:shadow-lg",
+                // Ghost button - DaisyUI ghost
+                ghost: "btn-ghost",
 
-                // Destructive button - Enhanced shadows
-                destructive: "bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white shadow-lg hover:shadow-xl focus:ring-red-500 dark:shadow-2xl dark:hover:shadow-red-500/25",
+                // Destructive button - DaisyUI error
+                destructive: "btn-error",
 
-                // Success button - Enhanced styling
-                success: "bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white shadow-lg hover:shadow-xl focus:ring-green-500 dark:shadow-2xl dark:hover:shadow-green-500/25",
+                // Success button - DaisyUI success
+                success: "btn-success",
+
+                // Neutral button - DaisyUI neutral
+                neutral: "btn-neutral",
+
+                // Accent button - DaisyUI accent
+                accent: "btn-accent",
             },
             size: {
-                sm: "h-8 px-3 text-sm font-medium",
-                md: "h-10 px-4 text-sm font-medium",
-                lg: "h-12 px-6 text-base font-semibold tracking-wide",
-                xl: "h-14 px-8 text-lg font-semibold tracking-wide",
+                sm: "btn-sm",
+                md: "btn-md",
+                lg: "btn-lg",
+                xl: "btn-lg text-lg px-8",
             },
         },
         defaultVariants: {
@@ -54,49 +59,23 @@ export interface ButtonProps
 
 export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     ({ className, variant, size, loading, leftIcon, rightIcon, children, disabled, ...props }, ref) => {
-        const MotionButton = motion.button;
-
         return (
-            <MotionButton
+            <button
                 className={cn(buttonVariants({ variant, size, className }))}
                 ref={ref}
                 disabled={disabled || loading}
-                whileHover={{ scale: disabled || loading ? 1 : 1.02 }}
-                whileTap={{ scale: disabled || loading ? 1 : 0.98 }}
-                transition={{ duration: 0.15, ease: "easeInOut" }}
                 {...props}
             >
                 {loading && (
-                    <svg
-                        className="animate-spin -ml-1 mr-2 h-4 w-4"
-                        xmlns="http://www.w3.org/2000/svg"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                    >
-                        <circle
-                            className="opacity-25"
-                            cx="12"
-                            cy="12"
-                            r="10"
-                            stroke="currentColor"
-                            strokeWidth="4"
-                        ></circle>
-                        <path
-                            className="opacity-75"
-                            fill="currentColor"
-                            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                        ></path>
-                    </svg>
+                    <span className="loading loading-spinner loading-sm mr-2"></span>
                 )}
-                {!loading && leftIcon && <span className="mr-2">{leftIcon}</span>}
+                {leftIcon && <span className="mr-2">{leftIcon}</span>}
                 {children}
-                {!loading && rightIcon && <span className="ml-2">{rightIcon}</span>}
-            </MotionButton>
+                {rightIcon && <span className="ml-2">{rightIcon}</span>}
+            </button>
         );
     }
-);
-
-Button.displayName = "Button";
+); Button.displayName = "Button";
 
 // Input component
 export interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
@@ -147,3 +126,62 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
 );
 
 Input.displayName = "Input";
+
+// Card component using DaisyUI
+export interface CardProps extends React.HTMLAttributes<HTMLDivElement> {
+    shadow?: 'sm' | 'md' | 'lg' | 'xl' | '2xl';
+    bordered?: boolean;
+    compact?: boolean;
+}
+
+export const Card = React.forwardRef<HTMLDivElement, CardProps>(
+    ({ className, shadow = 'lg', bordered = true, compact = false, children, ...props }, ref) => {
+        return (
+            <div
+                className={cn(
+                    "card bg-base-100",
+                    shadow === 'sm' && "shadow-sm",
+                    shadow === 'md' && "shadow-md",
+                    shadow === 'lg' && "shadow-lg",
+                    shadow === 'xl' && "shadow-xl",
+                    shadow === '2xl' && "shadow-2xl",
+                    bordered && "border border-base-300",
+                    compact && "card-compact",
+                    className
+                )}
+                ref={ref}
+                {...props}
+            >
+                {children}
+            </div>
+        );
+    }
+);
+Card.displayName = "Card";
+
+export const CardBody = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(
+    ({ className, ...props }, ref) => {
+        return (
+            <div className={cn("card-body", className)} ref={ref} {...props} />
+        );
+    }
+);
+CardBody.displayName = "CardBody";
+
+export const CardTitle = React.forwardRef<HTMLHeadingElement, React.HTMLAttributes<HTMLHeadingElement>>(
+    ({ className, ...props }, ref) => {
+        return (
+            <h2 className={cn("card-title", className)} ref={ref} {...props} />
+        );
+    }
+);
+CardTitle.displayName = "CardTitle";
+
+export const CardActions = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(
+    ({ className, ...props }, ref) => {
+        return (
+            <div className={cn("card-actions justify-end", className)} ref={ref} {...props} />
+        );
+    }
+);
+CardActions.displayName = "CardActions";

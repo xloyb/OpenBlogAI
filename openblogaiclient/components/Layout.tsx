@@ -12,18 +12,25 @@ export default function ProjectLayout({ children }: { children: React.ReactNode 
       exit={{ opacity: 0 }}
       transition={{ duration: 1.3 }}
     >
-      <div className="min-h-[100dvh] bg-gradient-to-br from-gray-50 via-white to-gray-100 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 grid md:grid-cols-[auto_1fr] grid-cols-[1fr]">
+      <div className="min-h-screen bg-base-200 flex">
+        {/* Sidebar */}
         <Sidebar />
-        <main className="p-4 md:p-8 pb-16 relative">
-          {/* Theme Toggle - Fixed Position */}
-          <div className="fixed top-4 right-4 z-50 md:top-6 md:right-6">
-            <ThemeToggle />
-          </div>
 
-          <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl shadow-xl p-6 md:p-8">
-            {children}
+        {/* Main Content */}
+        <main className="flex-1 p-4 md:p-8">
+          <div className="max-w-7xl mx-auto">
+            <div className="card bg-base-100 shadow-xl">
+              <div className="card-body p-6 md:p-8">
+                {children}
+              </div>
+            </div>
           </div>
         </main>
+
+        {/* Theme Toggle for Desktop */}
+        <div className="fixed top-6 right-6 z-50">
+          <ThemeToggle />
+        </div>
       </div>
     </motion.div>
   );

@@ -11,6 +11,7 @@
   "dependencies": {
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+    "daisyui": "^5.1.25",
     "framer-motion": "^12.6.2",
     "jwt-decode": "^4.0.0",
     "next": "15.2.4",

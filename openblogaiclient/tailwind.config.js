@@ -7,6 +7,52 @@ const config = {
     "./components/**/*.{js,ts,jsx,tsx,mdx}",
   ],
   darkMode: ["class", '[data-theme="dark"]'],
+  plugins: [require("daisyui")],
+  daisyui: {
+    themes: [
+      "light",
+      "dark",
+      {
+        lightCustom: {
+          primary: "#0ea5e9",
+          secondary: "#d946ef",
+          accent: "#06b6d4",
+          neutral: "#1f2937",
+          "base-100": "#ffffff",
+          "base-200": "#f9fafb",
+          "base-300": "#f3f4f6",
+          "base-content": "#1f2937",
+          info: "#3abff8",
+          success: "#36d399",
+          warning: "#fbbd23",
+          error: "#f87272",
+        },
+      },
+      {
+        darkCustom: {
+          primary: "#0ea5e9",
+          secondary: "#d946ef",
+          accent: "#06b6d4",
+          neutral: "#374151",
+          "base-100": "#1f2937",
+          "base-200": "#111827",
+          "base-300": "#0f172a",
+          "base-content": "#ffffff",
+          info: "#3abff8",
+          success: "#36d399",
+          warning: "#fbbd23",
+          error: "#f87272",
+        },
+      },
+    ],
+    darkTheme: "dark",
+    base: true,
+    styled: true,
+    utils: true,
+    prefix: "",
+    logs: true,
+    themeRoot: ":root",
+  },
   theme: {
     extend: {
       colors: {

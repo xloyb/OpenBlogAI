@@ -34,16 +34,23 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
         if (savedTheme && (savedTheme === 'light' || savedTheme === 'dark')) {
             setThemeState(savedTheme);
         } else {
-            // Default to light theme (as requested)
-            setThemeState('light');
+            // Check system preference if no saved theme
+            const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            setThemeState(systemPrefersDark ? 'dark' : 'light');
         }
         setMounted(true);
     }, []);
 
     useEffect(() => {
         if (mounted) {
-            // Apply theme to document
+            // Apply DaisyUI theme to document
             document.documentElement.setAttribute('data-theme', theme);
+            // Also add/remove dark class for custom components compatibility
+            if (theme === 'dark') {
+                document.documentElement.classList.add('dark');
+            } else {
+                document.documentElement.classList.remove('dark');
+            }
             // Save to localStorage
             localStorage.setItem('theme', theme);
         }

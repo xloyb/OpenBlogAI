@@ -60,7 +60,7 @@ export const Sidebar: React.FC = () => {
   return (
     <>
       <nav
-        className={`duration-300 ease-in-out overflow-hidden bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700
+        className={`duration-300 ease-in-out overflow-hidden bg-base-100 border-base-300
                     md:sticky md:top-0 md:h-screen md:border-r md:border-t-0 md:shadow-xl
                     fixed bottom-0 left-0 w-full h-[60px] border-t ${isOpen
             ? "md:w-[250px] md:px-4"
@@ -70,7 +70,7 @@ export const Sidebar: React.FC = () => {
         <div className="hidden md:block"> {/* Only show this div on medium screens and above (desktop) */}
           <div className="flex justify-between items-center mb-4">
             <span
-              className={`font-semibold mt-4 font-title inline-flex text-lg md:text-2xl text-gray-900 dark:text-white ${collapsed ? "!hidden" : "block"
+              className={`font-semibold mt-4 font-title inline-flex text-lg md:text-2xl text-base-content ${collapsed ? "!hidden" : "block"
                 }`}
             >
               OpenBlogAI
@@ -127,11 +127,11 @@ export const Sidebar: React.FC = () => {
           />
 
           {/* Theme Toggle */}
-          <li className="mt-auto pt-4 border-t border-gray-200 dark:border-gray-700">
+          <li className="mt-auto pt-4 border-t border-base-300">
             <div className="flex items-center justify-center p-3">
               {!collapsed && (
                 <div className="flex items-center justify-between w-full">
-                  <span className="text-sm text-gray-500 dark:text-gray-400">Theme</span>
+                  <span className="text-sm text-base-content/60">Theme</span>
                   <ThemeToggleCompact />
                 </div>
               )}
