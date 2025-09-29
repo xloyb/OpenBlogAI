@@ -34,12 +34,6 @@ export default function TranscriptExtraction({
 
     const isModerator = session?.user?.isModerator || session?.user?.isAdmin;
 
-    useEffect(() => {
-        if (videoId && extractionStatus === "idle") {
-            extractTranscript();
-        }
-    }, [videoId, extractionStatus]);
-
     const extractTranscript = async () => {
         if (!videoId || !session?.user?.id) return;
 
@@ -73,6 +67,12 @@ export default function TranscriptExtraction({
             setIsLoading(false);
         }
     };
+
+    useEffect(() => {
+        if (videoId && extractionStatus === "idle") {
+            extractTranscript();
+        }
+    }, [videoId, extractionStatus]);
 
     const handleModeratorAction = (action: "approved" | "rejected") => {
         setModeratorApproval(action);
