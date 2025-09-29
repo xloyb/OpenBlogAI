@@ -10,8 +10,44 @@ const config = {
   plugins: [require("daisyui")],
   daisyui: {
     themes: [
+      // Default themes
       "light",
       "dark",
+
+      // Professional themes
+      "corporate",
+      "business",
+      "luxury",
+      "wireframe",
+
+      // Colorful themes
+      "synthwave",
+      "retro",
+      "cyberpunk",
+      "valentine",
+      "halloween",
+      "garden",
+      "forest",
+      "aqua",
+      "lofi",
+      "pastel",
+      "fantasy",
+      "cmyk",
+      "autumn",
+      "acid",
+      "lemonade",
+
+      // Dark themes
+      "night",
+      "coffee",
+      "winter",
+      "dim",
+      "nord",
+      "sunset",
+      "dracula",
+      "black",
+
+      // Custom themes with your branding
       {
         lightCustom: {
           primary: "#0ea5e9",

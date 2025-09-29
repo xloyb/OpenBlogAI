@@ -1,6 +1,6 @@
 import type React from "react";
 import { JSX } from "react";
-import { FaChevronLeft, FaHome, FaTachometerAlt, FaPlus, FaClipboardList, FaCalendarAlt, FaUser } from "react-icons/fa";
+import { FaChevronLeft, FaHome, FaTachometerAlt, FaPlus, FaClipboardList, FaCalendarAlt, FaUser, FaPalette, FaBlog } from "react-icons/fa";
 import { IoLogOut } from "react-icons/io5";
 
 interface IconProps {
@@ -17,6 +17,8 @@ export const Icon: React.FC<IconProps> = ({ name, className = "" }) => {
     todo: <FaClipboardList className={className} />,
     calendar: <FaCalendarAlt className={className} />,
     profile: <FaUser className={className} />,
+    blog: <FaBlog className={className} />,
+    palette: <FaPalette className={className} />,
     logout: <IoLogOut  className={className} />,
 
   };

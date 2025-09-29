@@ -6,7 +6,8 @@ import { FiSun, FiMoon } from 'react-icons/fi';
 import { useTheme } from './ThemeProvider';
 
 export const ThemeToggle: React.FC = () => {
-    const { theme, toggleTheme } = useTheme();
+    const { isDarkTheme, toggleTheme, getThemeInfo, theme } = useTheme();
+    const currentThemeInfo = getThemeInfo(theme);
 
     return (
         <motion.button
@@ -15,13 +16,14 @@ export const ThemeToggle: React.FC = () => {
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             transition={{ duration: 0.2 }}
-            aria-label={`Switch to ${theme === 'light' ? 'dark' : 'light'} theme`}
+            aria-label={`Switch to ${isDarkTheme ? 'light' : 'dark'} theme`}
+            title={`Current: ${currentThemeInfo?.name || theme}`}
         >
             <motion.div
                 initial={false}
                 animate={{
-                    rotate: theme === 'dark' ? 180 : 0,
-                    opacity: theme === 'dark' ? 0 : 1,
+                    rotate: isDarkTheme ? 180 : 0,
+                    opacity: isDarkTheme ? 0 : 1,
                 }}
                 transition={{ duration: 0.3 }}
                 className="absolute inset-0 flex items-center justify-center"
@@ -32,8 +34,8 @@ export const ThemeToggle: React.FC = () => {
             <motion.div
                 initial={false}
                 animate={{
-                    rotate: theme === 'light' ? -180 : 0,
-                    opacity: theme === 'light' ? 0 : 1,
+                    rotate: !isDarkTheme ? -180 : 0,
+                    opacity: !isDarkTheme ? 0 : 1,
                 }}
                 transition={{ duration: 0.3 }}
                 className="absolute inset-0 flex items-center justify-center"
@@ -51,7 +53,8 @@ export const ThemeToggle: React.FC = () => {
 
 // Alternative compact version for smaller spaces
 export const ThemeToggleCompact: React.FC = () => {
-    const { theme, toggleTheme } = useTheme();
+    const { isDarkTheme, toggleTheme, getThemeInfo, theme } = useTheme();
+    const currentThemeInfo = getThemeInfo(theme);
 
     return (
         <motion.div
@@ -59,44 +62,47 @@ export const ThemeToggleCompact: React.FC = () => {
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
             onClick={toggleTheme}
+            title={`Current: ${currentThemeInfo?.name || theme}`}
         >
-            <FiSun className={`w-4 h-4 transition-colors ${theme === 'light' ? 'text-yellow-500' : 'text-gray-400'}`} />
+            <FiSun className={`w-4 h-4 transition-colors ${!isDarkTheme ? 'text-yellow-500' : 'text-base-content/40'}`} />
             <div className="relative w-8 h-5">
-                <div className="absolute inset-0 bg-gray-200 dark:bg-gray-700 rounded-full transition-colors"></div>
+                <div className="absolute inset-0 bg-base-300 rounded-full transition-colors"></div>
                 <motion.div
-                    className="absolute top-0.5 left-0.5 w-4 h-4 bg-white dark:bg-gray-900 rounded-full shadow-sm transition-all"
+                    className="absolute top-0.5 left-0.5 w-4 h-4 bg-base-100 rounded-full shadow-sm transition-all border border-base-300"
                     animate={{
-                        x: theme === 'dark' ? 12 : 0,
+                        x: isDarkTheme ? 12 : 0,
                     }}
                     transition={{ duration: 0.2, ease: "easeInOut" }}
                 ></motion.div>
             </div>
-            <FiMoon className={`w-4 h-4 transition-colors ${theme === 'dark' ? 'text-blue-400' : 'text-gray-400'}`} />
+            <FiMoon className={`w-4 h-4 transition-colors ${isDarkTheme ? 'text-blue-400' : 'text-base-content/40'}`} />
         </motion.div>
     );
 };
 
 // Dropdown menu item version
 export const ThemeToggleMenuItem: React.FC = () => {
-    const { theme, setTheme } = useTheme();
+    const { isDarkTheme, toggleTheme, getThemeInfo, theme } = useTheme();
+    const currentThemeInfo = getThemeInfo(theme);
 
     return (
         <div className="px-4 py-2">
-            <label className="flex cursor-pointer justify-between items-center">
+            <label className="flex cursor-pointer justify-between items-center" onClick={toggleTheme}>
                 <div className="flex items-center gap-2 text-sm">
-                    {theme === 'light' ? (
+                    {!isDarkTheme ? (
                         <FiSun className="w-4 h-4 text-yellow-500" />
                     ) : (
                         <FiMoon className="w-4 h-4 text-blue-400" />
                     )}
-                    <span className="text-gray-700 dark:text-gray-300">
-                        {theme === 'light' ? 'Light Theme' : 'Dark Theme'}
+                    <span className="text-base-content">
+                        {currentThemeInfo?.name || theme}
                     </span>
+                    <span className="text-xs opacity-60">({isDarkTheme ? 'Dark' : 'Light'})</span>
                 </div>
                 <div className="relative w-8 h-5">
-                    <div className="absolute inset-0 bg-gray-200 dark:bg-gray-700 rounded-full transition-colors"></div>
+                    <div className="absolute inset-0 bg-base-300 rounded-full transition-colors"></div>
                     <motion.div
-                        className="absolute top-0.5 left-0.5 w-4 h-4 bg-white dark:bg-gray-900 rounded-full shadow-sm transition-all"
+                        className="absolute top-0.5 left-0.5 w-4 h-4 bg-base-100 rounded-full shadow-sm transition-all border border-base-300"
                         animate={{
                             x: theme === 'dark' ? 12 : 0,
                         }}
