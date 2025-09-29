@@ -33,8 +33,17 @@ export const extractTranscript = async (
 
     // Fetch the transcript using the youtube-transcript package
     const transcript = await YoutubeTranscript.fetchTranscript(videoId);
-    const formattedTranscript = transcript.map((entry) => entry.text).join(" ");
+    const formattedTranscript = transcript.map((entry) => entry.text).join(" ").trim();
     console.log("formattedTranscript:", formattedTranscript);
+
+    // Validate transcript content
+    if (!formattedTranscript || formattedTranscript.length === 0) {
+      res.status(400).json({
+        error: true,
+        message: "No transcript content found for this video. The video might not have captions available."
+      });
+      return;
+    }
 
     const video = await findOrCreateVideo({
       url: `https://www.youtube.com/watch?v=${videoId}`,
@@ -42,11 +51,11 @@ export const extractTranscript = async (
       userId,
     });
 
-    // Check if transcript already exists for this video
+    // Check if transcript already exists for this video (1:1 relationship)
     let transcriptEntry;
-    if (video.transcript && Array.isArray(video.transcript) && video.transcript.length > 0) {
+    if (video.transcript) {
       // Use existing transcript
-      transcriptEntry = video.transcript[0];
+      transcriptEntry = video.transcript;
     } else {
       // Create new transcript
       transcriptEntry = await createTranscript(video.id, formattedTranscript);
@@ -58,6 +67,27 @@ export const extractTranscript = async (
       transcript: transcriptEntry,
     });
   } catch (error) {
+    console.error("Transcript extraction error:", error);
+
+    // Handle specific YouTube transcript errors
+    if (error instanceof Error) {
+      if (error.message.includes('Transcript is disabled') || error.message.includes('No transcript')) {
+        res.status(400).json({
+          error: true,
+          message: "Transcript is not available for this video. Please try a different video with captions enabled."
+        });
+        return;
+      }
+
+      if (error.message.includes('Video unavailable') || error.message.includes('Private video')) {
+        res.status(400).json({
+          error: true,
+          message: "Video is unavailable or private. Please check the video URL and try again."
+        });
+        return;
+      }
+    }
+
     next(error);
   }
 };
