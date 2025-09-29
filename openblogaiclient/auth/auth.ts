@@ -4,6 +4,9 @@ import { jwtDecode } from "jwt-decode";
 import type { JWT } from "next-auth/jwt";
 import type { Session, User } from "next-auth";
 
+// Token refresh queue to prevent race conditions
+let refreshPromise: Promise<JWT> | null = null;
+
 // Interface for decoded token payload
 interface AccessTokenPayload {
     userId: string;
@@ -34,8 +37,30 @@ function formatTokenAge(exp?: number): string {
     return `${hours}h ${minutes}m ${seconds}s remaining`;
 }
 
-// Function to refresh the access token
+// Function to refresh the access token with queue deduplication
 async function refreshAccessToken(token: JWT): Promise<JWT> {
+    // If there's already a refresh in progress, wait for it
+    if (refreshPromise) {
+        console.log("🔄 [Refresh Token] Using existing refresh promise");
+        return refreshPromise;
+    }
+
+    console.log("🔄 [Refresh Token] Starting new refresh process");
+
+    // Create new refresh promise
+    refreshPromise = performTokenRefresh(token);
+
+    try {
+        const result = await refreshPromise;
+        return result;
+    } finally {
+        // Clear the promise when done
+        refreshPromise = null;
+    }
+}
+
+// Actual token refresh implementation
+async function performTokenRefresh(token: JWT): Promise<JWT> {
     console.log("🔄 [Refresh Token] Attempting to refresh token");
     console.log("   Current Token Details:");
 
@@ -219,8 +244,8 @@ export const {
                 console.log("❌ [JWT Callback] Refresh failed, invalidating session");
                 return {
                     ...token,
-                    accessToken: "",  
-                    refreshToken: "", 
+                    accessToken: "",
+                    refreshToken: "",
                     accessTokenExpires: 0,
                     refreshTokenExpires: 0,
                     error: "RefreshAccessTokenError",
