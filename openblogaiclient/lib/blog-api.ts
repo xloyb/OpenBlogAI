@@ -2,21 +2,9 @@
 
 interface ApiResponse<T = unknown> {
     success?: boolean;
-         const response = await fetch(`${this.baseUrl}/api/blog/generate-blog`, {
-        method: 'POST',
-        headers: this.getHeaders(accessToken),
-        body: JSON.stringify({
-            model,
-            transcript,
-            userId
-        })
-    }); T;
-error ?: boolean;
-    messa        const response = await fetch(`${this.baseUrl}/api/blog/blogs/${id}`, {
-    method: 'PATCH',
-    headers: this.getHeaders(accessToken),
-    body: JSON.stringify(data)
-}); string;
+    data?: T;
+    error?: boolean;
+    message?: string;
 }
 
 interface Blog {
@@ -102,8 +90,8 @@ class BlogCreationAPI {
      * Extract transcript from YouTube video
      */
     async extractTranscript(videoId: string, userId: string, accessToken: string): Promise<TranscriptResponse> {
-        const response = await fetch(`${this.baseUrl}/transcript/${videoId}`, {
-            method: 'POST', // Changed to POST to send body data
+        const response = await fetch(`${this.baseUrl}/api/transcript/${videoId}`, {
+            method: 'POST',
             headers: this.getAuthHeaders(accessToken),
             body: JSON.stringify({ userId })
         });
@@ -120,7 +108,7 @@ class BlogCreationAPI {
         userId: string,
         accessToken: string
     ): Promise<BlogGenerationResponse> {
-        const response = await fetch(`${this.baseUrl}/blog/generate-blog`, {
+        const response = await fetch(`${this.baseUrl}/api/blog/generate-blog`, {
             method: 'POST',
             headers: this.getAuthHeaders(accessToken),
             body: JSON.stringify({
@@ -165,7 +153,7 @@ class BlogCreationAPI {
         data: BlogUpdateData,
         accessToken: string
     ): Promise<Blog> {
-        const response = await fetch(`${this.baseUrl}/blog/blogs/${id}`, {
+        const response = await fetch(`${this.baseUrl}/api/blog/blogs/${id}`, {
             method: 'PATCH',
             headers: this.getAuthHeaders(accessToken),
             body: JSON.stringify(data)
