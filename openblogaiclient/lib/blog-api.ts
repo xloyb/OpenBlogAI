@@ -1,10 +1,38 @@
 // API utilities for blog creation workflow
 
-interface ApiResponse<T = any> {
+interface ApiResponse<T = unknown> {
     success?: boolean;
     data?: T;
     error?: boolean;
     message?: string;
+}
+
+interface Blog {
+    id: number;
+    subject: string;
+    content: string;
+    visible: number;
+    userId: string;
+    videoId?: number;
+    createdAt: string;
+    updatedAt: string;
+    user?: {
+        id: string;
+        name: string;
+        email: string;
+    };
+    video?: {
+        id: number;
+        title: string;
+        url: string;
+        uploadedAt: string;
+    };
+}
+
+interface BlogUpdateData {
+    subject?: string;
+    content?: string;
+    visible?: number;
 }
 
 interface TranscriptResponse {
@@ -96,25 +124,25 @@ class BlogCreationAPI {
     /**
      * Get all blogs
      */
-    async getBlogs(accessToken: string): Promise<any[]> {
+    async getBlogs(accessToken: string): Promise<Blog[]> {
         const response = await fetch(`${this.baseUrl}/blog/blogs`, {
             method: 'GET',
             headers: this.getAuthHeaders(accessToken)
         });
 
-        return this.handleResponse<any[]>(response);
+        return this.handleResponse<Blog[]>(response);
     }
 
     /**
      * Get single blog by ID
      */
-    async getBlog(id: number, accessToken?: string): Promise<any> {
+    async getBlog(id: number, accessToken?: string): Promise<Blog> {
         const response = await fetch(`${this.baseUrl}/blog/blogs/${id}`, {
             method: 'GET',
             headers: this.getAuthHeaders(accessToken)
         });
 
-        return this.handleResponse<any>(response);
+        return this.handleResponse<Blog>(response);
     }
 
     /**
@@ -122,16 +150,16 @@ class BlogCreationAPI {
      */
     async updateBlog(
         id: number,
-        data: { subject?: string; content?: string; visible?: number },
+        data: BlogUpdateData,
         accessToken: string
-    ): Promise<any> {
+    ): Promise<Blog> {
         const response = await fetch(`${this.baseUrl}/blog/blogs/${id}`, {
             method: 'PATCH',
             headers: this.getAuthHeaders(accessToken),
             body: JSON.stringify(data)
         });
 
-        return this.handleResponse<any>(response);
+        return this.handleResponse<Blog>(response);
     }
 
     /**
@@ -156,5 +184,7 @@ export const blogAPI = new BlogCreationAPI();
 export type {
     ApiResponse,
     TranscriptResponse,
-    BlogGenerationResponse
+    BlogGenerationResponse,
+    Blog,
+    BlogUpdateData
 };
