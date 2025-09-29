@@ -1,31 +1,12 @@
 
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useSession } from "next-auth/react";
 import { motion } from "framer-motion";
 import { FiPlus, FiEye, FiEdit, FiTrash2, FiCalendar, FiUser, FiFileText } from "react-icons/fi";
 import Link from "next/link";
-import { blogAPI } from "../../../lib/blog-api";
-
-interface Blog {
-  id: number;
-  subject: string;
-  content: string;
-  visible: number;
-  userId: string;
-  videoId?: number;
-  createdAt: string;
-  updatedAt: string;
-  user?: {
-    name: string;
-    email: string;
-  };
-  video?: {
-    title: string;
-    url: string;
-  };
-}
+import { blogAPI, type Blog } from "../../../lib/blog-api";
 
 export default function BlogsPage() {
   const { data: session } = useSession();
@@ -33,23 +14,23 @@ export default function BlogsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  useEffect(() => {
-    if (session?.accessToken) {
-      fetchBlogs();
-    }
-  }, [session]);
+  const fetchBlogs = useCallback(async () => {
+    if (!session?.accessToken) return;
 
-  const fetchBlogs = async () => {
     try {
       setLoading(true);
-      const fetchedBlogs = await blogAPI.getBlogs(session?.accessToken as string);
+      const fetchedBlogs = await blogAPI.getBlogs(session.accessToken);
       setBlogs(fetchedBlogs);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to fetch blogs");
     } finally {
       setLoading(false);
     }
-  };
+  }, [session?.accessToken]);
+
+  useEffect(() => {
+    fetchBlogs();
+  }, [fetchBlogs]);
 
   const getWordCount = (content: string) => {
     return content.split(/\s+/).filter(word => word.length > 0).length;
