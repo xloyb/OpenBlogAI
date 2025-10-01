@@ -9,6 +9,9 @@ const router = Router();
 router.get('/models', getAvailableModels);
 // Route to generate a blog from a transcript
 router.post("/generate-blog", generateBlog as any);
+// Public route to get all visible blogs without authentication
+router.get('/public/blogs', getAllBlogs);
+// Protected route to get user's blogs
 router.get('/blogs', authenticateJWT, getAllBlogs);
 router.get('/blogs/:id', getSingleBlog);
 router.patch('/blogs/:id', updateExistingBlog);
