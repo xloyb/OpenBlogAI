@@ -19,10 +19,15 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen: externalIsOpen, onTogg
 
   // Load sidebar state from local storage on mount and handle responsive behavior
   useEffect(() => {
-    // Only handle state if we're using internal state (not controlled externally)
+    // Always load collapsed state from localStorage regardless of external control
+    const savedCollapsedState = localStorage.getItem("sidebarCollapsed");
+    if (savedCollapsedState !== null) {
+      setCollapsed(savedCollapsedState === "true");
+    }
+
+    // Only handle open/closed state if we're using internal state (not controlled externally)
     if (externalIsOpen === undefined) {
       const savedState = localStorage.getItem("sidebarOpen");
-      const savedCollapsedState = localStorage.getItem("sidebarCollapsed");
       console.log(
         "Loaded sidebar state from local storage:",
         savedState,
@@ -31,9 +36,6 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen: externalIsOpen, onTogg
 
       if (savedState !== null) {
         setInternalIsOpen(savedState === "true");
-      }
-      if (savedCollapsedState !== null) {
-        setCollapsed(savedCollapsedState === "true");
       }
 
       // Handle responsive behavior
@@ -53,12 +55,6 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen: externalIsOpen, onTogg
       // Add resize listener
       window.addEventListener('resize', handleResize);
       return () => window.removeEventListener('resize', handleResize);
-    } else {
-      // Load collapsed state from localStorage for externally controlled sidebar
-      const savedCollapsedState = localStorage.getItem("sidebarCollapsed");
-      if (savedCollapsedState !== null) {
-        setCollapsed(savedCollapsedState === "true");
-      }
     }
   }, [externalIsOpen]);
 
@@ -78,27 +74,29 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen: externalIsOpen, onTogg
     }
   }
 
-  // Toggle sidebar collapsed state (desktop) or open/closed (mobile)
+  // Toggle sidebar collapsed state (desktop only)
+  const toggleCollapse = () => {
+    // Always toggle collapsed state on desktop regardless of external control
+    const newCollapsedState = !collapsed;
+    console.log("Before toggle - collapsed:", collapsed, "new state will be:", newCollapsedState);
+    setCollapsed(newCollapsedState);
+    localStorage.setItem("sidebarCollapsed", newCollapsedState.toString());
+    console.log("Desktop: Toggled sidebar collapsed to:", newCollapsedState);
+  };
+
+  // Toggle sidebar open/closed (mobile only)
   const toggleSidebar = () => {
-    // If we have external control, use the external toggle
+    // If we have external control, use the external toggle for mobile
     if (onToggle) {
       onToggle();
       return;
     }
 
-    // On mobile, toggle open/closed
-    if (window.innerWidth < 768) {
-      const newOpenState = !isOpen;
-      setInternalIsOpen(newOpenState);
-      localStorage.setItem("sidebarOpen", newOpenState.toString());
-      console.log("Mobile: Toggled sidebar open:", newOpenState);
-    } else {
-      // On desktop, toggle collapsed state
-      const newCollapsedState = !collapsed;
-      setCollapsed(newCollapsedState);
-      localStorage.setItem("sidebarCollapsed", newCollapsedState.toString());
-      console.log("Desktop: Toggled sidebar collapsed:", newCollapsedState);
-    }
+    // Fallback for internal state management
+    const newOpenState = !isOpen;
+    setInternalIsOpen(newOpenState);
+    localStorage.setItem("sidebarOpen", newOpenState.toString());
+    console.log("Mobile: Toggled sidebar open:", newOpenState);
   };
 
 
@@ -114,10 +112,10 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen: externalIsOpen, onTogg
       )}
 
       <nav
-        className={`duration-300 ease-in-out bg-gradient-to-b from-white via-slate-50 to-blue-50 border-r border-slate-200 shadow-2xl z-50
+        className={`transition-all duration-300 ease-in-out bg-gradient-to-b from-white via-slate-50 to-blue-50 border-r border-slate-200 shadow-2xl z-50
                     md:sticky md:top-0 md:h-screen md:flex md:flex-col
-                    fixed left-0 top-0 h-full transform transition-transform ${isOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'
-          } ${collapsed && isOpen ? 'md:w-20' : isOpen ? 'md:w-64 w-64' : 'md:w-20'
+                    fixed left-0 top-0 h-full transform ${isOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'
+          } ${collapsed ? 'md:w-20' : 'md:w-64'} ${isOpen ? 'w-64' : 'w-0 md:w-auto'
           }`}
       >
         {/* Desktop Header */}
@@ -128,7 +126,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen: externalIsOpen, onTogg
               OpenBlogAI
             </h1>
           </div>
-          <ToggleButton onClick={toggleSidebar} isOpen={!collapsed} />
+          <ToggleButton onClick={toggleCollapse} isOpen={!collapsed} />
         </div>
 
         {/* Mobile Header */}
