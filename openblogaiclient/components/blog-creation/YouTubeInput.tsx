@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 import { motion } from "framer-motion";
 import { FiYoutube, FiPlay, FiCheckCircle, FiArrowRight } from 'react-icons/fi';
 
@@ -124,10 +125,10 @@ export default function YouTubeInput({ onVideoData, onNext, isLoading, setIsLoad
                             type="url"
                             placeholder="https://www.youtube.com/watch?v=dQw4w9WgXcQ"
                             className={`w-full px-6 py-4 text-lg border-2 rounded-2xl transition-all duration-300 focus:outline-none focus:ring-4 pr-16 ${error
-                                    ? 'border-red-300 bg-red-50 focus:border-red-500 focus:ring-red-200'
-                                    : videoPreview
-                                        ? 'border-emerald-300 bg-emerald-50 focus:border-emerald-500 focus:ring-emerald-200'
-                                        : 'border-slate-200 bg-white focus:border-indigo-500 focus:ring-indigo-200'
+                                ? 'border-red-300 bg-red-50 focus:border-red-500 focus:ring-red-200'
+                                : videoPreview
+                                    ? 'border-emerald-300 bg-emerald-50 focus:border-emerald-500 focus:ring-emerald-200'
+                                    : 'border-slate-200 bg-white focus:border-indigo-500 focus:ring-indigo-200'
                                 }`}
                             value={url}
                             onChange={handleUrlChange}
@@ -203,9 +204,11 @@ export default function YouTubeInput({ onVideoData, onNext, isLoading, setIsLoad
                     <div className="flex gap-6">
                         <div className="flex-shrink-0">
                             <div className="relative group overflow-hidden rounded-2xl shadow-lg">
-                                <img
+                                <Image
                                     src={videoPreview.thumbnail}
                                     alt="Video thumbnail"
+                                    width={160}
+                                    height={112}
                                     className="w-40 h-28 object-cover transition-transform duration-300 group-hover:scale-105"
                                     onError={(e) => {
                                         const target = e.target as HTMLImageElement;
@@ -257,8 +260,8 @@ export default function YouTubeInput({ onVideoData, onNext, isLoading, setIsLoad
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
                     className={`px-8 py-4 rounded-2xl text-lg font-bold shadow-lg transition-all duration-300 flex items-center gap-3 ${videoPreview && !isLoading
-                            ? 'bg-gradient-to-r from-emerald-500 to-indigo-600 text-white hover:shadow-xl hover:from-emerald-600 hover:to-indigo-700'
-                            : 'bg-gray-200 text-gray-500 cursor-not-allowed'
+                        ? 'bg-gradient-to-r from-emerald-500 to-indigo-600 text-white hover:shadow-xl hover:from-emerald-600 hover:to-indigo-700'
+                        : 'bg-gray-200 text-gray-500 cursor-not-allowed'
                         }`}
                 >
                     <span>Extract Transcript</span>
