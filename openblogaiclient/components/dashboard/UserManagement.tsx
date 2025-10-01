@@ -1,14 +1,14 @@
 "use client";
 
 import { useState } from "react";
-import { motion } from "framer-motion";
-import { FiEdit3, FiTrash2, FiUserPlus, FiSearch } from "react-icons/fi";
+import { motion, AnimatePresence } from "framer-motion";
+import { FiEdit3, FiTrash2, FiUserPlus, FiSearch, FiFilter, FiMoreVertical, FiMail, FiCalendar, FiShield } from "react-icons/fi";
 import { User } from "../../lib/dashboard-api";
 
 interface UserManagementProps {
     users: User[];
     onUsersChange: (users: User[]) => void;
-    onRefresh: () => void;
+    onRefresh?: () => void;
 }
 
 export default function UserManagement({ users, onUsersChange }: UserManagementProps) {
@@ -16,6 +16,9 @@ export default function UserManagement({ users, onUsersChange }: UserManagementP
     const [roleFilter, setRoleFilter] = useState<string>("all");
     const [statusFilter, setStatusFilter] = useState<string>("all");
     const [editingUser, setEditingUser] = useState<User | null>(null);
+    const [showFilters, setShowFilters] = useState(false);
+    const [selectedUsers, setSelectedUsers] = useState<string[]>([]);
+    const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
 
     const filteredUsers = users.filter(user => {
         const matchesSearch = user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
