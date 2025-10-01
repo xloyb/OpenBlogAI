@@ -165,7 +165,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen: externalIsOpen, onTogg
               collapsed={collapsed}
             />
             <SidebarItem
-              href="/blogs"
+              href="/myblogs"
               icon="blog"
               text="My Blogs"
               collapsed={collapsed}
