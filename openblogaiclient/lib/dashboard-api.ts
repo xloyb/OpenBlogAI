@@ -23,7 +23,31 @@ const getAuthHeaders = async () => {
 const handleResponse = async (response: Response) => {
     if (!response.ok) {
         const errorData = await response.json().catch(() => ({ message: 'Unknown error' }));
-        throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+        const error = {
+            response: {
+                status: response.status,
+                data: errorData
+            },
+            message: errorData.message || `HTTP error! status: ${response.status}`
+        };
+
+        // Handle specific error codes
+        if (response.status === 401) {
+            // Redirect to login or 401 page
+            if (typeof window !== 'undefined') {
+                window.location.href = '/401';
+            }
+        } else if (response.status === 404) {
+            if (typeof window !== 'undefined') {
+                window.location.href = '/404';
+            }
+        } else if (response.status >= 500) {
+            if (typeof window !== 'undefined') {
+                window.location.href = '/500';
+            }
+        }
+
+        throw error;
     }
     return response.json();
 };
