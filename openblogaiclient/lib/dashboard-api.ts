@@ -41,6 +41,7 @@ export interface User {
     isAdmin: boolean;
     isModerator: boolean;
     isBlocked: boolean;
+    isVerifiedPoster: boolean;
 }
 
 export interface UserStats {
@@ -122,6 +123,7 @@ export const dashboardAPI = {
         password: string;
         isAdmin?: boolean;
         isModerator?: boolean;
+        isVerifiedPoster?: boolean;
     }): Promise<User> {
         const response = await fetch(`${API_BASE_URL}/api/users`, {
             method: 'POST',
@@ -140,6 +142,7 @@ export const dashboardAPI = {
         isAdmin?: boolean;
         isModerator?: boolean;
         isBlocked?: boolean;
+        isVerifiedPoster?: boolean;
     }): Promise<User> {
         const response = await fetch(`${API_BASE_URL}/api/users/${userId}`, {
             method: 'PUT',

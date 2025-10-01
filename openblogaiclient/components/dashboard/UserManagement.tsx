@@ -2,8 +2,8 @@
 
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { FiEdit3, FiTrash2, FiUserPlus, FiSearch, FiFilter, FiMail, FiCalendar, FiShield, FiUsers, FiX } from "react-icons/fi";
-import { User } from "../../lib/dashboard-api";
+import { FiEdit3, FiTrash2, FiUserPlus, FiSearch, FiFilter, FiMail, FiCalendar, FiShield, FiUsers, FiX, FiStar } from "react-icons/fi";
+import { User, dashboardAPI } from "../../lib/dashboard-api";
 
 interface UserManagementProps {
     users: User[];
@@ -19,6 +19,9 @@ export default function UserManagement({ users, onUsersChange }: UserManagementP
     const [showFilters, setShowFilters] = useState(false);
     const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
     const [showAddUserModal, setShowAddUserModal] = useState(false);
+    const [showEditUserModal, setShowEditUserModal] = useState(false);
+    const [loading, setLoading] = useState(false);
+    const [editingUser, setEditingUser] = useState<User | null>(null);
     const [newUser, setNewUser] = useState({
         name: '',
         email: '',
@@ -40,45 +43,85 @@ export default function UserManagement({ users, onUsersChange }: UserManagementP
 
     const handleDeleteUser = async (userId: string) => {
         if (confirm("Are you sure you want to delete this user?")) {
+            setLoading(true);
             try {
+                await dashboardAPI.deleteUser(userId);
                 const updatedUsers = users.filter(user => user.id !== userId);
                 onUsersChange(updatedUsers);
+                alert("User deleted successfully!");
             } catch (error) {
                 console.error("Failed to delete user:", error);
+                alert("Failed to delete user. Please try again.");
+            } finally {
+                setLoading(false);
             }
         }
     };
 
     const handleEditUser = (user: User) => {
-        // TODO: Implement user editing functionality
-        console.log('Edit user:', user);
+        setEditingUser(user);
+        setShowEditUserModal(true);
     };
 
-    const handleAddUser = async () => {
+    const handleAddUser = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setLoading(true);
         try {
-            // Here you would typically call an API to create the user
-            const userToAdd: User = {
-                id: Date.now().toString(), // Temporary ID generation
+            const userData = {
                 name: newUser.name,
                 email: newUser.email,
-                role: newUser.role,
-                isActive: newUser.isActive,
-                createdAt: new Date().toISOString(),
-                updatedAt: new Date().toISOString(),
-                blogCount: 0,
-                videoCount: 0,
+                password: newUser.password,
                 isAdmin: newUser.role === 'admin',
                 isModerator: newUser.role === 'moderator',
-                isBlocked: false
+                isVerifiedPoster: false // Default to false for new users
             };
 
+            const createdUser = await dashboardAPI.createUser(userData);
+
             // Add to the existing users list
-            onUsersChange([...users, userToAdd]);
+            onUsersChange([...users, createdUser]);
 
             // Reset form and close modal
             resetForm();
+            alert("User created successfully!");
         } catch (error) {
             console.error("Failed to add user:", error);
+            alert("Failed to create user. Please try again.");
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleUpdateUser = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!editingUser) return;
+
+        setLoading(true);
+        try {
+            const updateData = {
+                name: editingUser.name,
+                email: editingUser.email,
+                isAdmin: editingUser.role === 'admin',
+                isModerator: editingUser.role === 'moderator',
+                isBlocked: editingUser.isBlocked,
+                isVerifiedPoster: editingUser.isVerifiedPoster
+            };
+
+            const updatedUser = await dashboardAPI.updateUser(editingUser.id, updateData);
+
+            // Update the user in the list
+            const updatedUsers = users.map(user =>
+                user.id === editingUser.id ? updatedUser : user
+            );
+            onUsersChange(updatedUsers);
+
+            resetEditForm();
+            alert("User updated successfully!");
+        } catch (error) {
+            console.error("Failed to update user:", error);
+            alert("Failed to update user. Please try again.");
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -91,6 +134,11 @@ export default function UserManagement({ users, onUsersChange }: UserManagementP
             isActive: true
         });
         setShowAddUserModal(false);
+    };
+
+    const resetEditForm = () => {
+        setEditingUser(null);
+        setShowEditUserModal(false);
     };
 
     return (
@@ -242,7 +290,8 @@ export default function UserManagement({ users, onUsersChange }: UserManagementP
                                                 whileHover={{ scale: 1.1 }}
                                                 whileTap={{ scale: 0.9 }}
                                                 onClick={() => handleEditUser(user)}
-                                                className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                                                disabled={loading}
+                                                className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors disabled:opacity-50"
                                             >
                                                 <FiEdit3 size={16} />
                                             </motion.button>
@@ -250,7 +299,8 @@ export default function UserManagement({ users, onUsersChange }: UserManagementP
                                                 whileHover={{ scale: 1.1 }}
                                                 whileTap={{ scale: 0.9 }}
                                                 onClick={() => handleDeleteUser(user.id)}
-                                                className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                                                disabled={loading}
+                                                className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors disabled:opacity-50"
                                             >
                                                 <FiTrash2 size={16} />
                                             </motion.button>
@@ -269,17 +319,31 @@ export default function UserManagement({ users, onUsersChange }: UserManagementP
                                             <FiCalendar className="mr-2" size={14} />
                                             {new Date(user.createdAt).toLocaleDateString()}
                                         </div>
+                                        {user.isVerifiedPoster && (
+                                            <div className="flex items-center text-amber-600 text-sm mt-1">
+                                                <FiStar className="mr-2" size={14} />
+                                                Verified Poster
+                                            </div>
+                                        )}
                                     </div>
 
                                     <div className="flex items-center justify-between pt-3 border-t border-slate-200/50">
-                                        <div className="flex items-center gap-2">
-                                            <FiShield size={14} className="text-slate-400" />
-                                            <span className={`px-3 py-1 rounded-full text-xs font-semibold ${user.role === 'admin' ? 'bg-gradient-to-r from-purple-100 to-pink-100 text-purple-700' :
-                                                user.role === 'moderator' ? 'bg-gradient-to-r from-blue-100 to-cyan-100 text-blue-700' :
-                                                    'bg-gradient-to-r from-green-100 to-emerald-100 text-green-700'
-                                                }`}>
-                                                {user.role.charAt(0).toUpperCase() + user.role.slice(1)}
-                                            </span>
+                                        <div className="flex items-center gap-2 flex-wrap">
+                                            <div className="flex items-center gap-2">
+                                                <FiShield size={14} className="text-slate-400" />
+                                                <span className={`px-3 py-1 rounded-full text-xs font-semibold ${user.role === 'admin' ? 'bg-gradient-to-r from-purple-100 to-pink-100 text-purple-700' :
+                                                    user.role === 'moderator' ? 'bg-gradient-to-r from-blue-100 to-cyan-100 text-blue-700' :
+                                                        'bg-gradient-to-r from-green-100 to-emerald-100 text-green-700'
+                                                    }`}>
+                                                    {user.role.charAt(0).toUpperCase() + user.role.slice(1)}
+                                                </span>
+                                            </div>
+                                            {user.isVerifiedPoster && (
+                                                <span className="px-2 py-1 bg-gradient-to-r from-amber-100 to-yellow-100 text-amber-700 rounded-full text-xs font-semibold flex items-center gap-1">
+                                                    <FiStar size={10} />
+                                                    Verified
+                                                </span>
+                                            )}
                                         </div>
 
                                         <div className={`flex items-center gap-1 text-xs font-medium ${user.isActive ? 'text-green-600' : 'text-red-500'
@@ -328,12 +392,20 @@ export default function UserManagement({ users, onUsersChange }: UserManagementP
                                         <p className="text-sm text-slate-500">{user.email}</p>
                                     </div>
 
-                                    <span className={`px-3 py-1 rounded-full text-xs font-semibold ${user.role === 'admin' ? 'bg-gradient-to-r from-purple-100 to-pink-100 text-purple-700' :
-                                        user.role === 'moderator' ? 'bg-gradient-to-r from-blue-100 to-cyan-100 text-blue-700' :
-                                            'bg-gradient-to-r from-green-100 to-emerald-100 text-green-700'
-                                        }`}>
-                                        {user.role.charAt(0).toUpperCase() + user.role.slice(1)}
-                                    </span>
+                                    <div className="flex items-center gap-2">
+                                        <span className={`px-3 py-1 rounded-full text-xs font-semibold ${user.role === 'admin' ? 'bg-gradient-to-r from-purple-100 to-pink-100 text-purple-700' :
+                                            user.role === 'moderator' ? 'bg-gradient-to-r from-blue-100 to-cyan-100 text-blue-700' :
+                                                'bg-gradient-to-r from-green-100 to-emerald-100 text-green-700'
+                                            }`}>
+                                            {user.role.charAt(0).toUpperCase() + user.role.slice(1)}
+                                        </span>
+                                        {user.isVerifiedPoster && (
+                                            <span className="px-2 py-1 bg-gradient-to-r from-amber-100 to-yellow-100 text-amber-700 rounded-full text-xs font-semibold flex items-center gap-1">
+                                                <FiStar size={10} />
+                                                Verified
+                                            </span>
+                                        )}
+                                    </div>
                                 </div>
 
                                 <div className="flex items-center gap-4">
@@ -346,7 +418,8 @@ export default function UserManagement({ users, onUsersChange }: UserManagementP
                                             whileHover={{ scale: 1.1 }}
                                             whileTap={{ scale: 0.9 }}
                                             onClick={() => handleEditUser(user)}
-                                            className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                                            disabled={loading}
+                                            className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors disabled:opacity-50"
                                         >
                                             <FiEdit3 size={16} />
                                         </motion.button>
@@ -354,7 +427,8 @@ export default function UserManagement({ users, onUsersChange }: UserManagementP
                                             whileHover={{ scale: 1.1 }}
                                             whileTap={{ scale: 0.9 }}
                                             onClick={() => handleDeleteUser(user.id)}
-                                            className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                                            disabled={loading}
+                                            className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors disabled:opacity-50"
                                         >
                                             <FiTrash2 size={16} />
                                         </motion.button>
@@ -475,7 +549,8 @@ export default function UserManagement({ users, onUsersChange }: UserManagementP
                                     whileTap={{ scale: 0.98 }}
                                     type="button"
                                     onClick={() => setShowAddUserModal(false)}
-                                    className="flex-1 px-4 py-3 border border-gray-200 text-gray-700 rounded-xl hover:bg-gray-50 transition-all duration-200 font-medium"
+                                    disabled={loading}
+                                    className="flex-1 px-4 py-3 border border-gray-200 text-gray-700 rounded-xl hover:bg-gray-50 transition-all duration-200 font-medium disabled:opacity-50"
                                 >
                                     Cancel
                                 </motion.button>
@@ -483,9 +558,135 @@ export default function UserManagement({ users, onUsersChange }: UserManagementP
                                     whileHover={{ scale: 1.02, boxShadow: "0 8px 20px rgba(59, 130, 246, 0.3)" }}
                                     whileTap={{ scale: 0.98 }}
                                     type="submit"
-                                    className="flex-1 px-4 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl hover:from-blue-700 hover:to-indigo-700 transition-all duration-200 font-medium shadow-lg"
+                                    disabled={loading}
+                                    className="flex-1 px-4 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl hover:from-blue-700 hover:to-indigo-700 transition-all duration-200 font-medium shadow-lg disabled:opacity-50"
                                 >
-                                    Add User
+                                    {loading ? 'Creating...' : 'Add User'}
+                                </motion.button>
+                            </div>
+                        </form>
+                    </motion.div>
+                </motion.div>
+            )}
+
+            {/* Edit User Modal */}
+            {showEditUserModal && editingUser && (
+                <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4"
+                    onClick={() => setShowEditUserModal(false)}
+                >
+                    <motion.div
+                        initial={{ scale: 0.9, opacity: 0, y: 20 }}
+                        animate={{ scale: 1, opacity: 1, y: 0 }}
+                        exit={{ scale: 0.9, opacity: 0, y: 20 }}
+                        onClick={(e) => e.stopPropagation()}
+                        className="bg-white/95 backdrop-blur-xl rounded-2xl p-8 max-w-md w-full border border-white/20 shadow-2xl"
+                    >
+                        <div className="flex justify-between items-center mb-6">
+                            <h3 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+                                Edit User
+                            </h3>
+                            <motion.button
+                                whileHover={{ scale: 1.1, rotate: 90 }}
+                                whileTap={{ scale: 0.9 }}
+                                onClick={() => setShowEditUserModal(false)}
+                                className="text-gray-400 hover:text-gray-600 transition-colors p-1"
+                            >
+                                <FiX size={24} />
+                            </motion.button>
+                        </div>
+
+                        <form onSubmit={handleUpdateUser} className="space-y-4">
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-2">
+                                    Full Name
+                                </label>
+                                <input
+                                    type="text"
+                                    value={editingUser.name}
+                                    onChange={(e) => setEditingUser({ ...editingUser, name: e.target.value })}
+                                    className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-white/70 backdrop-blur-sm"
+                                    placeholder="Enter full name"
+                                    required
+                                />
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-2">
+                                    Email Address
+                                </label>
+                                <input
+                                    type="email"
+                                    value={editingUser.email}
+                                    onChange={(e) => setEditingUser({ ...editingUser, email: e.target.value })}
+                                    className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-white/70 backdrop-blur-sm"
+                                    placeholder="Enter email address"
+                                    required
+                                />
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-2">
+                                    Role
+                                </label>
+                                <select
+                                    value={editingUser.role}
+                                    onChange={(e) => setEditingUser({ ...editingUser, role: e.target.value as 'user' | 'moderator' | 'admin' })}
+                                    className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-white/70 backdrop-blur-sm"
+                                    required
+                                >
+                                    <option value="user">User</option>
+                                    <option value="moderator">Moderator</option>
+                                    <option value="admin">Admin</option>
+                                </select>
+                            </div>
+
+                            <div className="space-y-3">
+                                <label className="flex items-center gap-2">
+                                    <input
+                                        type="checkbox"
+                                        checked={!editingUser.isBlocked}
+                                        onChange={(e) => setEditingUser({ ...editingUser, isBlocked: !e.target.checked })}
+                                        className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                                    />
+                                    <span className="text-sm font-medium text-gray-700">User is active</span>
+                                </label>
+                                <label className="flex items-center gap-2">
+                                    <input
+                                        type="checkbox"
+                                        checked={editingUser.isVerifiedPoster}
+                                        onChange={(e) => setEditingUser({ ...editingUser, isVerifiedPoster: e.target.checked })}
+                                        className="rounded border-gray-300 text-amber-600 focus:ring-amber-500"
+                                    />
+                                    <span className="text-sm font-medium text-gray-700 flex items-center gap-1">
+                                        <FiStar size={14} className="text-amber-600" />
+                                        Verified Poster
+                                    </span>
+                                </label>
+                            </div>
+
+                            <div className="flex gap-3 pt-4">
+                                <motion.button
+                                    whileHover={{ scale: 1.02 }}
+                                    whileTap={{ scale: 0.98 }}
+                                    type="button"
+                                    onClick={() => setShowEditUserModal(false)}
+                                    className="flex-1 px-4 py-3 border border-gray-200 text-gray-700 rounded-xl hover:bg-gray-50 transition-all duration-200 font-medium"
+                                    disabled={loading}
+                                >
+                                    Cancel
+                                </motion.button>
+                                <motion.button
+                                    whileHover={{ scale: 1.02, boxShadow: "0 8px 20px rgba(59, 130, 246, 0.3)" }}
+                                    whileTap={{ scale: 0.98 }}
+                                    type="submit"
+                                    disabled={loading}
+                                    className="flex-1 px-4 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl hover:from-blue-700 hover:to-indigo-700 transition-all duration-200 font-medium shadow-lg disabled:opacity-50"
+                                >
+                                    {loading ? 'Updating...' : 'Update User'}
                                 </motion.button>
                             </div>
                         </form>

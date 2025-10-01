@@ -9,7 +9,7 @@ export const createUserController = async (
     next: NextFunction
 ): Promise<void> => {
     try {
-        const { name, email, password, isAdmin, isModerator } = req.body;
+        const { name, email, password, isAdmin, isModerator, isVerifiedPoster } = req.body;
 
         if (!name || !email || !password) {
             throw new AppError("Name, email, and password are required", 400);
@@ -33,7 +33,8 @@ export const createUserController = async (
                 email,
                 password: hashedPassword,
                 isAdmin: isAdmin || false,
-                isModerator: isModerator || false
+                isModerator: isModerator || false,
+                isVerifiedPoster: isVerifiedPoster || false
             },
             select: {
                 id: true,
@@ -215,7 +216,7 @@ export const updateUserController = async (
 ): Promise<void> => {
     try {
         const { id } = req.params;
-        const { name, email, isAdmin, isModerator, isBlocked } = req.body;
+        const { name, email, isAdmin, isModerator, isBlocked, isVerifiedPoster } = req.body;
 
         const updateData: any = {};
 
@@ -224,6 +225,7 @@ export const updateUserController = async (
         if (isAdmin !== undefined) updateData.isAdmin = isAdmin;
         if (isModerator !== undefined) updateData.isModerator = isModerator;
         if (isBlocked !== undefined) updateData.isBlocked = isBlocked;
+        if (isVerifiedPoster !== undefined) updateData.isVerifiedPoster = isVerifiedPoster;
 
         const user = await prisma.user.update({
             where: { id },
