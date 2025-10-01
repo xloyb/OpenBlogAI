@@ -4,14 +4,10 @@ import type React from "react";
 import { useState, useEffect } from "react";
 import { ToggleButton } from "./ToggleButton";
 import { SidebarItem } from "./SidebarItem";
-import { ThemeToggleCompact } from "../ThemeToggle";
-import { ThemeSelectorCompact } from "../ThemeSelector";
 
 export const Sidebar: React.FC = () => {
   const [isOpen, setIsOpen] = useState(true); // Controls whether the sidebar is open or closed
   const [collapsed, setCollapsed] = useState(false); // Controls whether the sidebar is collapsed (icons only)
-
-
 
   // Load sidebar state from local storage on mount
   useEffect(() => {
@@ -119,12 +115,7 @@ export const Sidebar: React.FC = () => {
             text="Profile"
             collapsed={collapsed}
           />
-          <SidebarItem
-            href="/themes"
-            icon="palette"
-            text="Themes"
-            collapsed={collapsed}
-          />
+
 
           <SidebarItem
             onClick={handleLogout}
@@ -133,26 +124,8 @@ export const Sidebar: React.FC = () => {
             collapsed={collapsed}
           />
 
-          {/* Theme Selector */}
-          <li className="mt-auto pt-4 border-t border-base-300">
-            <div className="flex items-center justify-center p-3">
-              {!collapsed && (
-                <div className="flex items-center justify-between w-full">
-                  <span className="text-sm text-base-content/60">Theme</span>
-                  <div className="flex gap-2">
-                    <ThemeToggleCompact />
-                    <ThemeSelectorCompact />
-                  </div>
-                </div>
-              )}
-              {collapsed && (
-                <div className="flex flex-col gap-2">
-                  <ThemeToggleCompact />
-                  <ThemeSelectorCompact />
-                </div>
-              )}
-            </div>
-          </li>
+
+
 
         </ul>
       </nav>

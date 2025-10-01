@@ -1,10 +1,8 @@
 "use client";
 import { Sidebar } from "@/components/sidebar/Sidebar";
-import { ThemeToggle } from "@/components/ThemeToggle";
 import { motion } from "framer-motion";
 
 export default function ProjectLayout({ children }: { children: React.ReactNode }) {
-
   return (
     <motion.div
       initial={{ opacity: 0 }}
@@ -26,11 +24,6 @@ export default function ProjectLayout({ children }: { children: React.ReactNode 
             </div>
           </div>
         </main>
-
-        {/* Theme Toggle for Desktop */}
-        <div className="fixed top-6 right-6 z-50">
-          <ThemeToggle />
-        </div>
       </div>
     </motion.div>
   );

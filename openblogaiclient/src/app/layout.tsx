@@ -85,40 +85,22 @@
 
 import { SessionProvider } from 'next-auth/react';
 import SessionUpdater from '@/components/SessionUpdater';
-import { ThemeProvider } from '@/components/ThemeProvider';
 import './globals.css';
 import Layout from '@/components/Layout';
-// import { Sidebar } from '@/components/sidebar/Sidebar';
 
-export const metadata = {
-  title: 'My Next.js App',
-  description: 'A secure Next.js application',
+export const metadata: import('next').Metadata = {
+  title: "OpenBlogAI",
+  description: "Transform YouTube videos into engaging blog posts with AI",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" suppressHydrationWarning>
-      <head>
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `
-              try {
-                const theme = localStorage.getItem('theme') || 
-                  (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
-                document.documentElement.classList.toggle('dark', theme === 'dark');
-                document.documentElement.setAttribute('data-theme', theme);
-              } catch (e) {}
-            `,
-          }}
-        />
-      </head>
+    <html lang="en" data-theme="modern" suppressHydrationWarning>
       <body className="antialiased" suppressHydrationWarning>
-        <ThemeProvider>
-          <SessionProvider>
-            <SessionUpdater />
-            <Layout>{children}</Layout>
-          </SessionProvider>
-        </ThemeProvider>
+        <SessionProvider>
+          <SessionUpdater />
+          <Layout>{children}</Layout>
+        </SessionProvider>
       </body>
     </html>
   );
