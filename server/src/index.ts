@@ -12,6 +12,7 @@ import { globalErrorLogger, globalLogger }
 import { globalErrorHandler } from '@src/utils/errorHandler';
 import transcriptRoutes from './routes/transcriptRoutes';
 import blogRoutes from './routes/blogRoutes';
+import userRoutes from './routes/userRoutes';
 
 const app = express();
 
@@ -60,6 +61,7 @@ app.get('/', (req, res) => {
 app.use('/api/auth', authRoutes);
 app.use('/api/transcript', transcriptRoutes);
 app.use("/api/blog", blogRoutes);
+app.use("/api/users", userRoutes);
 
 
 
