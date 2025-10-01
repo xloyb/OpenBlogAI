@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { FiEdit3, FiTrash2, FiUserPlus, FiSearch, FiFilter, FiMail, FiCalendar, FiShield, FiUsers } from "react-icons/fi";
+import { FiEdit3, FiTrash2, FiUserPlus, FiSearch, FiFilter, FiMail, FiCalendar, FiShield, FiUsers, FiX } from "react-icons/fi";
 import { User } from "../../lib/dashboard-api";
 
 interface UserManagementProps {
@@ -18,6 +18,14 @@ export default function UserManagement({ users, onUsersChange }: UserManagementP
 
     const [showFilters, setShowFilters] = useState(false);
     const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+    const [showAddUserModal, setShowAddUserModal] = useState(false);
+    const [newUser, setNewUser] = useState({
+        name: '',
+        email: '',
+        password: '',
+        role: 'user' as 'user' | 'moderator' | 'admin',
+        isActive: true
+    });
 
     const filteredUsers = users.filter(user => {
         const matchesSearch = user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -44,6 +52,45 @@ export default function UserManagement({ users, onUsersChange }: UserManagementP
     const handleEditUser = (user: User) => {
         // TODO: Implement user editing functionality
         console.log('Edit user:', user);
+    };
+
+    const handleAddUser = async () => {
+        try {
+            // Here you would typically call an API to create the user
+            const userToAdd: User = {
+                id: Date.now().toString(), // Temporary ID generation
+                name: newUser.name,
+                email: newUser.email,
+                role: newUser.role,
+                isActive: newUser.isActive,
+                createdAt: new Date().toISOString(),
+                updatedAt: new Date().toISOString(),
+                blogCount: 0,
+                videoCount: 0,
+                isAdmin: newUser.role === 'admin',
+                isModerator: newUser.role === 'moderator',
+                isBlocked: false
+            };
+
+            // Add to the existing users list
+            onUsersChange([...users, userToAdd]);
+
+            // Reset form and close modal
+            resetForm();
+        } catch (error) {
+            console.error("Failed to add user:", error);
+        }
+    };
+
+    const resetForm = () => {
+        setNewUser({
+            name: '',
+            email: '',
+            password: '',
+            role: 'user',
+            isActive: true
+        });
+        setShowAddUserModal(false);
     };
 
     return (
@@ -79,6 +126,7 @@ export default function UserManagement({ users, onUsersChange }: UserManagementP
                         <motion.button
                             whileHover={{ scale: 1.05, boxShadow: "0 10px 25px rgba(59, 130, 246, 0.3)" }}
                             whileTap={{ scale: 0.95 }}
+                            onClick={() => setShowAddUserModal(true)}
                             className="px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl hover:from-blue-700 hover:to-indigo-700 transition-all duration-300 flex items-center gap-2 shadow-lg font-medium"
                         >
                             <FiUserPlus size={18} />
@@ -331,6 +379,119 @@ export default function UserManagement({ users, onUsersChange }: UserManagementP
                     </motion.div>
                 )}
             </motion.div>
+
+            {/* Add User Modal */}
+            {showAddUserModal && (
+                <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4"
+                    onClick={() => setShowAddUserModal(false)}
+                >
+                    <motion.div
+                        initial={{ scale: 0.9, opacity: 0, y: 20 }}
+                        animate={{ scale: 1, opacity: 1, y: 0 }}
+                        exit={{ scale: 0.9, opacity: 0, y: 20 }}
+                        onClick={(e) => e.stopPropagation()}
+                        className="bg-white/95 backdrop-blur-xl rounded-2xl p-8 max-w-md w-full border border-white/20 shadow-2xl"
+                    >
+                        <div className="flex justify-between items-center mb-6">
+                            <h3 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+                                Add New User
+                            </h3>
+                            <motion.button
+                                whileHover={{ scale: 1.1, rotate: 90 }}
+                                whileTap={{ scale: 0.9 }}
+                                onClick={() => setShowAddUserModal(false)}
+                                className="text-gray-400 hover:text-gray-600 transition-colors p-1"
+                            >
+                                <FiX size={24} />
+                            </motion.button>
+                        </div>
+
+                        <form onSubmit={handleAddUser} className="space-y-4">
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-2">
+                                    Full Name
+                                </label>
+                                <input
+                                    type="text"
+                                    value={newUser.name}
+                                    onChange={(e) => setNewUser({ ...newUser, name: e.target.value })}
+                                    className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-white/70 backdrop-blur-sm"
+                                    placeholder="Enter full name"
+                                    required
+                                />
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-2">
+                                    Email Address
+                                </label>
+                                <input
+                                    type="email"
+                                    value={newUser.email}
+                                    onChange={(e) => setNewUser({ ...newUser, email: e.target.value })}
+                                    className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-white/70 backdrop-blur-sm"
+                                    placeholder="Enter email address"
+                                    required
+                                />
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-2">
+                                    Password
+                                </label>
+                                <input
+                                    type="password"
+                                    value={newUser.password}
+                                    onChange={(e) => setNewUser({ ...newUser, password: e.target.value })}
+                                    className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-white/70 backdrop-blur-sm"
+                                    placeholder="Enter password"
+                                    required
+                                />
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-2">
+                                    Role
+                                </label>
+                                <select
+                                    value={newUser.role}
+                                    onChange={(e) => setNewUser({ ...newUser, role: e.target.value as 'user' | 'moderator' | 'admin' })}
+                                    className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-white/70 backdrop-blur-sm"
+                                    required
+                                >
+                                    <option value="user">User</option>
+                                    <option value="moderator">Moderator</option>
+                                    <option value="admin">Admin</option>
+                                </select>
+                            </div>
+
+                            <div className="flex gap-3 pt-4">
+                                <motion.button
+                                    whileHover={{ scale: 1.02 }}
+                                    whileTap={{ scale: 0.98 }}
+                                    type="button"
+                                    onClick={() => setShowAddUserModal(false)}
+                                    className="flex-1 px-4 py-3 border border-gray-200 text-gray-700 rounded-xl hover:bg-gray-50 transition-all duration-200 font-medium"
+                                >
+                                    Cancel
+                                </motion.button>
+                                <motion.button
+                                    whileHover={{ scale: 1.02, boxShadow: "0 8px 20px rgba(59, 130, 246, 0.3)" }}
+                                    whileTap={{ scale: 0.98 }}
+                                    type="submit"
+                                    className="flex-1 px-4 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl hover:from-blue-700 hover:to-indigo-700 transition-all duration-200 font-medium shadow-lg"
+                                >
+                                    Add User
+                                </motion.button>
+                            </div>
+                        </form>
+                    </motion.div>
+                </motion.div>
+            )}
         </div>
     );
 }
