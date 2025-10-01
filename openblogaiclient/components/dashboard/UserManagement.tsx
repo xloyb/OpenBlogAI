@@ -31,6 +31,11 @@ export default function UserManagement({ users, onUsersChange }: UserManagementP
     });
 
     const filteredUsers = users.filter(user => {
+        // Skip invalid user objects
+        if (!user || !user.name || !user.email || !user.role) {
+            return false;
+        }
+
         const matchesSearch = user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
             user.email.toLowerCase().includes(searchTerm.toLowerCase());
         const matchesRole = roleFilter === "all" || user.role === roleFilter;
@@ -278,7 +283,7 @@ export default function UserManagement({ users, onUsersChange }: UserManagementP
                                 <div className="flex items-start justify-between mb-6">
                                     <div className="relative">
                                         <div className="w-16 h-16 bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500 rounded-2xl flex items-center justify-center text-white font-bold text-xl shadow-lg">
-                                            {user.name.charAt(0).toUpperCase()}
+                                            {user.name ? user.name.charAt(0).toUpperCase() : '?'}
                                         </div>
                                         <div className={`absolute -bottom-1 -right-1 w-5 h-5 rounded-full border-2 border-white ${user.isActive ? 'bg-green-400' : 'bg-gray-400'
                                             }`}></div>
@@ -310,14 +315,14 @@ export default function UserManagement({ users, onUsersChange }: UserManagementP
 
                                 <div className="space-y-3">
                                     <div>
-                                        <h3 className="font-bold text-slate-800 text-lg mb-1">{user.name}</h3>
+                                        <h3 className="font-bold text-slate-800 text-lg mb-1">{user.name || 'Unknown User'}</h3>
                                         <div className="flex items-center text-slate-500 text-sm mb-2">
                                             <FiMail className="mr-2" size={14} />
-                                            {user.email}
+                                            {user.email || 'No email'}
                                         </div>
                                         <div className="flex items-center text-slate-500 text-sm">
                                             <FiCalendar className="mr-2" size={14} />
-                                            {new Date(user.createdAt).toLocaleDateString()}
+                                            {user.createdAt ? new Date(user.createdAt).toLocaleDateString() : 'Unknown date'}
                                         </div>
                                         {user.isVerifiedPoster && (
                                             <div className="flex items-center text-amber-600 text-sm mt-1">
@@ -335,7 +340,7 @@ export default function UserManagement({ users, onUsersChange }: UserManagementP
                                                     user.role === 'moderator' ? 'bg-gradient-to-r from-blue-100 to-cyan-100 text-blue-700' :
                                                         'bg-gradient-to-r from-green-100 to-emerald-100 text-green-700'
                                                     }`}>
-                                                    {user.role.charAt(0).toUpperCase() + user.role.slice(1)}
+                                                    {user.role ? user.role.charAt(0).toUpperCase() + user.role.slice(1) : 'Unknown'}
                                                 </span>
                                             </div>
                                             {user.isVerifiedPoster && (
@@ -381,15 +386,15 @@ export default function UserManagement({ users, onUsersChange }: UserManagementP
                                 <div className="flex items-center gap-4">
                                     <div className="relative">
                                         <div className="w-12 h-12 bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500 rounded-xl flex items-center justify-center text-white font-semibold">
-                                            {user.name.charAt(0).toUpperCase()}
+                                            {user.name ? user.name.charAt(0).toUpperCase() : '?'}
                                         </div>
                                         <div className={`absolute -bottom-1 -right-1 w-4 h-4 rounded-full border-2 border-white ${user.isActive ? 'bg-green-400' : 'bg-gray-400'
                                             }`}></div>
                                     </div>
 
                                     <div>
-                                        <h3 className="font-semibold text-slate-800">{user.name}</h3>
-                                        <p className="text-sm text-slate-500">{user.email}</p>
+                                        <h3 className="font-semibold text-slate-800">{user.name || 'Unknown User'}</h3>
+                                        <p className="text-sm text-slate-500">{user.email || 'No email'}</p>
                                     </div>
 
                                     <div className="flex items-center gap-2">
@@ -397,7 +402,7 @@ export default function UserManagement({ users, onUsersChange }: UserManagementP
                                             user.role === 'moderator' ? 'bg-gradient-to-r from-blue-100 to-cyan-100 text-blue-700' :
                                                 'bg-gradient-to-r from-green-100 to-emerald-100 text-green-700'
                                             }`}>
-                                            {user.role.charAt(0).toUpperCase() + user.role.slice(1)}
+                                            {user.role ? user.role.charAt(0).toUpperCase() + user.role.slice(1) : 'Unknown'}
                                         </span>
                                         {user.isVerifiedPoster && (
                                             <span className="px-2 py-1 bg-gradient-to-r from-amber-100 to-yellow-100 text-amber-700 rounded-full text-xs font-semibold flex items-center gap-1">
