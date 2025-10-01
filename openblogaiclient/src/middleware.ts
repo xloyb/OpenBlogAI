@@ -3,8 +3,8 @@ import { NextResponse } from "next/server";
 
 const LOGIN = "/login";
 const ROOT = "/";
-const PUBLIC_ROUTES = ["/login", "/register", "/products", "/401", "/404", "/500"] as const;
-const PROTECTED_SUB_ROUTES = ["/checkout", "/blogs"] as const;
+const PUBLIC_ROUTES = ["/login", "/register", "/products", "/401", "/404", "/500", "/blogs"] as const;
+const PROTECTED_SUB_ROUTES = ["/checkout", "/myblogs"] as const;
 
 export default auth((req) => {
   const session = req.auth;
@@ -24,9 +24,9 @@ export default auth((req) => {
   const isLoginOrRegister =
     nextUrl.pathname === LOGIN || nextUrl.pathname === "/register";
 
-  // Redirect authenticated users away from login/register to /blogs
+  // Redirect authenticated users away from login/register to /myblogs
   if (isAuthenticated && isLoginOrRegister) {
-    return NextResponse.redirect(new URL("/blogs", nextUrl));
+    return NextResponse.redirect(new URL("/myblogs", nextUrl));
   }
 
   // Redirect unauthenticated users from protected routes to login
