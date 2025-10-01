@@ -10,7 +10,8 @@ export const ToggleButton: React.FC<ToggleButtonProps> = ({ onClick, isOpen }) =
   return (
     <button
       onClick={onClick}
-      className={`ml-auto p-4 border-none rounded-lg bg-transparent cursor-pointer hover:bg-base-200 text-base-content ${isOpen ? "" : "rotate-180"}`}
+      className={`p-2 border-none rounded-xl bg-slate-100 hover:bg-slate-200 cursor-pointer transition-all duration-300 text-slate-600 hover:text-slate-800 shadow-sm hover:shadow-md ${isOpen ? "" : "rotate-180"
+        }`}
     >
       <Icon name="chevron-left" />
     </button>
