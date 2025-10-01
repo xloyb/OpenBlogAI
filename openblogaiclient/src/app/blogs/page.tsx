@@ -4,6 +4,8 @@ import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { FiCalendar, FiFileText, FiClock, FiEye, FiArrowRight } from "react-icons/fi";
 import Link from "next/link";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 
 interface Blog {
   id: number;
@@ -40,7 +42,7 @@ export default function PublicBlogsPage() {
     try {
       setLoading(true);
       const baseUrl = process.env.NEXT_PUBLIC_SERVER_URL || 'http://localhost:8082';
-      const response = await fetch(`${baseUrl}/api/public/blogs`, {
+      const response = await fetch(`${baseUrl}/api/blog/public/blogs`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -78,9 +80,10 @@ export default function PublicBlogsPage() {
     });
   };
 
-  const getPreviewText = (content: string, maxLength: number = 200) => {
-    if (content.length <= maxLength) return content;
-    return content.substring(0, maxLength) + "...";
+  const getPreviewText = (content: string) => {
+    // Remove markdown formatting for preview
+    const cleanText = content.replace(/[#*`_~\[\]()]/g, '').replace(/\n+/g, ' ').trim();
+    return cleanText.substring(0, 200) + (cleanText.length > 200 ? "..." : "");
   };
 
   if (loading) {
@@ -227,9 +230,11 @@ export default function PublicBlogsPage() {
                 </div>
 
                 <div className="mb-6">
-                  <p className="text-slate-600 leading-relaxed line-clamp-4">
-                    {getPreviewText(blog.content)}
-                  </p>
+                  <div className="text-slate-600 leading-relaxed line-clamp-4 prose prose-slate max-w-none">
+                    <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                      {getPreviewText(blog.content)}
+                    </ReactMarkdown>
+                  </div>
                 </div>
 
                 <div className="flex items-center justify-between pt-6 border-t border-slate-200">

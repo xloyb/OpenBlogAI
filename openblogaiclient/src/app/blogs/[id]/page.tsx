@@ -5,6 +5,8 @@ import { motion } from "framer-motion";
 import { FiCalendar, FiClock, FiArrowLeft, FiEye, FiShare2 } from "react-icons/fi";
 import Link from "next/link";
 import { useParams } from "next/navigation";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 
 interface Blog {
   id: number;
@@ -41,7 +43,7 @@ export default function PublicBlogDetailPage() {
     try {
       setLoading(true);
       const baseUrl = process.env.NEXT_PUBLIC_SERVER_URL || 'http://localhost:8082';
-      const response = await fetch(`${baseUrl}/api/blogs/${blogId}`, {
+      const response = await fetch(`${baseUrl}/api/blog/blogs/${blogId}`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -92,11 +94,11 @@ export default function PublicBlogDetailPage() {
   };
 
   const formatContent = (content: string) => {
-    return content.split('\n\n').map((paragraph, index) => (
-      <p key={index} className="mb-6 text-slate-700 leading-relaxed text-lg">
-        {paragraph}
-      </p>
-    ));
+    return (
+      <ReactMarkdown remarkPlugins={[remarkGfm]}>
+        {content}
+      </ReactMarkdown>
+    );
   };
 
   const handleShare = async () => {
@@ -229,7 +231,7 @@ export default function PublicBlogDetailPage() {
           </div>
 
           <div className="p-8 sm:p-12">
-            <div className="prose prose-lg max-w-none">
+            <div className="prose prose-lg max-w-none prose-slate prose-headings:text-slate-800 prose-p:text-slate-700 prose-p:leading-relaxed prose-p:text-lg prose-strong:text-slate-800 prose-code:text-indigo-600 prose-code:bg-indigo-50 prose-code:px-1 prose-code:py-0.5 prose-code:rounded prose-pre:bg-slate-800 prose-pre:text-slate-100 prose-blockquote:border-indigo-300 prose-blockquote:bg-indigo-50 prose-blockquote:py-2 prose-ul:text-slate-700 prose-ol:text-slate-700 prose-li:text-slate-700">
               {formatContent(blog.content)}
             </div>
           </div>
