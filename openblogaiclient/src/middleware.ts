@@ -3,7 +3,7 @@ import { NextResponse } from "next/server";
 
 const LOGIN = "/login";
 const ROOT = "/";
-const PUBLIC_ROUTES = ["/login", "/register", "/products"] as const;
+const PUBLIC_ROUTES = ["/login", "/register", "/products", "/401", "/404", "/500"] as const;
 const PROTECTED_SUB_ROUTES = ["/checkout", "/blogs"] as const;
 
 export default auth((req) => {
