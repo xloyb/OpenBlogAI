@@ -63,18 +63,40 @@ export const SidebarItem: React.FC<SidebarItemProps> = ({
             <a
               href={href}
               onClick={onClick}
-              className={`flex items-center gap-4 rounded-lg p-[0.85em] hover:bg-base-200 transition-colors md:w-full md:justify-start md:p-[0.85em] w-[60px] h-[60px] justify-center ${active ? "text-primary bg-primary/10" : "text-base-content"} no-underline`}
+              className={`group flex items-center gap-4 rounded-xl p-3 transition-all duration-300 w-full relative overflow-hidden ${active
+                  ? "bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-lg shadow-blue-200"
+                  : "text-slate-700 hover:bg-slate-100 hover:shadow-md"
+                } no-underline`}
             >
-              <Icon name={icon} />
-              <span className={collapsed ? "hidden" : "hidden md:inline-block"}>{text}</span>
+              <div className={`flex items-center justify-center w-6 h-6 ${active ? 'text-white' : 'text-slate-600'}`}>
+                <Icon name={icon} />
+              </div>
+              <span className={`font-medium transition-all duration-300 ${collapsed ? "md:opacity-0 md:w-0 md:overflow-hidden" : "md:opacity-100"
+                } ${active ? 'text-white' : 'text-slate-700'}`}>
+                {text}
+              </span>
+              {active && (
+                <div className="absolute right-0 top-0 bottom-0 w-1 bg-white rounded-l-full" />
+              )}
             </a>
           ) : (
             <button
               onClick={onClick}
-              className={`flex items-center gap-4 rounded-lg p-[0.85em] hover:bg-base-200 transition-colors md:w-full md:justify-start md:p-[0.85em] w-[60px] h-[60px] justify-center ${active ? "text-primary bg-primary/10" : "text-base-content"} no-underline border-none bg-transparent cursor-pointer`}
+              className={`group flex items-center gap-4 rounded-xl p-3 transition-all duration-300 w-full relative overflow-hidden ${active
+                  ? "bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-lg shadow-blue-200"
+                  : "text-slate-700 hover:bg-slate-100 hover:shadow-md"
+                } border-none bg-transparent cursor-pointer`}
             >
-              <Icon name={icon} />
-              <span className={collapsed ? "hidden" : "hidden md:inline-block"}>{text}</span>
+              <div className={`flex items-center justify-center w-6 h-6 ${active ? 'text-white' : 'text-slate-600'}`}>
+                <Icon name={icon} />
+              </div>
+              <span className={`font-medium transition-all duration-300 ${collapsed ? "md:opacity-0 md:w-0 md:overflow-hidden" : "md:opacity-100"
+                } ${active ? 'text-white' : 'text-slate-700'}`}>
+                {text}
+              </span>
+              {active && (
+                <div className="absolute right-0 top-0 bottom-0 w-1 bg-white rounded-l-full" />
+              )}
             </button>
           )}
         </>
