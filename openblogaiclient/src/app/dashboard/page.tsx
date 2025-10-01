@@ -176,79 +176,81 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="space-y-8">
-      {/* Header */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="text-center mb-8"
-      >
-        <div className="w-20 h-20 bg-gradient-to-r from-blue-500 to-purple-600 rounded-3xl flex items-center justify-center mx-auto mb-6 shadow-lg">
-          <FiBarChart className="w-10 h-10 text-white" />
-        </div>
-        <h1 className="text-4xl font-bold mb-4 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-          Admin Dashboard
-        </h1>
-        <p className="text-xl font-medium text-slate-600 max-w-2xl mx-auto">
-          Manage users, monitor activities, and analyze platform performance
-        </p>
-      </motion.div>
-
-      {/* Navigation Tabs */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.1 }}
-        className="flex justify-center mb-8"
-      >
-        <div className="bg-white rounded-2xl p-2 shadow-lg border border-slate-200">
-          <div className="flex space-x-2">
-            {tabs.map((tab) => (
-              <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
-                className={`flex items-center gap-3 px-6 py-3 rounded-xl font-semibold transition-all duration-300 ${activeTab === tab.id
-                  ? "bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-lg"
-                  : "text-slate-600 hover:bg-slate-100"
-                  }`}
-              >
-                <tab.icon className="w-5 h-5" />
-                {tab.label}
-              </button>
-            ))}
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-100/50">
+      <div className="space-y-8 p-6">
+        {/* Header */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="text-center mb-8"
+        >
+          <div className="w-20 h-20 bg-gradient-to-r from-blue-500 to-purple-600 rounded-3xl flex items-center justify-center mx-auto mb-6 shadow-lg">
+            <FiBarChart className="w-10 h-10 text-white" />
           </div>
-        </div>
-      </motion.div>
+          <h1 className="text-4xl font-bold mb-4 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+            Admin Dashboard
+          </h1>
+          <p className="text-xl font-medium text-slate-600 max-w-2xl mx-auto">
+            Manage users, monitor activities, and analyze platform performance
+          </p>
+        </motion.div>
 
-      {/* Tab Content */}
-      <motion.div
-        key={activeTab}
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.3 }}
-      >
-        {activeTab === "overview" && (
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            <UserStatistics stats={userStats} />
-            <BlogStatistics stats={blogStats} />
+        {/* Navigation Tabs */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1 }}
+          className="flex justify-center mb-8"
+        >
+          <div className="bg-white rounded-2xl p-2 shadow-lg border border-slate-200">
+            <div className="flex space-x-2">
+              {tabs.map((tab) => (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveTab(tab.id)}
+                  className={`flex items-center gap-3 px-6 py-3 rounded-xl font-semibold transition-all duration-300 ${activeTab === tab.id
+                    ? "bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-lg"
+                    : "text-slate-600 hover:bg-slate-100"
+                    }`}
+                >
+                  <tab.icon className="w-5 h-5" />
+                  {tab.label}
+                </button>
+              ))}
+            </div>
           </div>
-        )}
+        </motion.div>
 
-        {activeTab === "users" && (
-          <UserManagement
-            users={users}
-            onUsersChange={(users: ApiUser[]) => setUsers(users)}
-            onRefresh={loadDashboardData}
-          />
-        )}
+        {/* Tab Content */}
+        <motion.div
+          key={activeTab}
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3 }}
+        >
+          {activeTab === "overview" && (
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+              <UserStatistics stats={userStats} />
+              <BlogStatistics stats={blogStats} />
+            </div>
+          )}
 
-        {activeTab === "analytics" && (
-          <div className="space-y-8">
-            <UserStatistics stats={userStats} detailed />
-            <BlogStatistics stats={blogStats} detailed />
-          </div>
-        )}
-      </motion.div>
+          {activeTab === "users" && (
+            <UserManagement
+              users={users}
+              onUsersChange={(users: ApiUser[]) => setUsers(users)}
+              onRefresh={loadDashboardData}
+            />
+          )}
+
+          {activeTab === "analytics" && (
+            <div className="space-y-8">
+              <UserStatistics stats={userStats} detailed />
+              <BlogStatistics stats={blogStats} detailed />
+            </div>
+          )}
+        </motion.div>
+      </div>
     </div>
   );
 }
