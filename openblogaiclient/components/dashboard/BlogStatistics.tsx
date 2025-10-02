@@ -25,7 +25,7 @@ export default function BlogStatistics({ stats, detailed = false }: BlogStatisti
             >
                 <div className="animate-pulse">
                     <div className="h-8 bg-gradient-to-r from-slate-200 to-slate-300 rounded-2xl mb-6"></div>
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
                         {[...Array(4)].map((_, i) => (
                             <div key={i} className="bg-white/50 rounded-2xl p-4">
                                 <div className="h-12 bg-slate-200 rounded-xl mb-3"></div>
@@ -108,7 +108,7 @@ export default function BlogStatistics({ stats, detailed = false }: BlogStatisti
             </div>
 
             {/* Stats Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
                 {statCards.map((card, index) => (
                     <motion.div
                         key={card.title}
