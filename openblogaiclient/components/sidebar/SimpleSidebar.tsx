@@ -34,7 +34,6 @@ const publicMenuItems = [
 
 // Authenticated user menu items
 const authMenuItems = [
-    { href: '/dashboard', icon: FiLayout, label: 'Dashboard' },
     { href: '/myblogs', icon: FiFileText, label: 'My Blogs' },
     { href: '/profile', icon: FiUser, label: 'Profile' }
 ];
@@ -46,7 +45,7 @@ const adminModMenuItems = [
 
 // Admin only menu items  
 const adminMenuItems = [
-    { href: '/manage-users', icon: FiUsers, label: 'Manage Users', roles: ['admin'] }
+    { href: '/dashboard', icon: FiShield, label: 'Admin Control Panel', roles: ['admin'] }
 ];
 
 // Guest menu items (not logged in)
