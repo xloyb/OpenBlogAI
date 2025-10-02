@@ -68,16 +68,28 @@ export default function LoginPage() {
 
             <div className="text-center">
               <Link href="/register" className="block">
-                <Button
-                  variant="outline"
-                  className="w-full border-2 border-slate-200 hover:border-indigo-300 hover:bg-indigo-50 text-slate-700 font-semibold py-3 rounded-2xl transition-all duration-300"
-                  size="lg"
+                <motion.div
+                  whileHover={{ scale: 1.02, y: -2 }}
+                  whileTap={{ scale: 0.98 }}
+                  transition={{ type: "spring", stiffness: 400, damping: 17 }}
                 >
-                  <div className="flex items-center justify-center gap-2">
-                    <FiZap className="w-4 h-4" />
-                    Create New Account
-                  </div>
-                </Button>
+                  <Button
+                    variant="outline"
+                    className="w-full border-2 border-slate-200 hover:border-indigo-400 hover:bg-gradient-to-r hover:from-indigo-50 hover:to-purple-50 text-slate-700 hover:text-indigo-700 font-semibold py-3 rounded-2xl transition-all duration-300 shadow-md hover:shadow-lg group"
+                    size="lg"
+                  >
+                    <div className="flex items-center justify-center gap-2">
+                      <motion.div
+                        className="group-hover:rotate-12 transition-transform duration-300"
+                      >
+                        <FiZap className="w-4 h-4" />
+                      </motion.div>
+                      <span className="bg-gradient-to-r from-slate-700 to-indigo-700 bg-clip-text text-transparent group-hover:from-indigo-700 group-hover:to-purple-700">
+                        Create New Account
+                      </span>
+                    </div>
+                  </Button>
+                </motion.div>
               </Link>
             </div>
           </motion.div>

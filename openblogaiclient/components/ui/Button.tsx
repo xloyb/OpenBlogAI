@@ -7,8 +7,8 @@ import { cn } from '../../lib/utils';
 
 // Button variants using CVA for better type safety and consistency
 const buttonVariants = cva(
-    // Base styles - Enhanced for login page aesthetic
-    "inline-flex items-center justify-center rounded-lg font-medium transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-white dark:focus:ring-offset-gray-800 disabled:opacity-50 disabled:pointer-events-none hover:scale-[1.02] active:scale-[0.98] shadow-sm hover:shadow-md",
+    // Base styles - Enhanced for modern aesthetic with proper border radius
+    "inline-flex items-center justify-center rounded-xl font-medium transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-white dark:focus:ring-offset-gray-800 disabled:opacity-50 disabled:pointer-events-none hover:scale-[1.02] active:scale-[0.98] shadow-sm hover:shadow-md border-none",
     {
         variants: {
             variant: {

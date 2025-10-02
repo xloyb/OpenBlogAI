@@ -6,8 +6,8 @@ import { useSession } from "next-auth/react";
 import { doCredentialLogin } from "@/actions/auth";
 import { motion } from "framer-motion";
 import { FaEnvelope, FaLock, FaEye, FaEyeSlash, FaSpinner } from "react-icons/fa";
+import { FiLock } from "react-icons/fi";
 import { Button } from "./ui";
-import { Alert } from "./ui/components";
 
 interface FormErrors {
   email?: string;
@@ -107,31 +107,40 @@ export default function LoginForm() {
     >
       {/* Email Field */}
       <div className="space-y-2">
-        <label className="text-sm font-medium text-gray-700 dark:text-gray-300 flex items-center gap-2">
-          <FaEnvelope className="text-primary-500" />
+        <label className="text-sm font-semibold text-gray-800 flex items-center gap-2">
+          <FaEnvelope className="text-indigo-600 w-4 h-4" />
           Email Address
         </label>
-        <input
-          type="email"
-          name="email"
-          value={formData.email}
-          onChange={handleInputChange}
-          placeholder="Enter your email"
-          className={`w-full px-3 py-2 border rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-colors ${fieldErrors.email
-            ? 'border-error-500 focus:ring-error-500'
-            : 'border-gray-300 dark:border-gray-600'
-            }`}
-          required
-        />
+        <div className="relative">
+          <input
+            type="email"
+            name="email"
+            value={formData.email}
+            onChange={handleInputChange}
+            placeholder="Enter your email address"
+            className={`w-full px-4 py-3 pl-12 border-2 rounded-xl bg-white text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 transition-all duration-200 ${fieldErrors.email
+              ? 'border-red-300 focus:border-red-500 focus:ring-red-100'
+              : 'border-gray-200 focus:border-indigo-400 focus:ring-indigo-100 hover:border-gray-300'
+              }`}
+            required
+          />
+          <FaEnvelope className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-500 w-4 h-4" />
+        </div>
         {fieldErrors.email && (
-          <p className="text-sm text-error-500">{fieldErrors.email}</p>
+          <motion.p
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="text-sm text-red-600 font-medium"
+          >
+            {fieldErrors.email}
+          </motion.p>
         )}
       </div>
 
       {/* Password Field */}
       <div className="space-y-2">
-        <label className="text-sm font-medium text-gray-700 dark:text-gray-300 flex items-center gap-2">
-          <FaLock className="text-primary-500" />
+        <label className="text-sm font-semibold text-gray-800 flex items-center gap-2">
+          <FaLock className="text-indigo-600 w-4 h-4" />
           Password
         </label>
         <div className="relative">
@@ -141,75 +150,148 @@ export default function LoginForm() {
             value={formData.password}
             onChange={handleInputChange}
             placeholder="Enter your password"
-            className={`w-full px-3 py-2 pr-12 border rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-colors ${fieldErrors.password
-              ? 'border-error-500 focus:ring-error-500'
-              : 'border-gray-300 dark:border-gray-600'
+            className={`w-full px-4 py-3 pl-12 pr-12 border-2 rounded-xl bg-white text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 transition-all duration-200 ${fieldErrors.password
+              ? 'border-red-300 focus:border-red-500 focus:ring-red-100'
+              : 'border-gray-200 focus:border-indigo-400 focus:ring-indigo-100 hover:border-gray-300'
               }`}
             required
           />
-          <button
+          <FaLock className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-500 w-4 h-4" />
+          <motion.button
             type="button"
             onClick={() => setShowPassword(!showPassword)}
-            className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 transition-colors"
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.95 }}
+            className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-600 hover:text-indigo-600 transition-colors duration-200 p-1 rounded-lg hover:bg-gray-50"
           >
-            {showPassword ? <FaEyeSlash /> : <FaEye />}
-          </button>
+            {showPassword ? <FaEyeSlash className="w-4 h-4" /> : <FaEye className="w-4 h-4" />}
+          </motion.button>
         </div>
         {fieldErrors.password && (
-          <p className="text-sm text-error-500">{fieldErrors.password}</p>
+          <motion.p
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="text-sm text-red-600 font-medium"
+          >
+            {fieldErrors.password}
+          </motion.p>
         )}
       </div>
 
       {/* Remember Me & Forgot Password */}
-      <div className="flex items-center justify-between">
-        <label className="flex items-center cursor-pointer">
+      <div className="flex items-center justify-between pt-2">
+        <motion.label
+          className="flex items-center cursor-pointer group"
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.98 }}
+        >
           <input
             type="checkbox"
-            className="w-4 h-4 text-primary-600 bg-gray-100 border-gray-300 rounded focus:ring-primary-500 dark:focus:ring-primary-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600 mr-2"
+            className="w-4 h-4 text-indigo-600 bg-white border-2 border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-200 focus:border-indigo-400 transition-all duration-200 mr-3"
           />
-          <span className="text-sm text-gray-700 dark:text-gray-300">Remember me</span>
-        </label>
-        <a href="/forgot-password" className="text-sm text-primary-600 hover:text-primary-500 dark:text-primary-400 dark:hover:text-primary-300 transition-colors">
+          <span className="text-sm font-medium text-gray-800 group-hover:text-indigo-600 transition-colors">Remember me</span>
+        </motion.label>
+        <motion.a
+          href="/forgot-password"
+          className="text-sm font-medium text-indigo-600 hover:text-indigo-700 transition-colors duration-200"
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+        >
           Forgot password?
-        </a>
+        </motion.a>
       </div>
 
       {/* Error Message */}
       {error && (
         <motion.div
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
+          initial={{ opacity: 0, scale: 0.95, x: -10 }}
+          animate={{
+            opacity: 1,
+            scale: 1,
+            x: 0,
+            transition: {
+              type: "spring",
+              stiffness: 300,
+              damping: 25
+            }
+          }}
+          className="p-4 bg-gradient-to-r from-red-50 to-pink-50 border border-red-200 rounded-xl shadow-lg"
         >
-          <Alert variant="error">{error}</Alert>
+          <div className="flex items-center gap-3">
+            <div className="flex-shrink-0 w-8 h-8 bg-red-100 rounded-full flex items-center justify-center">
+              <svg className="w-4 h-4 text-red-600" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+              </svg>
+            </div>
+            <p className="text-red-800 font-medium text-sm">{error}</p>
+          </div>
         </motion.div>
       )}
 
       {/* Success Message */}
       {success && (
         <motion.div
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
+          initial={{ opacity: 0, scale: 0.95, y: 10 }}
+          animate={{
+            opacity: 1,
+            scale: 1,
+            y: 0,
+            transition: {
+              type: "spring",
+              stiffness: 300,
+              damping: 25
+            }
+          }}
+          className="p-4 bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-xl shadow-lg"
         >
-          <Alert variant="success">{success}</Alert>
+          <div className="flex items-center gap-3">
+            <div className="flex-shrink-0 w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
+              <svg className="w-4 h-4 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+              </svg>
+            </div>
+            <p className="text-green-800 font-medium text-sm">{success}</p>
+          </div>
         </motion.div>
       )}
 
       {/* Submit Button */}
-      <Button
-        type="submit"
-        disabled={isLoading}
-        className="w-full text-lg"
-        size="lg"
+      <motion.div
+        whileHover={{ scale: isLoading ? 1 : 1.02, y: -2 }}
+        whileTap={{ scale: isLoading ? 1 : 0.98 }}
+        transition={{ type: "spring", stiffness: 400, damping: 17 }}
       >
-        {isLoading ? (
-          <>
-            <FaSpinner className="animate-spin mr-2" />
-            Signing In...
-          </>
-        ) : (
-          "Sign In"
-        )}
-      </Button>
+        <Button
+          type="submit"
+          disabled={isLoading}
+          variant="outline"
+          className="w-full border-2 border-slate-200 hover:border-indigo-400 hover:bg-gradient-to-r hover:from-indigo-50 hover:to-purple-50 text-slate-700 hover:text-indigo-700 font-semibold py-3 rounded-2xl transition-all duration-300 shadow-md hover:shadow-lg group"
+          size="lg"
+        >
+          {isLoading ? (
+            <div className="flex items-center justify-center gap-2">
+              <motion.div
+                animate={{ rotate: 360 }}
+                transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+              >
+                <FaSpinner className="w-4 h-4" />
+              </motion.div>
+              <span>Signing In...</span>
+            </div>
+          ) : (
+            <div className="flex items-center justify-center gap-2">
+              <motion.div
+                className="group-hover:rotate-12 transition-transform duration-300"
+              >
+                <FiLock className="w-4 h-4" />
+              </motion.div>
+              <span className="bg-gradient-to-r from-slate-700 to-indigo-700 bg-clip-text text-transparent group-hover:from-indigo-700 group-hover:to-purple-700">
+                Sign In
+              </span>
+            </div>
+          )}
+        </Button>
+      </motion.div>
     </motion.form>
   );
 }

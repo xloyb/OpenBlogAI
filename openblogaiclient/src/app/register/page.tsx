@@ -68,16 +68,28 @@ export default function RegisterPage() {
 
                         <div className="text-center">
                             <Link href="/login" className="block">
-                                <Button
-                                    variant="outline"
-                                    className="w-full border-2 border-slate-200 hover:border-purple-300 hover:bg-purple-50 text-slate-700 font-semibold py-3 rounded-2xl transition-all duration-300"
-                                    size="lg"
+                                <motion.div
+                                    whileHover={{ scale: 1.02, y: -2 }}
+                                    whileTap={{ scale: 0.98 }}
+                                    transition={{ type: "spring", stiffness: 400, damping: 17 }}
                                 >
-                                    <div className="flex items-center justify-center gap-2">
-                                        <FiLogIn className="w-4 h-4" />
-                                        Sign In Instead
-                                    </div>
-                                </Button>
+                                    <Button
+                                        variant="outline"
+                                        className="w-full border-2 border-slate-200 hover:border-purple-400 hover:bg-gradient-to-r hover:from-purple-50 hover:to-indigo-50 text-slate-700 hover:text-purple-700 font-semibold py-3 rounded-2xl transition-all duration-300 shadow-md hover:shadow-lg group"
+                                        size="lg"
+                                    >
+                                        <div className="flex items-center justify-center gap-2">
+                                            <motion.div
+                                                className="group-hover:rotate-12 transition-transform duration-300"
+                                            >
+                                                <FiLogIn className="w-4 h-4" />
+                                            </motion.div>
+                                            <span className="bg-gradient-to-r from-slate-700 to-purple-700 bg-clip-text text-transparent group-hover:from-purple-700 group-hover:to-indigo-700">
+                                                Sign In Instead
+                                            </span>
+                                        </div>
+                                    </Button>
+                                </motion.div>
                             </Link>
                         </div>
                     </motion.div>
