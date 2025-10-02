@@ -13,6 +13,76 @@ export const getBlogById = async (id: number) => {
   });
 };
 
+export const getBlogBySlug = async (slug: string) => {
+  // Parse slug to extract title and date components
+  const datePart = slug.slice(-10); // Last 10 characters (YYYY-MM-DD)
+  const titlePart = slug.slice(0, -11); // Title part without date and hyphen
+
+  // Convert slug title back to searchable format
+  const titleKeywords = titlePart.replace(/-/g, ' ').toLowerCase();
+
+  // Parse date for range search (same day)
+  const searchDate = new Date(datePart);
+  const nextDay = new Date(searchDate);
+  nextDay.setDate(nextDay.getDate() + 1);
+
+  // Find blog by matching title keywords and date range
+  const blogs = await prisma.blog.findMany({
+    where: {
+      AND: [
+        {
+          subject: {
+            contains: titleKeywords.split(' ')[0] // Use first keyword for broad matching
+          }
+        },
+        {
+          createdAt: {
+            gte: searchDate,
+            lt: nextDay
+          }
+        },
+        {
+          visible: 1 // Only visible blogs
+        }
+      ]
+    },
+    include: { user: false, video: true },
+    orderBy: { createdAt: 'desc' }
+  });
+
+  // If we have multiple results, try to find the best match
+  if (blogs.length > 0) {
+    // Create slug for each blog and find exact match
+    for (const blog of blogs) {
+      const blogSlug = createSlugFromBlog(blog.subject, blog.createdAt);
+      if (blogSlug === slug) {
+        return blog;
+      }
+    }
+    // If no exact match, return the first one (most recent)
+    return blogs[0];
+  }
+
+  return null;
+};
+
+// Helper function to create slug from blog data (should match client-side logic)
+const createSlugFromBlog = (title: string, createdAt: Date) => {
+  const cleanTitle = title
+    .replace(/[#*`_~\[\]()]/g, '') // Remove markdown
+    .replace(/[^a-zA-Z0-9\s-]/g, '') // Remove special chars except spaces and hyphens
+    .trim()
+    .toLowerCase()
+    .replace(/\s+/g, '-') // Replace spaces with hyphens
+    .replace(/-+/g, '-') // Replace multiple hyphens with single
+    .substring(0, 60); // Limit length
+
+  // Format date as YYYY-MM-DD
+  const date = createdAt.toISOString().split('T')[0];
+
+  return `${cleanTitle}-${date}`;
+};
+
 export const getBlogs = async () => {
   return await prisma.blog.findMany({
     include: { user: false, video: true },
