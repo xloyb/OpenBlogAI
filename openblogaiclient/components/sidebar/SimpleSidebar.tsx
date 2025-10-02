@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { useSession } from 'next-auth/react';
 import {
     FiHome,
     FiLayout,
@@ -12,7 +13,11 @@ import {
     FiLogOut,
     FiMenu,
     FiX,
-    FiChevronLeft
+    FiChevronLeft,
+    FiLogIn,
+    FiUserPlus,
+    FiUsers,
+    FiShield
 } from 'react-icons/fi';
 import { doLogout } from '@/actions/auth';
 
@@ -21,18 +26,73 @@ interface SidebarProps {
     onToggle?: () => void;
 }
 
-const menuItems = [
+// Public menu items (always visible)
+const publicMenuItems = [
     { href: '/', icon: FiHome, label: 'Home' },
+    { href: '/blogs', icon: FiFileText, label: 'Blogs' }
+];
+
+// Authenticated user menu items
+const authMenuItems = [
     { href: '/dashboard', icon: FiLayout, label: 'Dashboard' },
-    { href: '/create-blog', icon: FiEdit, label: 'Create Blog' },
     { href: '/myblogs', icon: FiFileText, label: 'My Blogs' },
     { href: '/profile', icon: FiUser, label: 'Profile' }
 ];
 
+// Admin/Mod only menu items
+const adminModMenuItems = [
+    { href: '/create-blog', icon: FiEdit, label: 'Create Blog', roles: ['admin', 'moderator'] }
+];
+
+// Admin only menu items  
+const adminMenuItems = [
+    { href: '/manage-users', icon: FiUsers, label: 'Manage Users', roles: ['admin'] }
+];
+
+// Guest menu items (not logged in)
+const guestMenuItems = [
+    { href: '/login', icon: FiLogIn, label: 'Login' },
+    { href: '/register', icon: FiUserPlus, label: 'Register' }
+];
+
 export default function SimpleSidebar({ isOpen = true, onToggle }: SidebarProps) {
+    const { data: session, status } = useSession();
     const pathname = usePathname();
     const [isCollapsed, setIsCollapsed] = useState(true); // Start collapsed by default
     const [isMobileOpen, setIsMobileOpen] = useState(false);
+
+    // Get user permissions from session
+    const isAuthenticated = status === 'authenticated';
+    const isAdmin = session?.user?.isAdmin || false;
+    const isModerator = session?.user?.isModerator || false;
+    const isAdminOrMod = isAdmin || isModerator;
+
+    // Build dynamic menu based on authentication and role
+    const getMenuItems = () => {
+        let items = [...publicMenuItems];
+
+        if (isAuthenticated) {
+            // Add authenticated user items
+            items = [...items, ...authMenuItems];
+
+            // Add admin/moderator items
+            if (isAdminOrMod) {
+                items = [...items, ...adminModMenuItems];
+            }
+
+            // Add admin-only items
+            if (isAdmin) {
+                items = [...items, ...adminMenuItems];
+            }
+        } else {
+            // Add guest items (login/register)
+            items = [...items, ...guestMenuItems];
+        }
+
+        return items;
+    };
+
+    const menuItems = getMenuItems();
 
     // Load collapsed state from localStorage
     useEffect(() => {
@@ -168,19 +228,39 @@ export default function SimpleSidebar({ isOpen = true, onToggle }: SidebarProps)
                     </ul>
                 </nav>
 
-                {/* Logout Button */}
-                <div className="p-4 border-t border-gray-200">
-                    <button
-                        onClick={handleLogout}
-                        className={`
-              flex items-center gap-3 px-3 py-2 w-full rounded-lg text-red-600 hover:bg-red-50 transition-colors
-              ${isCollapsed ? 'justify-center' : ''}
-            `}
-                    >
-                        <FiLogOut className="w-5 h-5 flex-shrink-0" />
-                        {!isCollapsed && <span className="font-medium">Logout</span>}
-                    </button>
-                </div>
+                {/* User Info & Logout Button - Only for authenticated users */}
+                {isAuthenticated && (
+                    <div className="p-4 border-t border-gray-200">
+                        {/* User Role Indicator */}
+                        {!isCollapsed && (
+                            <div className="mb-3 px-3 py-2 bg-gray-50 rounded-lg">
+                                <div className="flex items-center gap-2">
+                                    <FiShield className="w-4 h-4 text-gray-600" />
+                                    <span className="text-xs font-medium text-gray-700">
+                                        {isAdmin ? 'Admin' : isModerator ? 'Moderator' : 'User'}
+                                    </span>
+                                </div>
+                                {session?.user?.name && (
+                                    <p className="text-xs text-gray-500 mt-1 truncate">
+                                        {session.user.name}
+                                    </p>
+                                )}
+                            </div>
+                        )}
+
+                        {/* Logout Button */}
+                        <button
+                            onClick={handleLogout}
+                            className={`
+                                flex items-center gap-3 px-3 py-2 w-full rounded-lg text-red-600 hover:bg-red-50 transition-colors
+                                ${isCollapsed ? 'justify-center' : ''}
+                            `}
+                        >
+                            <FiLogOut className="w-5 h-5 flex-shrink-0" />
+                            {!isCollapsed && <span className="font-medium">Logout</span>}
+                        </button>
+                    </div>
+                )}
             </aside>
         </>
     );
