@@ -6,7 +6,6 @@ import { usePathname } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import {
     FiHome,
-    FiLayout,
     FiEdit,
     FiFileText,
     FiUser,
@@ -16,7 +15,6 @@ import {
     FiChevronLeft,
     FiLogIn,
     FiUserPlus,
-    FiUsers,
     FiShield
 } from 'react-icons/fi';
 import { doLogout } from '@/actions/auth';
