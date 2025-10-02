@@ -49,6 +49,23 @@ export default function BlogsPage() {
     });
   };
 
+  const createSlug = (title: string, createdAt: string) => {
+    // Clean the title: remove markdown, special chars, convert to lowercase
+    const cleanTitle = title
+      .replace(/[#*`_~\[\]()]/g, '') // Remove markdown
+      .replace(/[^a-zA-Z0-9\s-]/g, '') // Remove special chars except spaces and hyphens
+      .trim()
+      .toLowerCase()
+      .replace(/\s+/g, '-') // Replace spaces with hyphens
+      .replace(/-+/g, '-') // Replace multiple hyphens with single
+      .substring(0, 60); // Limit length
+
+    // Format date as YYYY-MM-DD
+    const date = new Date(createdAt).toISOString().split('T')[0];
+
+    return `${cleanTitle}-${date}`;
+  };
+
   const getPreviewText = (content: string, maxLength: number = 150) => {
     if (content.length <= maxLength) return content;
     return content.substring(0, maxLength) + "...";
@@ -272,7 +289,7 @@ export default function BlogsPage() {
                   {/* Actions */}
                   <div className="flex gap-3">
                     <Link
-                      href={`/blogs/${blog.id}`}
+                      href={`/blogs/${createSlug(blog.subject, blog.createdAt)}`}
                       className="flex-1 inline-flex items-center justify-center px-4 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-semibold rounded-2xl hover:shadow-lg transition-all duration-300 hover:scale-105 gap-2"
                     >
                       <FiEye className="w-4 h-4" />
