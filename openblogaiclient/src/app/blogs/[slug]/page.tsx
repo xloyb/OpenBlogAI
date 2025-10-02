@@ -171,7 +171,7 @@ export default function BlogDetail() {
         <div className="absolute top-40 right-10 w-72 h-72 bg-purple-200 rounded-full mix-blend-multiply filter blur-xl opacity-10 animate-float" style={{ animationDelay: '2s' }}></div>
       </div>
 
-      <div className="relative max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      <div className="relative w-full px-4 sm:px-6 lg:px-8 xl:px-12 2xl:px-16 py-12">
         <motion.div
           initial={{ opacity: 0, x: -30 }}
           animate={{ opacity: 1, x: 0 }}
@@ -193,8 +193,8 @@ export default function BlogDetail() {
           transition={{ duration: 0.8 }}
           className="bg-white/80 backdrop-blur-sm rounded-3xl shadow-2xl border border-slate-200 overflow-hidden"
         >
-          <div className="p-8 sm:p-12 border-b border-slate-200">
-            <h1 className="text-4xl sm:text-5xl font-bold text-slate-800 mb-6 leading-tight">
+          <div className="p-6 sm:p-10 lg:p-12 xl:p-16 2xl:p-20 border-b border-slate-200">
+            <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold text-slate-800 mb-8 leading-tight">
               {cleanMarkdown(blog.subject)}
             </h1>
 
@@ -233,13 +233,13 @@ export default function BlogDetail() {
             )}
           </div>
 
-          <div className="p-8 sm:p-12">
-            <div className="prose prose-lg max-w-none prose-slate prose-headings:text-slate-800 prose-p:text-slate-700 prose-p:leading-relaxed prose-p:text-lg prose-strong:text-slate-800 prose-code:text-indigo-600 prose-code:bg-indigo-50 prose-code:px-1 prose-code:py-0.5 prose-code:rounded prose-pre:bg-slate-800 prose-pre:text-slate-100 prose-blockquote:border-indigo-300 prose-blockquote:bg-indigo-50 prose-blockquote:py-2 prose-ul:text-slate-700 prose-ol:text-slate-700 prose-li:text-slate-700">
+          <div className="p-6 sm:p-10 lg:p-12 xl:p-16 2xl:p-20">
+            <div className="prose prose-xl max-w-none prose-slate prose-headings:text-slate-800 prose-p:text-slate-700 prose-p:leading-relaxed prose-p:text-xl prose-strong:text-slate-800 prose-code:text-indigo-600 prose-code:bg-indigo-50 prose-code:px-2 prose-code:py-1 prose-code:rounded prose-pre:bg-slate-800 prose-pre:text-slate-100 prose-pre:p-6 prose-blockquote:border-indigo-300 prose-blockquote:bg-indigo-50 prose-blockquote:py-4 prose-blockquote:px-6 prose-ul:text-slate-700 prose-ol:text-slate-700 prose-li:text-slate-700 prose-headings:mb-6 prose-headings:mt-10">
               {formatContent(blog.content)}
             </div>
           </div>
 
-          <div className="p-8 sm:p-12 border-t border-slate-200 bg-gradient-to-r from-slate-50 to-indigo-50">
+          <div className="p-6 sm:p-10 lg:p-12 xl:p-16 2xl:p-20 border-t border-slate-200 bg-gradient-to-r from-slate-50 to-indigo-50">
             <div className="flex items-center justify-between">
               <div className="text-slate-600">
                 <p className="text-sm">Published on {formatDate(blog.createdAt)}</p>
