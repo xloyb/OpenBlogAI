@@ -31,7 +31,7 @@ const menuItems = [
 
 export default function SimpleSidebar({ isOpen = true, onToggle }: SidebarProps) {
     const pathname = usePathname();
-    const [isCollapsed, setIsCollapsed] = useState(false);
+    const [isCollapsed, setIsCollapsed] = useState(true); // Start collapsed by default
     const [isMobileOpen, setIsMobileOpen] = useState(false);
 
     // Load collapsed state from localStorage
@@ -41,6 +41,22 @@ export default function SimpleSidebar({ isOpen = true, onToggle }: SidebarProps)
             setIsCollapsed(JSON.parse(saved));
         }
     }, []);
+
+    // Set CSS custom property for main content margin
+    useEffect(() => {
+        const updateSidebarWidth = () => {
+            if (window.innerWidth >= 768) { // Desktop
+                const width = isCollapsed ? '64px' : '256px'; // 16 * 4 = 64px, 64 * 4 = 256px
+                document.documentElement.style.setProperty('--sidebar-width', width);
+            } else { // Mobile
+                document.documentElement.style.setProperty('--sidebar-width', '0px');
+            }
+        };
+
+        updateSidebarWidth();
+        window.addEventListener('resize', updateSidebarWidth);
+        return () => window.removeEventListener('resize', updateSidebarWidth);
+    }, [isCollapsed]);
 
     const toggleCollapsed = () => {
         const newState = !isCollapsed;
@@ -89,8 +105,8 @@ export default function SimpleSidebar({ isOpen = true, onToggle }: SidebarProps)
             {/* Sidebar */}
             <aside
                 className={`
-          fixed md:relative top-0 left-0 h-full bg-white border-r border-gray-200 shadow-xl z-45
-          transition-all duration-300 ease-in-out
+          fixed top-0 left-0 h-screen bg-white border-r border-gray-200 shadow-xl z-45
+          transition-all duration-300 ease-in-out flex flex-col
           ${effectiveIsOpen ? 'translate-x-0' : '-translate-x-full'}
           md:translate-x-0
           ${isCollapsed ? 'md:w-16' : 'md:w-64'}

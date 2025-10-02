@@ -12,17 +12,20 @@ export default function ProjectLayout({ children }: { children: React.ReactNode 
       transition={{ duration: 0.8 }}
       className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50"
     >
-      <div className="min-h-screen flex">
-        {/* Sidebar */}
-        <SimpleSidebar />
+      {/* Fixed Sidebar */}
+      <SimpleSidebar />
 
-        {/* Main Content */}
-        <main className="flex-1 p-4 md:p-6 lg:p-8 transition-all duration-300 ease-in-out min-h-screen">
-          <div className="w-full max-w-none">
-            {children}
-          </div>
-        </main>
-      </div>
+      {/* Main Content with margin for fixed sidebar */}
+      <main
+        className="min-h-screen p-4 md:p-6 lg:p-8 transition-all duration-300 ease-in-out ml-0"
+        style={{
+          marginLeft: 'var(--sidebar-width, 0px)'
+        }}
+      >
+        <div className="w-full max-w-none">
+          {children}
+        </div>
+      </main>
     </motion.div>
   );
 }
