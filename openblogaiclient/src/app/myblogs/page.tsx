@@ -66,6 +66,13 @@ export default function BlogsPage() {
     return `${cleanTitle}-${date}`;
   };
 
+  const cleanMarkdown = (text: string) => {
+    return text
+      .replace(/[#*`_~\[\]()]/g, '') // Remove markdown formatting
+      .replace(/\n+/g, ' ') // Replace newlines with spaces
+      .trim(); // Remove leading/trailing whitespace
+  };
+
   const getPreviewText = (content: string, maxLength: number = 150) => {
     if (content.length <= maxLength) return content;
     return content.substring(0, maxLength) + "...";
@@ -227,7 +234,7 @@ export default function BlogsPage() {
                   {/* Blog Header */}
                   <div className="mb-6">
                     <h2 className="text-2xl font-bold text-slate-800 mb-3 group-hover:text-indigo-700 transition-colors duration-300 line-clamp-2">
-                      {blog.subject}
+                      {cleanMarkdown(blog.subject)}
                     </h2>
                   </div>
 

@@ -98,10 +98,17 @@ export default function BlogDetail() {
     );
   };
 
+  const cleanMarkdown = (text: string) => {
+    return text
+      .replace(/[#*`_~\[\]()]/g, '') // Remove markdown formatting
+      .replace(/\n+/g, ' ') // Replace newlines with spaces
+      .trim(); // Remove leading/trailing whitespace
+  };
+
   const handleShare = () => {
     const shareData = {
-      title: blog?.subject,
-      text: `Check out this blog: ${blog?.subject}`,
+      title: blog ? cleanMarkdown(blog.subject) : '',
+      text: `Check out this blog: ${blog ? cleanMarkdown(blog.subject) : ''}`,
       url: `${window.location.origin}/blogs/${slug}`,
     };
 
@@ -188,7 +195,7 @@ export default function BlogDetail() {
         >
           <div className="p-8 sm:p-12 border-b border-slate-200">
             <h1 className="text-4xl sm:text-5xl font-bold text-slate-800 mb-6 leading-tight">
-              {blog.subject}
+              {cleanMarkdown(blog.subject)}
             </h1>
 
             <div className="flex flex-wrap items-center justify-between gap-4 text-slate-600">

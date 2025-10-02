@@ -103,6 +103,13 @@ export default function PublicBlogsPage() {
     return `${cleanTitle}-${date}`;
   };
 
+  const cleanMarkdown = (text: string) => {
+    return text
+      .replace(/[#*`_~\[\]()]/g, '') // Remove markdown formatting
+      .replace(/\n+/g, ' ') // Replace newlines with spaces
+      .trim(); // Remove leading/trailing whitespace
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-indigo-50 flex items-center justify-center">
@@ -229,7 +236,7 @@ export default function PublicBlogsPage() {
               >
                 <div className="mb-6">
                   <h2 className="text-2xl font-bold text-slate-800 mb-4 group-hover:text-indigo-600 transition-colors duration-300 line-clamp-2">
-                    {blog.subject}
+                    {cleanMarkdown(blog.subject)}
                   </h2>
 
                   <div className="flex items-center justify-between text-sm text-slate-500 mb-4">
