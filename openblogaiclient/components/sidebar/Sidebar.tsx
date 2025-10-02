@@ -106,17 +106,19 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen: externalIsOpen, onTogg
       {/* Mobile Menu Overlay - only visible on mobile when sidebar is open */}
       {isOpen && (
         <div
-          className="md:hidden fixed inset-0 bg-black/50 backdrop-blur-sm z-40 transition-opacity duration-300"
+          className="md:hidden fixed inset-0 bg-black/50 backdrop-blur-sm z-[60] transition-all duration-300 ease-in-out"
           onClick={onToggle || toggleSidebar}
+          style={{ touchAction: 'none' }}
         />
       )}
 
       <nav
-        className={`transition-all duration-300 ease-in-out bg-gradient-to-b from-white via-slate-50 to-blue-50 border-r border-slate-200 shadow-2xl z-50
-                    md:sticky md:top-0 md:h-screen md:flex md:flex-col
-                    fixed left-0 top-0 h-full transform ${isOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'
-          } ${collapsed ? 'md:w-20' : 'md:w-64'} ${isOpen ? 'w-64' : 'w-0 md:w-auto'
-          }`}
+        className={`transition-all duration-300 ease-in-out bg-gradient-to-b from-white via-slate-50 to-blue-50 border-r border-slate-200 shadow-2xl z-[70]
+                    md:relative md:h-screen md:flex md:flex-col md:transform-none
+                    fixed left-0 top-0 h-full transform ${isOpen ? 'translate-x-0' : '-translate-x-full'
+          } ${collapsed ? 'md:w-20' : 'md:w-64'} ${isOpen ? 'w-64' : 'w-0'
+          } md:${collapsed ? 'w-20' : 'w-64'}`}
+        style={{ touchAction: 'pan-y' }}
       >
         {/* Desktop Header */}
         <div className="hidden md:flex justify-between items-center p-6 border-b border-slate-200">
@@ -144,39 +146,41 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen: externalIsOpen, onTogg
           </button>
         </div>
         {/* Navigation Links */}
-        <nav className="flex-1 px-4 py-6">
-          <ul className="space-y-2">
-            <SidebarItem
-              href="/"
-              icon="home"
-              text="Home"
-              collapsed={collapsed}
-            />
-            <SidebarItem
-              href="/dashboard"
-              icon="dashboard"
-              text="Dashboard"
-              collapsed={collapsed}
-            />
-            <SidebarItem
-              href="/create-blog"
-              icon="create"
-              text="Create Blog"
-              collapsed={collapsed}
-            />
-            <SidebarItem
-              href="/myblogs"
-              icon="blog"
-              text="My Blogs"
-              collapsed={collapsed}
-            />
-            <SidebarItem
-              href="/profile"
-              icon="profile"
-              text="Profile"
-              collapsed={collapsed}
-            />
-          </ul>
+        <div className="flex-1 flex flex-col px-4 py-6 overflow-y-auto">
+          <nav className="flex-1">
+            <ul className="space-y-2">
+              <SidebarItem
+                href="/"
+                icon="home"
+                text="Home"
+                collapsed={collapsed}
+              />
+              <SidebarItem
+                href="/dashboard"
+                icon="dashboard"
+                text="Dashboard"
+                collapsed={collapsed}
+              />
+              <SidebarItem
+                href="/create-blog"
+                icon="create"
+                text="Create Blog"
+                collapsed={collapsed}
+              />
+              <SidebarItem
+                href="/myblogs"
+                icon="blog"
+                text="My Blogs"
+                collapsed={collapsed}
+              />
+              <SidebarItem
+                href="/profile"
+                icon="profile"
+                text="Profile"
+                collapsed={collapsed}
+              />
+            </ul>
+          </nav>
 
           {/* Logout Button at Bottom */}
           <div className="mt-auto pt-6 border-t border-slate-200">
@@ -187,7 +191,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen: externalIsOpen, onTogg
               collapsed={collapsed}
             />
           </div>
-        </nav>
+        </div>
 
 
       </nav>

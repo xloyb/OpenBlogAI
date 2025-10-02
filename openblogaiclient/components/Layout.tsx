@@ -25,6 +25,50 @@ export default function ProjectLayout({ children }: { children: React.ReactNode 
     setSidebarOpen(!sidebarOpen);
   };
 
+  // Handle swipe gestures for mobile
+  useEffect(() => {
+    let startX = 0;
+    let currentX = 0;
+    let isDragging = false;
+
+    const handleTouchStart = (e: TouchEvent) => {
+      if (window.innerWidth >= 768) return; // Desktop only
+      startX = e.touches[0].clientX;
+      isDragging = true;
+    };
+
+    const handleTouchMove = (e: TouchEvent) => {
+      if (!isDragging || window.innerWidth >= 768) return;
+      currentX = e.touches[0].clientX;
+      const deltaX = currentX - startX;
+
+      // Swipe right from left edge to open
+      if (startX < 20 && deltaX > 50 && !sidebarOpen) {
+        setSidebarOpen(true);
+        isDragging = false;
+      }
+      // Swipe left to close
+      else if (deltaX < -50 && sidebarOpen) {
+        setSidebarOpen(false);
+        isDragging = false;
+      }
+    };
+
+    const handleTouchEnd = () => {
+      isDragging = false;
+    };
+
+    document.addEventListener('touchstart', handleTouchStart, { passive: true });
+    document.addEventListener('touchmove', handleTouchMove, { passive: true });
+    document.addEventListener('touchend', handleTouchEnd, { passive: true });
+
+    return () => {
+      document.removeEventListener('touchstart', handleTouchStart);
+      document.removeEventListener('touchmove', handleTouchMove);
+      document.removeEventListener('touchend', handleTouchEnd);
+    };
+  }, [sidebarOpen]);
+
   return (
     <motion.div
       initial={{ opacity: 0 }}
@@ -36,20 +80,22 @@ export default function ProjectLayout({ children }: { children: React.ReactNode 
       {/* Mobile Menu Button */}
       <button
         onClick={toggleSidebar}
-        className="md:hidden fixed top-4 left-4 z-50 p-3 bg-white rounded-xl shadow-lg border border-slate-200 hover:bg-slate-50 transition-all duration-300"
+        className="md:hidden fixed top-4 left-4 z-[80] p-3 bg-white rounded-xl shadow-lg border border-slate-200 hover:bg-slate-50 transition-all duration-300 active:scale-95"
+        style={{ touchAction: 'manipulation' }}
+        aria-label="Toggle sidebar"
       >
         <svg className="w-6 h-6 text-slate-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
         </svg>
       </button>
 
-      <div className="min-h-screen flex">
+      <div className="min-h-screen flex overflow-hidden">
         {/* Sidebar */}
         <Sidebar isOpen={sidebarOpen} onToggle={toggleSidebar} />
 
         {/* Main Content */}
-        <main className="flex-1 p-4 md:p-6 lg:p-8 md:ml-0">
-          <div className="w-full max-w-none">
+        <main className="flex-1 p-4 md:p-6 lg:p-8 md:ml-0 transition-all duration-300 ease-in-out min-h-screen overflow-x-hidden">
+          <div className="w-full max-w-none pt-16 md:pt-0">
             {children}
           </div>
         </main>
