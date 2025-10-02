@@ -5,10 +5,15 @@ import { useState, useEffect } from "react";
 
 export default function ProjectLayout({ children }: { children: React.ReactNode }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
 
   // Handle responsive sidebar state
   useEffect(() => {
+    setMounted(true);
+
     const handleResize = () => {
+      // On desktop, sidebar should be open by default
+      // On mobile, sidebar should be closed by default
       if (window.innerWidth >= 768) {
         setSidebarOpen(true);
       } else {
@@ -16,7 +21,10 @@ export default function ProjectLayout({ children }: { children: React.ReactNode 
       }
     };
 
+    // Set initial state
     handleResize();
+
+    // Listen for resize events
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
@@ -80,7 +88,13 @@ export default function ProjectLayout({ children }: { children: React.ReactNode 
       {/* Mobile Menu Button */}
       <button
         onClick={toggleSidebar}
-        className="md:hidden fixed top-4 left-4 z-[80] p-3 bg-white rounded-xl shadow-lg border border-slate-200 hover:bg-slate-50 transition-all duration-300 active:scale-95"
+        className={`
+          md:hidden fixed top-4 left-4 z-[60] 
+          p-3 bg-white rounded-xl shadow-lg border border-slate-200 
+          hover:bg-slate-50 active:scale-95
+          transition-all duration-300 ease-in-out
+          ${mounted && sidebarOpen ? 'opacity-0 pointer-events-none' : 'opacity-100 pointer-events-auto'}
+        `}
         style={{ touchAction: 'manipulation' }}
         aria-label="Toggle sidebar"
       >
@@ -89,12 +103,12 @@ export default function ProjectLayout({ children }: { children: React.ReactNode 
         </svg>
       </button>
 
-      <div className="min-h-screen flex overflow-hidden">
+      <div className="min-h-screen flex">
         {/* Sidebar */}
         <Sidebar isOpen={sidebarOpen} onToggle={toggleSidebar} />
 
         {/* Main Content */}
-        <main className="flex-1 p-4 md:p-6 lg:p-8 md:ml-0 transition-all duration-300 ease-in-out min-h-screen overflow-x-hidden">
+        <main className="flex-1 p-4 md:p-6 lg:p-8 transition-all duration-300 ease-in-out min-h-screen">
           <div className="w-full max-w-none pt-16 md:pt-0">
             {children}
           </div>

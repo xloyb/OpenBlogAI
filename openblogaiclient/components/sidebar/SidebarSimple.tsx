@@ -2,7 +2,7 @@
 import type React from "react";
 import Link from "next/link";
 
-export const Sidebar: React.FC = () => {
+export const SidebarSimple: React.FC = () => {
     const handleLogout = async () => {
         try {
             console.log("🔄 Logout process started");

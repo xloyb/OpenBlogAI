@@ -13,12 +13,15 @@ interface SidebarProps {
 export const Sidebar: React.FC<SidebarProps> = ({ isOpen: externalIsOpen, onToggle }) => {
   const [internalIsOpen, setInternalIsOpen] = useState(true); // Controls whether the sidebar is open or closed
   const [collapsed, setCollapsed] = useState(false); // Controls whether the sidebar is collapsed (icons only)
+  const [mounted, setMounted] = useState(false); // Track if component is mounted to prevent hydration issues
 
   // Use external state if provided, otherwise use internal state
   const isOpen = externalIsOpen !== undefined ? externalIsOpen : internalIsOpen;
 
   // Load sidebar state from local storage on mount and handle responsive behavior
   useEffect(() => {
+    setMounted(true);
+
     // Always load collapsed state from localStorage regardless of external control
     const savedCollapsedState = localStorage.getItem("sidebarCollapsed");
     if (savedCollapsedState !== null) {
@@ -76,12 +79,12 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen: externalIsOpen, onTogg
 
   // Toggle sidebar collapsed state (desktop only)
   const toggleCollapse = () => {
+    console.log('🔄 Collapse button clicked! Current state:', collapsed);
     // Always toggle collapsed state on desktop regardless of external control
     const newCollapsedState = !collapsed;
-    console.log("Before toggle - collapsed:", collapsed, "new state will be:", newCollapsedState);
     setCollapsed(newCollapsedState);
     localStorage.setItem("sidebarCollapsed", newCollapsedState.toString());
-    console.log("Desktop: Toggled sidebar collapsed to:", newCollapsedState);
+    console.log('✅ Collapse state updated to:', newCollapsedState);
   };
 
   // Toggle sidebar open/closed (mobile only)
@@ -103,52 +106,63 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen: externalIsOpen, onTogg
 
   return (
     <>
-      {/* Mobile Menu Overlay - only visible on mobile when sidebar is open */}
-      {isOpen && (
-        <div
-          className="md:hidden fixed inset-0 bg-black/50 backdrop-blur-sm z-[60] transition-all duration-300 ease-in-out"
-          onClick={onToggle || toggleSidebar}
-          style={{ touchAction: 'none' }}
-        />
-      )}
+      {/* Mobile Menu Overlay */}
+      <div
+        className={`md:hidden fixed inset-0 bg-black/50 backdrop-blur-sm z-40 transition-all duration-300 ${mounted && isOpen ? 'opacity-100 visible' : 'opacity-0 invisible'
+          }`}
+        onClick={onToggle || toggleSidebar}
+        aria-hidden={!(mounted && isOpen)}
+      />
 
-      <nav
-        className={`transition-all duration-300 ease-in-out bg-gradient-to-b from-white via-slate-50 to-blue-50 border-r border-slate-200 shadow-2xl z-[70]
-                    md:relative md:h-screen md:flex md:flex-col md:transform-none
-                    fixed left-0 top-0 h-full transform ${isOpen ? 'translate-x-0' : '-translate-x-full'
-          } ${collapsed ? 'md:w-20' : 'md:w-64'} ${isOpen ? 'w-64' : 'w-0'
-          } md:${collapsed ? 'w-20' : 'w-64'}`}
-        style={{ touchAction: 'pan-y' }}
+      {/* Sidebar */}
+      <aside
+        data-testid="main-sidebar"
+        className={`
+          h-full bg-gradient-to-b from-white via-slate-50 to-blue-50 
+          border-r border-slate-200 shadow-xl
+          transition-all duration-300 ease-in-out
+          flex flex-col pointer-events-auto
+          fixed top-0 left-0 z-50
+          ${isOpen ? 'translate-x-0 w-64' : '-translate-x-full w-0'}
+          md:relative md:z-auto md:translate-x-0
+          ${mounted && collapsed ? 'md:w-16' : 'md:w-64'}
+        `}
       >
         {/* Desktop Header */}
-        <div className="hidden md:flex justify-between items-center p-6 border-b border-slate-200">
-          <div className={`transition-opacity duration-300 ${collapsed ? 'opacity-0 w-0 overflow-hidden' : 'opacity-100'
+        <div className="hidden md:flex justify-between items-center p-4 border-b border-slate-200 pointer-events-auto">
+          <div className={`transition-all duration-300 ${collapsed ? 'opacity-0 w-0 overflow-hidden' : 'opacity-100 w-auto'
             }`}>
-            <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+            <h1 className="text-xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent whitespace-nowrap">
               OpenBlogAI
             </h1>
           </div>
           <ToggleButton onClick={toggleCollapse} isOpen={!collapsed} />
         </div>
 
-        {/* Mobile Header */}
-        <div className="md:hidden flex justify-between items-center p-4 border-b border-slate-200">
-          <h1 className="text-xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-            OpenBlogAI
-          </h1>
-          <button
-            onClick={onToggle || toggleSidebar}
-            className="p-2 rounded-lg hover:bg-slate-100 transition-colors"
-          >
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          </button>
-        </div>
+        {/* Mobile Header - only show when sidebar is open on mobile */}
+        {mounted && isOpen && (
+          <div className="md:hidden flex justify-between items-center p-4 border-b border-slate-200 bg-slate-50/80 backdrop-blur-sm">
+            <h1 className="text-lg font-semibold text-slate-700">
+              Menu
+            </h1>
+            <button
+              onClick={onToggle || toggleSidebar}
+              className="p-2 rounded-lg hover:bg-slate-200 active:bg-slate-300 transition-colors"
+              aria-label="Close menu"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+        )}
         {/* Navigation Links */}
-        <div className="flex-1 flex flex-col px-4 py-6 overflow-y-auto">
-          <nav className="flex-1">
-            <ul className="space-y-2">
+        <div
+          className="flex-1 flex flex-col px-4 py-6 overflow-y-auto pointer-events-auto"
+          onClick={(e) => console.log('Navigation container clicked:', e.target)}
+        >
+          <nav className="flex-1 pointer-events-auto">
+            <ul className="space-y-2 pointer-events-auto">
               <SidebarItem
                 href="/"
                 icon="home"
@@ -194,7 +208,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen: externalIsOpen, onTogg
         </div>
 
 
-      </nav>
+      </aside>
     </>
   );
 };

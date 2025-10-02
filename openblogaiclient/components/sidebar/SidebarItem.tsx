@@ -62,10 +62,13 @@ export const SidebarItem: React.FC<SidebarItemProps> = ({
           {href ? (
             <a
               href={href}
-              onClick={onClick}
-              className={`group flex items-center gap-4 rounded-xl p-3 transition-all duration-300 w-full relative overflow-hidden ${active
-                  ? "bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-lg shadow-blue-200"
-                  : "text-slate-700 hover:bg-slate-100 hover:shadow-md"
+              onClick={(e) => {
+                console.log('Sidebar link clicked:', href, e);
+                if (onClick) onClick();
+              }}
+              className={`group flex items-center gap-4 rounded-xl p-3 transition-all duration-300 w-full relative overflow-hidden pointer-events-auto ${active
+                ? "bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-lg shadow-blue-200"
+                : "text-slate-700 hover:bg-slate-100 hover:shadow-md"
                 } no-underline`}
             >
               <div className={`flex items-center justify-center w-6 h-6 ${active ? 'text-white' : 'text-slate-600'}`}>
@@ -81,10 +84,13 @@ export const SidebarItem: React.FC<SidebarItemProps> = ({
             </a>
           ) : (
             <button
-              onClick={onClick}
-              className={`group flex items-center gap-4 rounded-xl p-3 transition-all duration-300 w-full relative overflow-hidden ${active
-                  ? "bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-lg shadow-blue-200"
-                  : "text-slate-700 hover:bg-slate-100 hover:shadow-md"
+              onClick={(e) => {
+                console.log('Sidebar button clicked:', text, e);
+                if (onClick) onClick();
+              }}
+              className={`group flex items-center gap-4 rounded-xl p-3 transition-all duration-300 w-full relative overflow-hidden pointer-events-auto ${active
+                ? "bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-lg shadow-blue-200"
+                : "text-slate-700 hover:bg-slate-100 hover:shadow-md"
                 } border-none bg-transparent cursor-pointer`}
             >
               <div className={`flex items-center justify-center w-6 h-6 ${active ? 'text-white' : 'text-slate-600'}`}>
