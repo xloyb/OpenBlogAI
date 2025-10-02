@@ -13,6 +13,7 @@ router.post("/generate-blog", generateBlog as any);
 router.get('/public/blogs', getAllBlogs);
 // Protected route to get user's blogs
 router.get('/blogs', authenticateJWT, getAllBlogs);
+router.get('/blogs/slug/:slug', getSingleBlog);
 router.get('/blogs/:id', getSingleBlog);
 router.patch('/blogs/:id', updateExistingBlog);
 router.delete('/blogs/:id', deleteExistingBlog);
