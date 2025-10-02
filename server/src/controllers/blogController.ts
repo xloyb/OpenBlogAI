@@ -4,7 +4,7 @@ import { Request, Response, NextFunction } from "express";
 import { createOpenAI } from "@ai-sdk/openai";
 import { streamText, CoreMessage } from "ai";
 import { CHAT_INSTRUCTIONS } from "@src/utils/instructions";
-import { createBlog, deleteBlog, getBlogById, getBlogs, updateBlog } from "@src/services/blogService";
+import { createBlog, deleteBlog, getBlogById, getBlogBySlug, getBlogs, updateBlog } from "@src/services/blogService";
 
 // OpenRouter Free Models Configuration
 const FREE_MODEL_CONFIG = {
@@ -211,18 +211,30 @@ export const getAllBlogs = async (
 };
 
 export const getSingleBlog = async (
-    req: Request<{ id: string }>,
+    req: Request<{ id?: string; slug?: string }>,
     res: Response,
     next: NextFunction
 ): Promise<void> => {
     try {
-        const id = parseInt(req.params.id);
-        if (isNaN(id)) {
-            res.status(400).json({ error: true, message: "Invalid blog ID" });
+        let blog;
+
+        // Check if we're fetching by slug or by ID
+        if (req.params.slug) {
+            // Slug-based fetching
+            blog = await getBlogBySlug(req.params.slug);
+        } else if (req.params.id) {
+            // ID-based fetching (legacy support)
+            const id = parseInt(req.params.id);
+            if (isNaN(id)) {
+                res.status(400).json({ error: true, message: "Invalid blog ID" });
+                return;
+            }
+            blog = await getBlogById(id);
+        } else {
+            res.status(400).json({ error: true, message: "Blog ID or slug is required" });
             return;
         }
 
-        const blog = await getBlogById(id);
         if (!blog) {
             res.status(404).json({ error: true, message: "Blog not found" });
             return;
