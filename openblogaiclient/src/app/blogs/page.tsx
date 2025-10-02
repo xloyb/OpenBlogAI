@@ -86,6 +86,23 @@ export default function PublicBlogsPage() {
     return cleanText.substring(0, 200) + (cleanText.length > 200 ? "..." : "");
   };
 
+  const createSlug = (title: string, createdAt: string) => {
+    // Clean the title: remove markdown, special chars, convert to lowercase
+    const cleanTitle = title
+      .replace(/[#*`_~\[\]()]/g, '') // Remove markdown
+      .replace(/[^a-zA-Z0-9\s-]/g, '') // Remove special chars except spaces and hyphens
+      .trim()
+      .toLowerCase()
+      .replace(/\s+/g, '-') // Replace spaces with hyphens
+      .replace(/-+/g, '-') // Replace multiple hyphens with single
+      .substring(0, 60); // Limit length
+
+    // Format date as YYYY-MM-DD
+    const date = new Date(createdAt).toISOString().split('T')[0];
+
+    return `${cleanTitle}-${date}`;
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-indigo-50 flex items-center justify-center">
@@ -254,7 +271,7 @@ export default function PublicBlogsPage() {
 
                 <div className="mt-6">
                   <Link
-                    href={`/blogs/${blog.id}`}
+                    href={`/blogs/${createSlug(blog.subject, blog.createdAt)}`}
                     className="inline-flex items-center text-indigo-600 font-semibold hover:text-indigo-700 transition-colors duration-300 group-hover:scale-105"
                   >
                     Read More
