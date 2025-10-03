@@ -5,6 +5,8 @@ import { createOpenAI } from "@ai-sdk/openai";
 import { streamText, CoreMessage } from "ai";
 import { CHAT_INSTRUCTIONS } from "@src/utils/instructions";
 import { createBlog, deleteBlog, getBlogById, getBlogBySlug, getBlogs, updateBlog, getBlogsWithPagination } from "@src/services/blogService";
+import { cachedBlogService } from "@src/services/cachedBlogService";
+import { markForCacheInvalidation } from "@src/middlewares/cacheMiddleware";
 
 // OpenRouter Free Models Configuration
 const FREE_MODEL_CONFIG = {
@@ -159,6 +161,9 @@ export const generateBlog = async (
             userId: uid,
         });
 
+        // Mark for cache invalidation since we created a new public blog
+        markForCacheInvalidation(req as any, { invalidateAll: true });
+
         res.status(200).json({
             success: true,
             blog: rawBlog,
@@ -255,7 +260,8 @@ export const getPublicBlogs = async (
             visible: 1, // Only visible blogs for public
         };
 
-        const paginatedBlogs = await getBlogsWithPagination(options);
+        // Use cached service for public blogs to improve performance
+        const paginatedBlogs = await cachedBlogService.getBlogsWithPaginationCached(options);
 
         // If search term is provided, filter results
         if (search && typeof search === 'string') {
@@ -295,16 +301,16 @@ export const getSingleBlog = async (
 
         // Check if we're fetching by slug or by ID
         if (req.params.slug) {
-            // Slug-based fetching
-            blog = await getBlogBySlug(req.params.slug);
+            // Slug-based fetching with cache
+            blog = await cachedBlogService.getBlogBySlugCached(req.params.slug);
         } else if (req.params.id) {
-            // ID-based fetching (legacy support)
+            // ID-based fetching (legacy support) with cache
             const id = parseInt(req.params.id);
             if (isNaN(id)) {
                 res.status(400).json({ error: true, message: "Invalid blog ID" });
                 return;
             }
-            blog = await getBlogById(id);
+            blog = await cachedBlogService.getBlogByIdCached(id);
         } else {
             res.status(400).json({ error: true, message: "Blog ID or slug is required" });
             return;
@@ -340,6 +346,10 @@ export const updateExistingBlog = async (
         }
 
         const updatedBlog = await updateBlog(id, req.body);
+
+        // Mark for cache invalidation after blog update
+        markForCacheInvalidation(req as any, { blogId: id });
+
         res.status(200).json(updatedBlog);
     } catch (error) {
         next(error);
@@ -365,6 +375,10 @@ export const deleteExistingBlog = async (
         }
 
         await deleteBlog(id);
+
+        // Mark for cache invalidation after blog deletion
+        markForCacheInvalidation(req as any, { blogId: id });
+
         res.status(204).send();
     } catch (error) {
         next(error);

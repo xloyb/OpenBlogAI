@@ -13,6 +13,8 @@ import { globalErrorHandler } from '@src/utils/errorHandler';
 import transcriptRoutes from './routes/transcriptRoutes';
 import blogRoutes from './routes/blogRoutes';
 import userRoutes from './routes/userRoutes';
+import { redisClient, cacheManager } from '@src/utils/cache';
+import { cachedBlogService } from '@src/services/cachedBlogService';
 
 const app = express();
 
@@ -68,8 +70,77 @@ app.use("/api/users", userRoutes);
 // 8. Global error handling middleware (should be the last middleware)
 app.use(globalErrorHandler);
 
-// 9. Start the server
+// 9. Initialize Redis and start the server
 const PORT = parseInt(process.env.PORT || '8082', 10);
-app.listen(PORT, '0.0.0.0', () => {
-  console.log(`Server running on port ${PORT} - http://0.0.0.0:${PORT}`);
+
+async function startServer() {
+  try {
+    // Initialize Redis connection with graceful fallback
+    console.log('Initializing Redis connection...');
+    let redisConnected = false;
+
+    try {
+      // Try to connect to Redis with timeout
+      await Promise.race([
+        redisClient.connect(),
+        new Promise((_, reject) => setTimeout(() => reject(new Error('Redis connection timeout')), 3000))
+      ]);
+
+      // Check Redis connection status with a short delay
+      await new Promise(resolve => setTimeout(resolve, 100));
+      redisConnected = await cacheManager.isConnected();
+
+      if (redisConnected) {
+        console.log('✅ Redis connected successfully');
+
+        // Warm up cache with commonly requested data (optional)
+        setTimeout(async () => {
+          try {
+            await cachedBlogService.warmUpCache();
+            console.log('✅ Cache warm-up completed');
+          } catch (error) {
+            console.warn('⚠️ Cache warm-up failed (non-critical):', error);
+          }
+        }, 2000); // Wait 2 seconds after server start
+      }
+    } catch (error) {
+      console.warn('⚠️ Redis connection failed - continuing without cache');
+      console.warn('⚠️ Cache will be bypassed and data will be served directly from database');
+      redisConnected = false;
+
+      // Ensure Redis client is disconnected to prevent reconnection attempts
+      try {
+        redisClient.disconnect(false);
+      } catch (disconnectError) {
+        // Ignore disconnect errors
+      }
+    }
+
+    // Start the Express server regardless of Redis status
+    app.listen(PORT, '0.0.0.0', () => {
+      console.log(`🚀 Server running on port ${PORT} - http://0.0.0.0:${PORT}`);
+      if (redisConnected) {
+        console.log(`📊 Cache stats endpoint: http://0.0.0.0:${PORT}/api/blog/cache/stats`);
+        console.log(`🗑️ Cache invalidation endpoint: http://0.0.0.0:${PORT}/api/blog/cache/invalidate`);
+      } else {
+        console.log(`⚠️ Cache endpoints unavailable - Redis not connected`);
+      }
+    });
+  } catch (error) {
+    console.error('❌ Failed to start server:', error);
+    process.exit(1);
+  }
+}// Handle graceful shutdown
+process.on('SIGTERM', async () => {
+  console.log('🛑 SIGTERM received, shutting down gracefully...');
+  await redisClient.quit();
+  process.exit(0);
 });
+
+process.on('SIGINT', async () => {
+  console.log('🛑 SIGINT received, shutting down gracefully...');
+  await redisClient.quit();
+  process.exit(0);
+});
+
+startServer();
