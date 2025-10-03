@@ -4,6 +4,7 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import { FiCheck, FiArrowLeft, FiEdit, FiEye, FiSave, FiShare2, FiAlertCircle, FiVideo, FiFileText, FiCpu } from "react-icons/fi";
 import { useSession } from "next-auth/react";
+import ReactMarkdown from "react-markdown";
 import { blogAPI } from "../../lib/blog-api";
 
 interface StepData {
@@ -202,12 +203,13 @@ export default function ModeratorReview({ stepData, onPrev, isModerator }: Moder
                             placeholder="Edit your blog content here..."
                         />
                     ) : showPreview ? (
-                        <div
-                            className="prose prose-sm max-w-none"
-                            dangerouslySetInnerHTML={{
-                                __html: getCurrentBlog().replace(/\n/g, '<br>')
-                            }}
-                        />
+                        <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            className="prose prose-lg max-w-none prose-headings:text-primary prose-links:text-secondary prose-strong:text-accent prose-code:text-accent prose-pre:bg-base-300 prose-blockquote:border-primary"
+                        >
+                            <ReactMarkdown>{getCurrentBlog()}</ReactMarkdown>
+                        </motion.div>
                     ) : (
                         <div className="font-mono text-sm whitespace-pre-wrap">
                             {getCurrentBlog()}
