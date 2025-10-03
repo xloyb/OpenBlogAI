@@ -357,21 +357,3 @@ Key models:
 ## 📝 License
 
 This project is open source and available under the [MIT License](LICENSE).
-
-## 🙏 Acknowledgments
-
-- **Next.js Team** for the amazing React framework
-- **Prisma** for the excellent database toolkit
-- **OpenAI** for powerful AI capabilities
-- **Vercel** for deployment and hosting solutions
-- **Contributors** who help improve this project
-
-## 📞 Support
-
-- **Issues**: [GitHub Issues](https://github.com/xloyb/OpenBlogAI/issues)
-- **Discussions**: [GitHub Discussions](https://github.com/xloyb/OpenBlogAI/discussions)
-- **Documentation**: Check the `/docs` folder for detailed guides
-
----
-
-**Made with ❤️ and AI** - Transform your videos into engaging blog content today!
