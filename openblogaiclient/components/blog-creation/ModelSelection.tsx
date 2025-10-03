@@ -347,24 +347,31 @@ export default function ModelSelection({ onModelSelect, onNext, onPrev, selected
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.3 }}
-                className="flex justify-between pt-4"
+                className="flex justify-between pt-6"
             >
-                <button
+                <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.98 }}
                     onClick={onPrev}
-                    className="btn btn-outline btn-lg gap-2"
+                    className="px-8 py-4 bg-white text-slate-700 font-semibold rounded-2xl border-2 border-slate-200 hover:border-indigo-300 transition-all duration-300 hover:shadow-lg flex items-center gap-2"
                 >
                     <FiArrowLeft className="w-5 h-5" />
                     Back
-                </button>
+                </motion.button>
 
-                <button
+                <motion.button
+                    whileHover={{ scale: !selected ? 1 : 1.05 }}
+                    whileTap={{ scale: 0.98 }}
                     onClick={handleNext}
                     disabled={!selected}
-                    className="btn btn-primary btn-lg gap-2"
+                    className="group relative px-8 py-4 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-semibold rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 overflow-hidden disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
                 >
-                    Generate Blog
-                    <FiArrowRight className="w-5 h-5" />
-                </button>
+                    <div className="absolute inset-0 bg-gradient-to-r from-purple-600 to-indigo-600 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                    <div className="relative flex items-center gap-2">
+                        Generate Blog
+                        <FiArrowRight className="w-5 h-5" />
+                    </div>
+                </motion.button>
             </motion.div>
         </div>
     );
