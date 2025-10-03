@@ -25,6 +25,10 @@ interface Blog {
   visible: number;
   userId: string;
   videoId?: number;
+  seoTitle?: string;
+  seoDescription?: string;
+  seoKeywords?: string[];
+  seoFaq?: string[];
   createdAt: string;
   updatedAt: string;
   user?: {
@@ -294,8 +298,8 @@ export default function PublicBlogsPage() {
                 <button
                   onClick={() => handleSortChange('createdAt')}
                   className={`px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 flex items-center gap-1 ${sortBy === 'createdAt'
-                      ? 'bg-indigo-100 text-indigo-700'
-                      : 'bg-white text-slate-600 hover:bg-slate-50'
+                    ? 'bg-indigo-100 text-indigo-700'
+                    : 'bg-white text-slate-600 hover:bg-slate-50'
                     }`}
                 >
                   Date
@@ -306,8 +310,8 @@ export default function PublicBlogsPage() {
                 <button
                   onClick={() => handleSortChange('subject')}
                   className={`px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 flex items-center gap-1 ${sortBy === 'subject'
-                      ? 'bg-indigo-100 text-indigo-700'
-                      : 'bg-white text-slate-600 hover:bg-slate-50'
+                    ? 'bg-indigo-100 text-indigo-700'
+                    : 'bg-white text-slate-600 hover:bg-slate-50'
                     }`}
                 >
                   Title
@@ -457,8 +461,8 @@ export default function PublicBlogsPage() {
                   onClick={() => handlePageChange(currentPage - 1)}
                   disabled={!meta.hasPrevPage}
                   className={`p-2 rounded-lg transition-all duration-200 ${meta.hasPrevPage
-                      ? 'bg-white text-slate-600 hover:bg-slate-50 border border-slate-200'
-                      : 'bg-slate-100 text-slate-400 cursor-not-allowed'
+                    ? 'bg-white text-slate-600 hover:bg-slate-50 border border-slate-200'
+                    : 'bg-slate-100 text-slate-400 cursor-not-allowed'
                     }`}
                 >
                   <FiChevronLeft className="w-5 h-5" />
@@ -482,8 +486,8 @@ export default function PublicBlogsPage() {
                         key={pageNum}
                         onClick={() => handlePageChange(pageNum)}
                         className={`w-10 h-10 rounded-lg transition-all duration-200 text-sm font-medium ${pageNum === currentPage
-                            ? 'bg-indigo-600 text-white'
-                            : 'bg-white text-slate-600 hover:bg-slate-50 border border-slate-200'
+                          ? 'bg-indigo-600 text-white'
+                          : 'bg-white text-slate-600 hover:bg-slate-50 border border-slate-200'
                           }`}
                       >
                         {pageNum}
@@ -496,8 +500,8 @@ export default function PublicBlogsPage() {
                   onClick={() => handlePageChange(currentPage + 1)}
                   disabled={!meta.hasNextPage}
                   className={`p-2 rounded-lg transition-all duration-200 ${meta.hasNextPage
-                      ? 'bg-white text-slate-600 hover:bg-slate-50 border border-slate-200'
-                      : 'bg-slate-100 text-slate-400 cursor-not-allowed'
+                    ? 'bg-white text-slate-600 hover:bg-slate-50 border border-slate-200'
+                    : 'bg-slate-100 text-slate-400 cursor-not-allowed'
                     }`}
                 >
                   <FiChevronRight className="w-5 h-5" />

@@ -14,6 +14,10 @@ interface Blog {
     visible: number;
     userId: string;
     videoId?: number;
+    seoTitle?: string;
+    seoDescription?: string;
+    seoKeywords?: string[];
+    seoFaq?: string[];
     createdAt: string;
     updatedAt: string;
     user?: {
@@ -33,6 +37,10 @@ interface BlogUpdateData {
     subject?: string;
     content?: string;
     visible?: number;
+    seoTitle?: string;
+    seoDescription?: string;
+    seoKeywords?: string[];
+    seoFaq?: string[];
 }
 
 interface TranscriptResponse {
@@ -117,7 +125,13 @@ class BlogCreationAPI {
         modelId: string,
         transcript: string,
         userId: string,
-        accessToken: string
+        accessToken: string,
+        seoFields?: {
+            seoTitle?: string;
+            seoDescription?: string;
+            seoKeywords?: string[];
+            seoFaq?: string[];
+        }
     ): Promise<BlogGenerationResponse> {
         const response = await fetch(`${this.baseUrl}/api/blog/generate-blog`, {
             method: 'POST',
@@ -125,7 +139,8 @@ class BlogCreationAPI {
             body: JSON.stringify({
                 modelId,
                 transcript,
-                uid: userId
+                uid: userId,
+                ...seoFields
             })
         });
 

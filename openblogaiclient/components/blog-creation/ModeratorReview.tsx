@@ -6,6 +6,8 @@ import { FiCheck, FiArrowLeft, FiEdit, FiEye, FiSave, FiShare2, FiAlertCircle, F
 import { useSession } from "next-auth/react";
 import ReactMarkdown from "react-markdown";
 import { blogAPI } from "../../lib/blog-api";
+import SEOFieldsForm from "./SEOFieldsForm";
+import { SEOFieldsFormData } from "../../types/blog";
 
 interface StepData {
     videoUrl?: string;
@@ -29,6 +31,12 @@ export default function ModeratorReview({ stepData, onPrev, isModerator }: Moder
     const [showPreview, setShowPreview] = useState(false);
     const [publishStatus, setPublishStatus] = useState<"idle" | "publishing" | "success" | "error">("idle");
     const [error, setError] = useState("");
+    const [seoFields, setSeoFields] = useState<SEOFieldsFormData>({
+        seoTitle: "",
+        seoDescription: "",
+        seoKeywords: [],
+        seoFaq: []
+    });
 
     const handlePublish = async () => {
         if (!session?.user?.id) return;
@@ -41,7 +49,13 @@ export default function ModeratorReview({ stepData, onPrev, isModerator }: Moder
                 stepData.selectedModel || '',
                 stepData.transcript || '',
                 session.user.id,
-                session.accessToken as string
+                session.accessToken as string,
+                {
+                    seoTitle: seoFields.seoTitle || undefined,
+                    seoDescription: seoFields.seoDescription || undefined,
+                    seoKeywords: seoFields.seoKeywords.length > 0 ? seoFields.seoKeywords : undefined,
+                    seoFaq: seoFields.seoFaq.length > 0 ? seoFields.seoFaq : undefined
+                }
             );
 
             setPublishStatus("success");
@@ -217,6 +231,12 @@ export default function ModeratorReview({ stepData, onPrev, isModerator }: Moder
                     )}
                 </div>
             </motion.div>
+
+            {/* SEO Fields Form */}
+            <SEOFieldsForm
+                onSEOFieldsChange={setSeoFields}
+                initialData={seoFields}
+            />
 
             {/* Moderator Checklist */}
             {isModerator && (
