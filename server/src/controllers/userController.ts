@@ -497,3 +497,203 @@ export const toggleUserStatusController = async (
         next(error);
     }
 };
+
+export const getUserProfileController = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+): Promise<void> => {
+    try {
+        const userId = req.user?.userId;
+
+        if (!userId) {
+            throw new AppError("User not authenticated", 401);
+        }
+
+        // Get user profile with statistics
+        const user = await prisma.user.findUnique({
+            where: { id: userId },
+            select: {
+                id: true,
+                name: true,
+                email: true,
+                createdAt: true,
+                updatedAt: true,
+                isAdmin: true,
+                isModerator: true,
+                isVerifiedPoster: true,
+                isBlocked: true,
+                _count: {
+                    select: {
+                        Blogs: {
+                            where: { visible: 1 }
+                        },
+                        Videos: true
+                    }
+                }
+            }
+        });
+
+        if (!user) {
+            throw new AppError("User not found", 404);
+        }
+
+        // Get recent activity statistics
+        const thirtyDaysAgo = new Date();
+        thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+
+        const sevenDaysAgo = new Date();
+        sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+
+        const [
+            recentBlogs,
+            recentVideos,
+            weeklyBlogs,
+            weeklyVideos,
+            totalBlogViews
+        ] = await Promise.all([
+            prisma.blog.count({
+                where: {
+                    userId,
+                    visible: 1,
+                    createdAt: { gte: thirtyDaysAgo }
+                }
+            }),
+            prisma.video.count({
+                where: {
+                    userId,
+                    createdAt: { gte: thirtyDaysAgo }
+                }
+            }),
+            prisma.blog.count({
+                where: {
+                    userId,
+                    visible: 1,
+                    createdAt: { gte: sevenDaysAgo }
+                }
+            }),
+            prisma.video.count({
+                where: {
+                    userId,
+                    createdAt: { gte: sevenDaysAgo }
+                }
+            }),
+            // Mock blog views - you can implement actual view tracking later
+            Promise.resolve(user._count.Blogs * Math.floor(Math.random() * 100) + 50)
+        ]);
+
+        // Calculate user achievements
+        const achievements = [];
+        if (user._count.Blogs >= 1) achievements.push({ name: "First Blog", icon: "📝", description: "Published your first blog post" });
+        if (user._count.Blogs >= 5) achievements.push({ name: "Blogger", icon: "✍️", description: "Published 5 blog posts" });
+        if (user._count.Blogs >= 10) achievements.push({ name: "Prolific Writer", icon: "🏆", description: "Published 10 blog posts" });
+        if (user._count.Videos >= 1) achievements.push({ name: "Content Creator", icon: "🎥", description: "Uploaded your first video" });
+        if (user.isVerifiedPoster) achievements.push({ name: "Verified", icon: "✅", description: "Verified content creator" });
+        if (user.isModerator) achievements.push({ name: "Moderator", icon: "👮", description: "Community moderator" });
+        if (user.isAdmin) achievements.push({ name: "Administrator", icon: "👑", description: "Platform administrator" });
+
+        const profileData = {
+            user: {
+                id: user.id,
+                name: user.name,
+                email: user.email,
+                createdAt: user.createdAt,
+                updatedAt: user.updatedAt,
+                role: user.isAdmin ? 'admin' : user.isModerator ? 'moderator' : 'user',
+                isVerifiedPoster: user.isVerifiedPoster,
+                isBlocked: user.isBlocked,
+                isActive: !user.isBlocked
+            },
+            statistics: {
+                totalBlogs: user._count.Blogs,
+                totalVideos: user._count.Videos,
+                recentBlogs,
+                recentVideos,
+                weeklyBlogs,
+                weeklyVideos,
+                totalBlogViews,
+                accountAge: Math.floor((Date.now() - user.createdAt.getTime()) / (1000 * 60 * 60 * 24))
+            },
+            achievements
+        };
+
+        res.status(200).json({
+            success: true,
+            data: profileData
+        });
+    } catch (error) {
+        next(error);
+    }
+};
+
+export const getUserActivityController = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+): Promise<void> => {
+    try {
+        const userId = req.user?.userId;
+        const { limit = 20 } = req.query;
+
+        if (!userId) {
+            throw new AppError("User not authenticated", 401);
+        }
+
+        const limitNum = Math.min(parseInt(limit as string) || 20, 50);
+
+        // Get recent blogs and videos
+        const [recentBlogs, recentVideos] = await Promise.all([
+            prisma.blog.findMany({
+                where: { userId, visible: 1 },
+                select: {
+                    id: true,
+                    subject: true,
+                    createdAt: true
+                },
+                orderBy: { createdAt: 'desc' },
+                take: Math.floor(limitNum / 2)
+            }),
+            prisma.video.findMany({
+                where: { userId },
+                select: {
+                    id: true,
+                    title: true,
+                    createdAt: true
+                },
+                orderBy: { createdAt: 'desc' },
+                take: Math.floor(limitNum / 2)
+            })
+        ]);
+
+        // Combine and format activities
+        const activities = [
+            ...recentBlogs.map(blog => ({
+                id: `blog-${blog.id}`,
+                type: 'blog_created',
+                title: blog.subject,
+                createdAt: blog.createdAt,
+                icon: '📝',
+                description: `Published blog post "${blog.subject}"`
+            })),
+            ...recentVideos.map(video => ({
+                id: `video-${video.id}`,
+                type: 'video_uploaded',
+                title: video.title,
+                createdAt: video.createdAt,
+                icon: '🎥',
+                description: `Uploaded video "${video.title}"`
+            }))
+        ];
+
+        // Sort by date and limit
+        activities.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+        const limitedActivities = activities.slice(0, limitNum);
+
+        res.status(200).json({
+            success: true,
+            data: limitedActivities
+        });
+    } catch (error) {
+        next(error);
+    }
+};
