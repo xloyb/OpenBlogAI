@@ -83,11 +83,98 @@ const createSlugFromBlog = (title: string, createdAt: Date) => {
   return `${cleanTitle}-${date}`;
 };
 
+// Interfaces for pagination and sorting
+interface PaginationOptions {
+  page?: number;
+  limit?: number;
+  sortBy?: 'createdAt' | 'updatedAt' | 'subject' | 'id';
+  sortOrder?: 'asc' | 'desc';
+  visible?: number;
+}
+
+interface PaginatedResponse<T> {
+  data: T[];
+  meta: {
+    total: number;
+    page: number;
+    limit: number;
+    totalPages: number;
+    hasNextPage: boolean;
+    hasPrevPage: boolean;
+  };
+}
+
 export const getBlogs = async () => {
   return await prisma.blog.findMany({
     include: { user: false, video: true },
     orderBy: { createdAt: "desc" },
   });
+};
+
+export const getBlogsWithPagination = async (options: PaginationOptions = {}): Promise<PaginatedResponse<any>> => {
+  const {
+    page = 1,
+    limit = 10,
+    sortBy = 'createdAt',
+    sortOrder = 'desc',
+    visible
+  } = options;
+
+  // Validate pagination parameters
+  const validatedPage = Math.max(1, page);
+  const validatedLimit = Math.min(Math.max(1, limit), 100); // Max 100 items per page
+  const skip = (validatedPage - 1) * validatedLimit;
+
+  // Validate sort parameters
+  const validSortFields = ['createdAt', 'updatedAt', 'subject', 'id'];
+  const validatedSortBy = validSortFields.includes(sortBy) ? sortBy : 'createdAt';
+  const validatedSortOrder = ['asc', 'desc'].includes(sortOrder) ? sortOrder : 'desc';
+
+  // Build where clause
+  const whereClause: any = {};
+  if (visible !== undefined) {
+    whereClause.visible = visible;
+  }
+
+  // Get total count for pagination metadata
+  const total = await prisma.blog.count({
+    where: whereClause,
+  });
+
+  // Get paginated data
+  const data = await prisma.blog.findMany({
+    where: whereClause,
+    include: {
+      user: {
+        select: {
+          id: true,
+          email: true,
+          // Exclude sensitive data
+        }
+      },
+      video: true
+    },
+    orderBy: { [validatedSortBy]: validatedSortOrder },
+    skip,
+    take: validatedLimit,
+  });
+
+  // Calculate pagination metadata
+  const totalPages = Math.ceil(total / validatedLimit);
+  const hasNextPage = validatedPage < totalPages;
+  const hasPrevPage = validatedPage > 1;
+
+  return {
+    data,
+    meta: {
+      total,
+      page: validatedPage,
+      limit: validatedLimit,
+      totalPages,
+      hasNextPage,
+      hasPrevPage,
+    },
+  };
 };
 
 export const updateBlog = async (id: number, data: { subject?: string; content?: string; visible?: number }) => {

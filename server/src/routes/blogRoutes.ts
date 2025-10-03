@@ -1,6 +1,6 @@
 // src/routes/blogRoutes.ts
 import { Router } from "express";
-import { deleteExistingBlog, generateBlog, getAllBlogs, getSingleBlog, updateExistingBlog, getAvailableModels } from "@controllers/blogController";
+import { deleteExistingBlog, generateBlog, getAllBlogs, getSingleBlog, updateExistingBlog, getAvailableModels, getPublicBlogs } from "@controllers/blogController";
 import { authenticateJWT, authorizeAdmin } from "@src/middlewares/authMiddleware";
 
 const router = Router();
@@ -9,8 +9,8 @@ const router = Router();
 router.get('/models', getAvailableModels);
 // Route to generate a blog from a transcript
 router.post("/generate-blog", generateBlog as any);
-// Public route to get all visible blogs without authentication
-router.get('/public/blogs', getAllBlogs);
+// Public route to get all visible blogs with pagination and sorting
+router.get('/public/blogs', getPublicBlogs);
 // Protected route to get user's blogs
 router.get('/blogs', authenticateJWT, getAllBlogs);
 router.get('/blogs/slug/:slug', getSingleBlog);

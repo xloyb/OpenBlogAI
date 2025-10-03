@@ -4,7 +4,7 @@ import { Request, Response, NextFunction } from "express";
 import { createOpenAI } from "@ai-sdk/openai";
 import { streamText, CoreMessage } from "ai";
 import { CHAT_INSTRUCTIONS } from "@src/utils/instructions";
-import { createBlog, deleteBlog, getBlogById, getBlogBySlug, getBlogs, updateBlog } from "@src/services/blogService";
+import { createBlog, deleteBlog, getBlogById, getBlogBySlug, getBlogs, updateBlog, getBlogsWithPagination } from "@src/services/blogService";
 
 // OpenRouter Free Models Configuration
 const FREE_MODEL_CONFIG = {
@@ -196,15 +196,90 @@ export const getAvailableModels = async (
     }
 };
 
-// Keep existing CRUD operations unchanged
+// Enhanced blogs controller with pagination and sorting
 export const getAllBlogs = async (
     req: Request,
     res: Response,
     next: NextFunction
 ): Promise<void> => {
     try {
-        const blogs = await getBlogs();
-        res.status(200).json(blogs);
+        // Check if this is a paginated request
+        const { page, limit, sortBy, sortOrder, paginated } = req.query;
+
+        // If pagination parameters are provided or explicitly requested
+        if (page || limit || sortBy || sortOrder || paginated === 'true') {
+            const options = {
+                page: page ? parseInt(page as string) : undefined,
+                limit: limit ? parseInt(limit as string) : undefined,
+                sortBy: sortBy as 'createdAt' | 'updatedAt' | 'subject' | 'id',
+                sortOrder: sortOrder as 'asc' | 'desc',
+                // For public route, only show visible blogs
+                visible: req.path.includes('/public/') ? 1 : undefined,
+            };
+
+            const paginatedBlogs = await getBlogsWithPagination(options);
+            res.status(200).json({
+                success: true,
+                ...paginatedBlogs
+            });
+        } else {
+            // Legacy support - return all blogs without pagination
+            const blogs = await getBlogs();
+            res.status(200).json(blogs);
+        }
+    } catch (error) {
+        next(error);
+    }
+};
+
+// Dedicated controller for public blogs with enhanced features
+export const getPublicBlogs = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+): Promise<void> => {
+    try {
+        const {
+            page = 1,
+            limit = 10,
+            sortBy = 'createdAt',
+            sortOrder = 'desc',
+            search
+        } = req.query;
+
+        const options = {
+            page: parseInt(page as string),
+            limit: parseInt(limit as string),
+            sortBy: sortBy as 'createdAt' | 'updatedAt' | 'subject' | 'id',
+            sortOrder: sortOrder as 'asc' | 'desc',
+            visible: 1, // Only visible blogs for public
+        };
+
+        const paginatedBlogs = await getBlogsWithPagination(options);
+
+        // If search term is provided, filter results
+        if (search && typeof search === 'string') {
+            const searchTerm = search.toLowerCase();
+            paginatedBlogs.data = paginatedBlogs.data.filter(blog =>
+                blog.subject?.toLowerCase().includes(searchTerm) ||
+                blog.content?.toLowerCase().includes(searchTerm)
+            );
+            // Update total count after filtering
+            paginatedBlogs.meta.total = paginatedBlogs.data.length;
+            paginatedBlogs.meta.totalPages = Math.ceil(paginatedBlogs.data.length / options.limit);
+        }
+
+        res.status(200).json({
+            success: true,
+            ...paginatedBlogs,
+            query: {
+                page: options.page,
+                limit: options.limit,
+                sortBy: options.sortBy,
+                sortOrder: options.sortOrder,
+                search: search || null,
+            }
+        });
     } catch (error) {
         next(error);
     }
