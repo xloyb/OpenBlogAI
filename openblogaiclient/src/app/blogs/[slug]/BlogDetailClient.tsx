@@ -6,7 +6,7 @@ import Link from 'next/link';
 import { motion } from 'framer-motion';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
-import { FiArrowLeft, FiShare2, FiCalendar, FiClock, FiEye } from 'react-icons/fi';
+import { FiArrowLeft, FiShare2, FiCalendar, FiClock, FiEye, FiTag, FiHelpCircle } from 'react-icons/fi';
 
 interface Blog {
     id: number;
@@ -201,11 +201,73 @@ export default function BlogDetailClient({ blog, slug }: Props) {
                         </div>
                     </motion.div>
 
+                    {/* Keywords Section */}
+                    {blog.seoKeywords && blog.seoKeywords.length > 0 && (
+                        <motion.div
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: 0.5 }}
+                            className="px-6 sm:px-10 lg:px-12 xl:px-16 2xl:px-20 pb-6"
+                        >
+                            <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-2xl p-6 border border-blue-200">
+                                <div className="flex items-center mb-4">
+                                    <FiTag className="w-5 h-5 text-blue-600 mr-2" />
+                                    <h3 className="text-lg font-semibold text-slate-800">Keywords</h3>
+                                </div>
+                                <div className="flex flex-wrap gap-2">
+                                    {blog.seoKeywords.map((keyword, index) => (
+                                        <span
+                                            key={index}
+                                            className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm font-medium hover:bg-blue-200 transition-colors duration-200"
+                                        >
+                                            {keyword}
+                                        </span>
+                                    ))}
+                                </div>
+                            </div>
+                        </motion.div>
+                    )}
+
+                    {/* FAQ Section */}
+                    {blog.seoFaq && blog.seoFaq.length > 0 && (
+                        <motion.div
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: 0.6 }}
+                            className="px-6 sm:px-10 lg:px-12 xl:px-16 2xl:px-20 pb-6"
+                        >
+                            <div className="bg-gradient-to-r from-green-50 to-emerald-50 rounded-2xl p-6 border border-green-200">
+                                <div className="flex items-center mb-6">
+                                    <FiHelpCircle className="w-5 h-5 text-green-600 mr-2" />
+                                    <h3 className="text-lg font-semibold text-slate-800">Frequently Asked Questions</h3>
+                                </div>
+                                <div className="space-y-4">
+                                    {blog.seoFaq.map((faq, index) => (
+                                        <motion.div
+                                            key={index}
+                                            initial={{ opacity: 0, x: -20 }}
+                                            animate={{ opacity: 1, x: 0 }}
+                                            transition={{ delay: 0.7 + index * 0.1 }}
+                                            className="bg-white rounded-lg p-4 shadow-sm border border-green-100"
+                                        >
+                                            <div className="flex items-start">
+                                                <div className="flex-shrink-0 w-6 h-6 bg-green-100 rounded-full flex items-center justify-center mr-3 mt-0.5">
+                                                    <span className="text-green-600 text-sm font-medium">{index + 1}</span>
+                                                </div>
+                                                <p className="text-slate-700 leading-relaxed">{faq}</p>
+                                            </div>
+                                        </motion.div>
+                                    ))}
+                                </div>
+                            </div>
+                        </motion.div>
+                    )}
+
                     {/* Footer */}
                     <motion.div
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: 0.6 }}
+                        transition={{ delay: 0.8 }}
                         className="p-6 sm:p-10 lg:p-12 xl:p-16 2xl:p-20 border-t border-slate-200 bg-gradient-to-r from-slate-50 to-indigo-50"
                     >
                         <div className="flex items-center justify-between">
