@@ -257,16 +257,19 @@ export default function YouTubeInput({ onVideoData, onNext, isLoading, setIsLoad
                 <motion.button
                     onClick={handleNext}
                     disabled={!videoPreview || isLoading}
-                    whileHover={{ scale: 1.02 }}
+                    whileHover={{ scale: (!videoPreview || isLoading) ? 1 : 1.05 }}
                     whileTap={{ scale: 0.98 }}
-                    className={`px-8 py-4 rounded-2xl text-lg font-bold shadow-lg transition-all duration-300 flex items-center gap-3 ${videoPreview && !isLoading
-                        ? 'bg-gradient-to-r from-emerald-500 to-indigo-600 text-white hover:shadow-xl hover:from-emerald-600 hover:to-indigo-700'
+                    className={`group relative px-8 py-4 font-semibold rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden flex items-center gap-2 ${videoPreview && !isLoading
+                        ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white hover:scale-105'
                         : 'bg-gray-200 text-gray-500 cursor-not-allowed'
                         }`}
                 >
-                    <span>Extract Transcript</span>
-                    <div className={`transition-transform duration-300 ${videoPreview && !isLoading ? 'group-hover:translate-x-1' : ''}`}>
-                        <FiArrowRight className="w-6 h-6" />
+                    {videoPreview && !isLoading && (
+                        <div className="absolute inset-0 bg-gradient-to-r from-purple-600 to-indigo-600 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                    )}
+                    <div className="relative flex items-center gap-2">
+                        <span>Extract Transcript</span>
+                        <FiArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform duration-300" />
                     </div>
                 </motion.button>
             </motion.div>
