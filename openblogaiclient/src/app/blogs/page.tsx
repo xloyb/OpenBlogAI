@@ -245,17 +245,17 @@ export default function PublicBlogsPage() {
         <div className="absolute bottom-20 left-1/2 w-72 h-72 bg-emerald-200 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-float" style={{ animationDelay: '4s' }}></div>
       </div>
 
-      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 xl:px-12 py-8 sm:py-12">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8 }}
-          className="text-center mb-16"
+          className="text-center mb-8 sm:mb-12 lg:mb-16"
         >
-          <h1 className="text-5xl md:text-6xl font-bold mb-6 bg-gradient-to-r from-indigo-600 via-purple-600 to-emerald-600 bg-clip-text text-transparent">
+          <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-4 sm:mb-6 bg-gradient-to-r from-indigo-600 via-purple-600 to-emerald-600 bg-clip-text text-transparent px-2">
             Discover Amazing Blogs
           </h1>
-          <p className="text-xl text-slate-600 max-w-3xl mx-auto leading-relaxed">
+          <p className="text-lg sm:text-xl text-slate-600 max-w-3xl mx-auto leading-relaxed px-4">
             Explore AI-generated blogs from our community. Discover insights, stories, and knowledge shared by creators from around the world.
           </p>
         </motion.div>
@@ -267,10 +267,10 @@ export default function PublicBlogsPage() {
           transition={{ duration: 0.6, delay: 0.2 }}
           className="mb-8"
         >
-          <div className="bg-white/70 backdrop-blur-sm rounded-2xl p-6 border border-slate-200 shadow-lg">
-            <div className="flex flex-col lg:flex-row gap-4 items-center">
+          <div className="bg-white/70 backdrop-blur-sm rounded-2xl p-4 sm:p-6 border border-slate-200 shadow-lg">
+            <div className="flex flex-col sm:flex-row gap-4 items-stretch sm:items-center">
               {/* Search Bar */}
-              <form onSubmit={handleSearch} className="flex-1 max-w-md">
+              <form onSubmit={handleSearch} className="flex-1 w-full sm:max-w-md">
                 <div className="relative">
                   <FiSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-5 h-5" />
                   <input
@@ -293,8 +293,8 @@ export default function PublicBlogsPage() {
               </form>
 
               {/* Sort Controls */}
-              <div className="flex items-center gap-2">
-                <span className="text-sm text-slate-600 mr-2">Sort by:</span>
+              <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto justify-center sm:justify-start">
+                <span className="text-sm text-slate-600 mr-2 hidden sm:inline">Sort by:</span>
                 <button
                   onClick={() => handleSortChange('createdAt')}
                   className={`px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 flex items-center gap-1 ${sortBy === 'createdAt'
@@ -324,19 +324,19 @@ export default function PublicBlogsPage() {
 
             {/* Stats Bar */}
             {meta && (
-              <div className="flex flex-wrap items-center justify-between mt-4 pt-4 border-t border-slate-200">
-                <div className="flex items-center gap-6 text-sm text-slate-600">
+              <div className="flex flex-col sm:flex-row flex-wrap items-start sm:items-center justify-between gap-2 sm:gap-4 mt-4 pt-4 border-t border-slate-200">
+                <div className="flex flex-wrap items-center gap-3 sm:gap-6 text-sm text-slate-600">
                   <span>Total: <strong>{meta.total}</strong> blogs</span>
                   <span>Page: <strong>{meta.page}</strong> of <strong>{meta.totalPages}</strong></span>
                   {searchTerm && (
                     <span>Searching for: <strong>&ldquo;{searchTerm}&rdquo;</strong></span>
                   )}
                 </div>
-                <div className="flex items-center gap-4 text-sm text-slate-600">
+                <div className="flex flex-wrap items-center gap-2 sm:gap-4 text-sm text-slate-600 mt-2 sm:mt-0">
                   {blogs.length > 0 && (
                     <>
-                      <span>Avg: <strong>{Math.round(blogs.reduce((acc: number, blog: Blog) => acc + getWordCount(blog.content), 0) / blogs.length)}</strong> words</span>
-                      <span><strong>{Math.round(blogs.reduce((acc: number, blog: Blog) => acc + getReadingTime(blog.content), 0) / blogs.length)}</strong> min read</span>
+                      <span className="hidden sm:inline">Avg: <strong>{Math.round(blogs.reduce((acc: number, blog: Blog) => acc + getWordCount(blog.content), 0) / blogs.length)}</strong> words</span>
+                      <span className="hidden sm:inline"><strong>{Math.round(blogs.reduce((acc: number, blog: Blog) => acc + getReadingTime(blog.content), 0) / blogs.length)}</strong> min read</span>
                     </>
                   )}
                 </div>
@@ -350,15 +350,15 @@ export default function PublicBlogsPage() {
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8 }}
-            className="text-center bg-white/70 backdrop-blur-sm p-16 rounded-3xl border border-slate-200 shadow-lg"
+            className="text-center bg-white/70 backdrop-blur-sm p-8 sm:p-12 lg:p-16 rounded-2xl sm:rounded-3xl border border-slate-200 shadow-lg mx-4 sm:mx-0"
           >
             <div className="w-20 h-20 bg-gradient-to-r from-indigo-100 to-purple-100 rounded-2xl flex items-center justify-center mx-auto mb-6">
               <FiFileText className="w-10 h-10 text-indigo-600" />
             </div>
-            <h2 className="text-3xl font-bold mb-4 text-slate-800">
+            <h2 className="text-2xl sm:text-3xl font-bold mb-4 text-slate-800 px-2">
               {searchTerm ? `No blogs found for "${searchTerm}"` : 'No Public Blogs Yet'}
             </h2>
-            <p className="text-slate-600 text-lg mb-8">
+            <p className="text-slate-600 text-base sm:text-lg mb-6 sm:mb-8 px-4">
               {searchTerm
                 ? 'Try adjusting your search terms or clearing the search to see all blogs.'
                 : 'Be the first to create and share amazing AI-generated content with the community!'
@@ -385,22 +385,22 @@ export default function PublicBlogsPage() {
         ) : (
           <>
             {/* Blog Grid */}
-            <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3 mb-12">
+            <div className="grid gap-6 sm:gap-8 sm:grid-cols-2 lg:grid-cols-3 mb-8 sm:mb-12">
               {blogs.map((blog: Blog, index: number) => (
                 <motion.article
                   key={blog.id}
                   initial={{ opacity: 0, y: 30 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.6, delay: index * 0.1 }}
-                  className="group bg-white/70 backdrop-blur-sm rounded-3xl p-8 border border-slate-200 shadow-lg hover:shadow-2xl transition-all duration-500 hover:scale-105 hover:bg-white/80"
+                  className="group bg-white/70 backdrop-blur-sm rounded-2xl sm:rounded-3xl p-4 sm:p-6 lg:p-8 border border-slate-200 shadow-lg hover:shadow-2xl transition-all duration-500 hover:scale-102 sm:hover:scale-105 hover:bg-white/80"
                 >
                   <div className="mb-6">
-                    <h2 className="text-2xl font-bold text-slate-800 mb-4 group-hover:text-indigo-600 transition-colors duration-300 line-clamp-2">
+                    <h2 className="text-lg sm:text-xl lg:text-2xl font-bold text-slate-800 mb-3 sm:mb-4 group-hover:text-indigo-600 transition-colors duration-300 line-clamp-2">
                       {cleanMarkdown(blog.subject)}
                     </h2>
 
-                    <div className="flex items-center justify-between text-sm text-slate-500 mb-4">
-                      <div className="flex items-center space-x-4">
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 text-sm text-slate-500 mb-3 sm:mb-4">
+                      <div className="flex flex-wrap items-center gap-3 sm:gap-4">
                         <div className="flex items-center">
                           <FiCalendar className="w-4 h-4 mr-1" />
                           {formatDate(blog.createdAt)}
@@ -413,16 +413,16 @@ export default function PublicBlogsPage() {
                     </div>
                   </div>
 
-                  <div className="mb-6">
-                    <div className="text-slate-600 leading-relaxed line-clamp-4 prose prose-slate max-w-none">
+                  <div className="mb-4 sm:mb-6">
+                    <div className="text-slate-600 leading-relaxed line-clamp-3 sm:line-clamp-4 prose prose-sm sm:prose prose-slate max-w-none">
                       <ReactMarkdown remarkPlugins={[remarkGfm]}>
                         {getPreviewText(blog.content)}
                       </ReactMarkdown>
                     </div>
                   </div>
 
-                  <div className="flex items-center justify-between pt-6 border-t border-slate-200">
-                    <div className="flex items-center space-x-4 text-sm text-slate-500">
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-0 pt-4 sm:pt-6 border-t border-slate-200">
+                    <div className="flex flex-wrap items-center gap-3 sm:gap-4 text-sm text-slate-500">
                       <div className="flex items-center">
                         <FiFileText className="w-4 h-4 mr-1" />
                         {getWordCount(blog.content)} words
@@ -436,10 +436,10 @@ export default function PublicBlogsPage() {
                     </div>
                   </div>
 
-                  <div className="mt-6">
+                  <div className="mt-4 sm:mt-6">
                     <Link
                       href={`/blogs/${createSlug(blog.subject, blog.createdAt)}`}
-                      className="inline-flex items-center text-indigo-600 font-semibold hover:text-indigo-700 transition-colors duration-300 group-hover:scale-105"
+                      className="inline-flex items-center text-indigo-600 font-semibold hover:text-indigo-700 transition-colors duration-300 group-hover:scale-105 text-sm sm:text-base"
                     >
                       Read More
                       <FiArrowRight className="ml-2 w-4 h-4 transform group-hover:translate-x-1 transition-transform duration-300" />
@@ -455,7 +455,7 @@ export default function PublicBlogsPage() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, delay: 0.3 }}
-                className="flex items-center justify-center gap-2"
+                className="flex items-center justify-center gap-1 sm:gap-2 px-4"
               >
                 <button
                   onClick={() => handlePageChange(currentPage - 1)}
@@ -485,7 +485,7 @@ export default function PublicBlogsPage() {
                       <button
                         key={pageNum}
                         onClick={() => handlePageChange(pageNum)}
-                        className={`w-10 h-10 rounded-lg transition-all duration-200 text-sm font-medium ${pageNum === currentPage
+                        className={`w-8 h-8 sm:w-10 sm:h-10 rounded-lg transition-all duration-200 text-xs sm:text-sm font-medium ${pageNum === currentPage
                           ? 'bg-indigo-600 text-white'
                           : 'bg-white text-slate-600 hover:bg-slate-50 border border-slate-200'
                           }`}
