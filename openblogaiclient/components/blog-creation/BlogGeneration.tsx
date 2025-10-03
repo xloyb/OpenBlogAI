@@ -4,6 +4,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { motion } from "framer-motion";
 import { FiEdit, FiArrowRight, FiArrowLeft, FiCheck, FiAlertCircle, FiCopy, FiDownload, FiEye } from "react-icons/fi";
 import { useSession } from "next-auth/react";
+import ReactMarkdown from "react-markdown";
 import { blogAPI } from "../../lib/blog-api";
 
 interface BlogGenerationProps {
@@ -152,28 +153,78 @@ export default function BlogGeneration({
             <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="text-center"
+                transition={{ duration: 0.6, ease: "easeOut" }}
+                className="text-center relative"
             >
-                <div className="w-16 h-16 bg-green-500 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <FiEdit className="w-8 h-8 text-white" />
+                {/* Background Gradient */}
+                <div className="absolute inset-0 bg-gradient-to-br from-purple-500/10 via-blue-500/10 to-green-500/10 rounded-3xl blur-xl" />
+
+                <div className="relative z-10">
+                    <motion.div
+                        initial={{ scale: 0 }}
+                        animate={{ scale: 1 }}
+                        transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
+                        className="w-20 h-20 bg-gradient-to-br from-purple-600 via-blue-600 to-green-600 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-2xl relative overflow-hidden"
+                    >
+                        <div className="absolute inset-0 bg-white/20 backdrop-blur-sm" />
+                        <FiEdit className="w-10 h-10 text-white relative z-10" />
+                        <motion.div
+                            animate={{
+                                rotate: [0, 360],
+                                scale: [1, 1.1, 1]
+                            }}
+                            transition={{
+                                duration: 3,
+                                repeat: Infinity,
+                                ease: "linear"
+                            }}
+                            className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent"
+                        />
+                    </motion.div>
+
+                    <motion.h2
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.4 }}
+                        className="text-3xl font-bold mb-3 bg-gradient-to-r from-purple-600 via-blue-600 to-green-600 bg-clip-text text-transparent"
+                    >
+                        Generate AI Blog
+                    </motion.h2>
+
+                    <motion.p
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.6 }}
+                        className="text-base-content/80 text-lg"
+                    >
+                        Creating your blog post using <span className="font-semibold text-primary">{selectedModel?.toUpperCase()}</span> model
+                    </motion.p>
                 </div>
-                <h2 className="text-2xl font-bold mb-2">Generate AI Blog</h2>
-                <p className="text-base-content/70">
-                    Creating your blog post using {selectedModel?.toUpperCase()} model
-                </p>
             </motion.div>
 
             {/* Generation Status */}
             <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.1 }}
-                className="bg-base-200 rounded-xl p-6"
+                initial={{ opacity: 0, y: 20, scale: 0.95 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                transition={{ delay: 0.1, duration: 0.5 }}
+                className="bg-gradient-to-br from-base-200/50 to-base-300/30 backdrop-blur-xl rounded-2xl p-6 border border-white/10 shadow-xl relative overflow-hidden"
             >
+                {/* Animated background */}
+                <motion.div
+                    animate={{
+                        background: [
+                            "linear-gradient(45deg, rgba(139, 92, 246, 0.05), rgba(59, 130, 246, 0.05))",
+                            "linear-gradient(45deg, rgba(59, 130, 246, 0.05), rgba(16, 185, 129, 0.05))",
+                            "linear-gradient(45deg, rgba(16, 185, 129, 0.05), rgba(139, 92, 246, 0.05))"
+                        ]
+                    }}
+                    transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
+                    className="absolute inset-0"
+                />
                 <div className="flex items-center gap-4 mb-4">
                     <div className={`w-3 h-3 rounded-full ${generationStatus === "generating" ? "bg-warning animate-pulse" :
-                            generationStatus === "success" ? "bg-success" :
-                                generationStatus === "error" ? "bg-error" : "bg-base-300"
+                        generationStatus === "success" ? "bg-success" :
+                            generationStatus === "error" ? "bg-error" : "bg-base-300"
                         }`}></div>
                     <span className="font-medium">
                         {generationStatus === "idle" && "Ready to generate"}
@@ -185,17 +236,54 @@ export default function BlogGeneration({
 
                 {generationStatus === "generating" && (
                     <motion.div
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        className="space-y-3"
+                        initial={{ opacity: 0, scale: 0.95 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        transition={{ duration: 0.4 }}
+                        className="space-y-4 relative z-10"
                     >
-                        <div className="flex items-center gap-2">
-                            <div className="loading loading-spinner loading-sm"></div>
-                            <span className="text-sm">AI is writing your blog post...</span>
+                        <div className="flex items-center gap-3">
+                            <motion.div
+                                animate={{ rotate: 360 }}
+                                transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+                                className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full"
+                            />
+                            <span className="text-sm font-medium bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+                                AI is crafting your blog post...
+                            </span>
                         </div>
-                        <progress className="progress progress-primary w-full" value={generationProgress} max={100}></progress>
-                        <div className="text-xs text-base-content/70">
-                            Progress: {Math.round(generationProgress)}% • {getWordCount(streamingText)} words
+
+                        {/* Enhanced Progress Bar */}
+                        <div className="relative">
+                            <div className="w-full bg-base-300 rounded-full h-3 shadow-inner">
+                                <motion.div
+                                    initial={{ width: 0 }}
+                                    animate={{ width: `${generationProgress}%` }}
+                                    transition={{ duration: 0.3, ease: "easeOut" }}
+                                    className="h-full bg-gradient-to-r from-purple-500 via-blue-500 to-green-500 rounded-full relative overflow-hidden shadow-lg"
+                                >
+                                    <motion.div
+                                        animate={{
+                                            x: [-100, 200],
+                                            opacity: [0, 1, 0]
+                                        }}
+                                        transition={{
+                                            duration: 1.5,
+                                            repeat: Infinity,
+                                            ease: "linear"
+                                        }}
+                                        className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent"
+                                    />
+                                </motion.div>
+                            </div>
+                        </div>
+
+                        <div className="flex justify-between items-center text-xs">
+                            <span className="text-base-content/70 font-medium">
+                                Progress: <span className="text-primary font-bold">{Math.round(generationProgress)}%</span>
+                            </span>
+                            <span className="bg-gradient-to-r from-secondary to-accent bg-clip-text text-transparent font-semibold">
+                                {getWordCount(streamingText)} words generated
+                            </span>
                         </div>
                     </motion.div>
                 )}
@@ -227,128 +315,251 @@ export default function BlogGeneration({
                     transition={{ delay: 0.2 }}
                     className="bg-base-200 rounded-xl p-6"
                 >
-                    <div className="flex items-center justify-between mb-4">
-                        <h3 className="font-bold flex items-center gap-2">
+                    <div className="flex items-center justify-between mb-6">
+                        <motion.h3
+                            className="text-xl font-bold flex items-center gap-3"
+                            initial={{ opacity: 0, x: -10 }}
+                            animate={{ opacity: 1, x: 0 }}
+                        >
                             {generationStatus === "generating" ? (
                                 <>
-                                    <div className="loading loading-spinner loading-sm"></div>
-                                    Generating...
+                                    <motion.div
+                                        animate={{ rotate: 360 }}
+                                        transition={{ duration: 1.5, repeat: Infinity, ease: "linear" }}
+                                        className="w-5 h-5 border-2 border-primary border-t-transparent rounded-full"
+                                    />
+                                    <span className="bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+                                        Generating...
+                                    </span>
                                 </>
                             ) : (
                                 <>
-                                    <FiCheck className="w-5 h-5 text-success" />
-                                    Blog Generated
+                                    <motion.div
+                                        initial={{ scale: 0, rotate: -180 }}
+                                        animate={{ scale: 1, rotate: 0 }}
+                                        transition={{ type: "spring", stiffness: 200 }}
+                                        className="w-6 h-6 bg-gradient-to-r from-green-500 to-emerald-500 rounded-full flex items-center justify-center"
+                                    >
+                                        <FiCheck className="w-4 h-4 text-white" />
+                                    </motion.div>
+                                    <span className="bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent">
+                                        Blog Generated
+                                    </span>
                                 </>
                             )}
-                        </h3>
+                        </motion.h3>
 
-                        <div className="flex items-center gap-2">
+                        <motion.div
+                            className="flex items-center gap-3"
+                            initial={{ opacity: 0, x: 10 }}
+                            animate={{ opacity: 1, x: 0 }}
+                        >
                             {generatedBlog && (
                                 <>
-                                    <div className="badge badge-info">{getWordCount(generatedBlog)} words</div>
-                                    <div className="badge badge-secondary">{getReadingTime(generatedBlog)} min read</div>
-                                    <button
+                                    <motion.div
+                                        whileHover={{ scale: 1.05 }}
+                                        className="px-3 py-1 bg-gradient-to-r from-blue-500/20 to-indigo-500/20 border border-blue-500/30 rounded-full text-xs font-semibold text-blue-600 backdrop-blur-sm"
+                                    >
+                                        {getWordCount(generatedBlog)} words
+                                    </motion.div>
+                                    <motion.div
+                                        whileHover={{ scale: 1.05 }}
+                                        className="px-3 py-1 bg-gradient-to-r from-purple-500/20 to-pink-500/20 border border-purple-500/30 rounded-full text-xs font-semibold text-purple-600 backdrop-blur-sm"
+                                    >
+                                        {getReadingTime(generatedBlog)} min read
+                                    </motion.div>
+                                    <motion.button
+                                        whileHover={{ scale: 1.05, y: -1 }}
+                                        whileTap={{ scale: 0.95 }}
                                         onClick={() => setShowPreview(!showPreview)}
-                                        className="btn btn-sm btn-ghost gap-1"
+                                        className={`btn btn-sm gap-2 transition-all duration-300 shadow-md ${showPreview
+                                                ? "bg-gradient-to-r from-violet-500 to-purple-500 text-white border-none hover:from-violet-600 hover:to-purple-600"
+                                                : "bg-gradient-to-r from-slate-100 to-gray-100 text-gray-700 border border-gray-200 hover:from-slate-200 hover:to-gray-200 hover:border-gray-300"
+                                            }`}
                                     >
                                         <FiEye className="w-4 h-4" />
-                                        {showPreview ? "Raw" : "Preview"}
-                                    </button>
+                                        <span className="font-medium">{showPreview ? "Raw" : "Preview"}</span>
+                                    </motion.button>
                                 </>
                             )}
-                        </div>
+                        </motion.div>
                     </div>
 
                     <div
                         ref={streamingRef}
-                        className="bg-base-100 rounded-lg p-4 max-h-96 overflow-y-auto"
+                        className="bg-gradient-to-br from-base-100/80 to-base-200/50 backdrop-blur-lg rounded-xl p-6 max-h-96 overflow-y-auto border border-white/10 shadow-inner relative"
                     >
-                        {showPreview && generatedBlog ? (
-                            <div
-                                className="prose prose-sm max-w-none"
-                                dangerouslySetInnerHTML={{
-                                    __html: generatedBlog.replace(/\n/g, '<br>')
-                                }}
-                            />
-                        ) : (
-                            <div className="font-mono text-sm whitespace-pre-wrap">
-                                {generationStatus === "generating" ? streamingText : generatedBlog}
-                                {generationStatus === "generating" && (
-                                    <motion.span
-                                        animate={{ opacity: [1, 0] }}
-                                        transition={{ duration: 0.8, repeat: Infinity }}
-                                        className="inline-block w-2 h-4 bg-primary ml-1"
-                                    />
-                                )}
-                            </div>
-                        )}
+                        {/* Subtle pattern overlay */}
+                        <div className="absolute inset-0 opacity-5" style={{
+                            backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23000' fill-opacity='0.1'%3E%3Ccircle cx='5' cy='5' r='2'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`
+                        }} />
+
+                        <div className="relative z-10">
+                            {showPreview && generatedBlog ? (
+                                <motion.div
+                                    initial={{ opacity: 0 }}
+                                    animate={{ opacity: 1 }}
+                                    className="prose prose-lg max-w-none prose-headings:text-primary prose-links:text-secondary prose-strong:text-accent prose-code:text-accent prose-pre:bg-base-300 prose-blockquote:border-primary"
+                                >
+                                    <ReactMarkdown>{generatedBlog}</ReactMarkdown>
+                                </motion.div>
+                            ) : (
+                                <div className="font-mono text-sm whitespace-pre-wrap leading-relaxed text-base-content/90">
+                                    {generationStatus === "generating" ? streamingText : generatedBlog}
+                                    {generationStatus === "generating" && (
+                                        <motion.span
+                                            animate={{
+                                                opacity: [1, 0],
+                                                scale: [1, 1.2, 1]
+                                            }}
+                                            transition={{
+                                                duration: 0.8,
+                                                repeat: Infinity,
+                                                ease: "easeInOut"
+                                            }}
+                                            className="inline-block w-3 h-5 bg-gradient-to-r from-primary to-secondary rounded-sm ml-1"
+                                        />
+                                    )}
+                                </div>
+                            )}
+                        </div>
                     </div>
 
                     {generatedBlog && (
-                        <div className="flex gap-2 mt-4">
-                            <button
+                        <motion.div
+                            initial={{ opacity: 0, y: 10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: 0.3 }}
+                            className="flex gap-4 mt-6"
+                        >
+                            <motion.button
+                                whileHover={{ scale: 1.02, y: -2 }}
+                                whileTap={{ scale: 0.98 }}
                                 onClick={copyToClipboard}
-                                className="btn btn-sm btn-ghost gap-1"
+                                className="btn btn-sm bg-gradient-to-r from-blue-500 to-indigo-500 text-white border-none hover:from-blue-600 hover:to-indigo-600 gap-2 transition-all duration-300 shadow-lg hover:shadow-xl"
                             >
                                 <FiCopy className="w-4 h-4" />
-                                Copy
-                            </button>
-                            <button
+                                <span className="font-medium">Copy Text</span>
+                            </motion.button>
+                            <motion.button
+                                whileHover={{ scale: 1.02, y: -2 }}
+                                whileTap={{ scale: 0.98 }}
                                 onClick={downloadBlog}
-                                className="btn btn-sm btn-ghost gap-1"
+                                className="btn btn-sm bg-gradient-to-r from-emerald-500 to-green-500 text-white border-none hover:from-emerald-600 hover:to-green-600 gap-2 transition-all duration-300 shadow-lg hover:shadow-xl"
                             >
                                 <FiDownload className="w-4 h-4" />
-                                Download
-                            </button>
-                        </div>
+                                <span className="font-medium">Download MD</span>
+                            </motion.button>
+                        </motion.div>
                     )}
 
                     {/* Moderator Review Section */}
                     {isModerator && generatedBlog && (
                         <motion.div
-                            initial={{ opacity: 0, y: 10 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            className="bg-warning/10 border border-warning/20 rounded-lg p-4 mt-4"
+                            initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                            animate={{ opacity: 1, y: 0, scale: 1 }}
+                            transition={{ delay: 0.4, duration: 0.5 }}
+                            className="bg-gradient-to-br from-amber-500/10 via-orange-500/10 to-red-500/10 backdrop-blur-xl border border-amber-500/20 rounded-2xl p-6 mt-6 relative overflow-hidden"
                         >
-                            <h4 className="font-medium mb-3 flex items-center gap-2">
-                                <FiAlertCircle className="w-4 h-4 text-warning" />
-                                Moderator Review Required
-                            </h4>
+                            {/* Animated background pattern */}
+                            <motion.div
+                                animate={{
+                                    background: [
+                                        "linear-gradient(45deg, rgba(245, 158, 11, 0.05), rgba(249, 115, 22, 0.05))",
+                                        "linear-gradient(45deg, rgba(249, 115, 22, 0.05), rgba(239, 68, 68, 0.05))",
+                                        "linear-gradient(45deg, rgba(239, 68, 68, 0.05), rgba(245, 158, 11, 0.05))"
+                                    ]
+                                }}
+                                transition={{ duration: 4, repeat: Infinity, ease: "linear" }}
+                                className="absolute inset-0"
+                            />
 
-                            <p className="text-sm text-base-content/70 mb-4">
-                                Please review the generated blog content for quality, accuracy, and appropriateness.
-                            </p>
-
-                            <div className="flex gap-2">
-                                <button
-                                    onClick={() => handleModeratorAction("approved")}
-                                    className={`btn btn-sm ${moderatorApproval === "approved" ? "btn-success" : "btn-outline"}`}
-                                    disabled={moderatorApproval !== "pending"}
+                            <div className="relative z-10">
+                                <motion.h4
+                                    initial={{ opacity: 0, x: -10 }}
+                                    animate={{ opacity: 1, x: 0 }}
+                                    className="font-bold text-lg mb-4 flex items-center gap-3"
                                 >
-                                    <FiCheck className="w-4 h-4" />
-                                    Approve
-                                </button>
-                                <button
-                                    onClick={() => handleModeratorAction("rejected")}
-                                    className={`btn btn-sm ${moderatorApproval === "rejected" ? "btn-error" : "btn-outline"}`}
-                                    disabled={moderatorApproval !== "pending"}
-                                >
-                                    <FiAlertCircle className="w-4 h-4" />
-                                    Reject
-                                </button>
-                            </div>
+                                    <motion.div
+                                        animate={{ rotate: [0, 10, -10, 0] }}
+                                        transition={{ duration: 2, repeat: Infinity }}
+                                        className="w-6 h-6 bg-gradient-to-r from-amber-500 to-orange-500 rounded-lg flex items-center justify-center"
+                                    >
+                                        <FiAlertCircle className="w-4 h-4 text-white" />
+                                    </motion.div>
+                                    <span className="bg-gradient-to-r from-amber-600 to-orange-600 bg-clip-text text-transparent">
+                                        Moderator Review Required
+                                    </span>
+                                </motion.h4>
 
-                            {moderatorApproval !== "pending" && (
-                                <motion.div
+                                <motion.p
                                     initial={{ opacity: 0, y: 5 }}
                                     animate={{ opacity: 1, y: 0 }}
-                                    className={`alert mt-3 ${moderatorApproval === "approved" ? "alert-success" : "alert-error"}`}
+                                    transition={{ delay: 0.1 }}
+                                    className="text-sm text-base-content/80 mb-6 leading-relaxed"
                                 >
-                                    <span>
-                                        Blog content {moderatorApproval === "approved" ? "approved" : "rejected"} by moderator
-                                    </span>
-                                </motion.div>
-                            )}
+                                    Please review the generated blog content for quality, accuracy, and appropriateness before publishing.
+                                </motion.p>
+
+                                <div className="flex gap-4">
+                                    <motion.button
+                                        whileHover={{ scale: 1.02, y: -2 }}
+                                        whileTap={{ scale: 0.98 }}
+                                        onClick={() => handleModeratorAction("approved")}
+                                        className={`btn btn-sm gap-2 transition-all duration-300 shadow-lg hover:shadow-xl ${moderatorApproval === "approved"
+                                            ? "bg-gradient-to-r from-green-500 to-emerald-500 text-white border-none"
+                                            : "bg-white text-green-600 border-2 border-green-500 hover:bg-green-50 hover:border-green-600"
+                                            }`}
+                                        disabled={moderatorApproval !== "pending"}
+                                    >
+                                        <FiCheck className="w-4 h-4" />
+                                        <span className="font-semibold">Approve</span>
+                                    </motion.button>
+                                    <motion.button
+                                        whileHover={{ scale: 1.02, y: -2 }}
+                                        whileTap={{ scale: 0.98 }}
+                                        onClick={() => handleModeratorAction("rejected")}
+                                        className={`btn btn-sm gap-2 transition-all duration-300 shadow-lg hover:shadow-xl ${moderatorApproval === "rejected"
+                                            ? "bg-gradient-to-r from-red-500 to-pink-500 text-white border-none"
+                                            : "bg-white text-red-600 border-2 border-red-500 hover:bg-red-50 hover:border-red-600"
+                                            }`}
+                                        disabled={moderatorApproval !== "pending"}
+                                    >
+                                        <FiAlertCircle className="w-4 h-4" />
+                                        <span className="font-semibold">Reject</span>
+                                    </motion.button>
+                                </div>
+
+                                {moderatorApproval !== "pending" && (
+                                    <motion.div
+                                        initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                                        transition={{ type: "spring", stiffness: 200 }}
+                                        className={`mt-4 p-4 rounded-xl backdrop-blur-sm border ${moderatorApproval === "approved"
+                                            ? "bg-gradient-to-r from-green-500/20 to-emerald-500/20 border-green-500/30"
+                                            : "bg-gradient-to-r from-red-500/20 to-pink-500/20 border-red-500/30"
+                                            }`}
+                                    >
+                                        <div className="flex items-center gap-2">
+                                            <motion.div
+                                                initial={{ scale: 0, rotate: -180 }}
+                                                animate={{ scale: 1, rotate: 0 }}
+                                                transition={{ type: "spring", stiffness: 200 }}
+                                                className={`w-5 h-5 rounded-full flex items-center justify-center ${moderatorApproval === "approved" ? "bg-green-500" : "bg-red-500"
+                                                    }`}
+                                            >
+                                                <FiCheck className="w-3 h-3 text-white" />
+                                            </motion.div>
+                                            <span className="font-medium">
+                                                Blog content <span className={`font-bold ${moderatorApproval === "approved" ? "text-green-600" : "text-red-600"
+                                                    }`}>
+                                                    {moderatorApproval === "approved" ? "approved" : "rejected"}
+                                                </span> by moderator
+                                            </span>
+                                        </div>
+                                    </motion.div>
+                                )}
+                            </div>
                         </motion.div>
                     )}
                 </motion.div>
@@ -358,29 +569,50 @@ export default function BlogGeneration({
             <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.3 }}
-                className="flex justify-between pt-4"
+                transition={{ delay: 0.3, duration: 0.5 }}
+                className="flex justify-between pt-6"
             >
-                <button
+                <motion.button
+                    whileHover={{ scale: 1.02, y: -2 }}
+                    whileTap={{ scale: 0.98 }}
                     onClick={onPrev}
-                    className="btn btn-outline btn-lg gap-2"
+                    className="btn btn-outline btn-lg gap-2 bg-gradient-to-r from-base-200/50 to-base-300/50 backdrop-blur-sm border-white/20 hover:from-base-300/60 hover:to-base-200/60 transition-all duration-300 shadow-lg"
                 >
                     <FiArrowLeft className="w-5 h-5" />
                     Back
-                </button>
+                </motion.button>
 
-                <button
+                <motion.button
+                    whileHover={{
+                        scale: generationStatus === "success" && (!isModerator || moderatorApproval === "approved") ? 1.02 : 1,
+                        y: generationStatus === "success" && (!isModerator || moderatorApproval === "approved") ? -2 : 0,
+                        boxShadow: "0 10px 30px rgba(139, 92, 246, 0.3)"
+                    }}
+                    whileTap={{ scale: 0.98 }}
                     onClick={handleNext}
                     disabled={
                         generationStatus !== "success" ||
                         (isModerator && moderatorApproval !== "approved") ||
                         isLoading
                     }
-                    className="btn btn-primary btn-lg gap-2"
+                    className="btn btn-lg gap-2 bg-gradient-to-r from-purple-600 via-blue-600 to-green-600 hover:from-purple-700 hover:via-blue-700 hover:to-green-700 border-none text-white shadow-xl disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 relative overflow-hidden"
                 >
-                    Review & Publish
-                    <FiArrowRight className="w-5 h-5" />
-                </button>
+                    {/* Animated shine effect */}
+                    <motion.div
+                        animate={{
+                            x: [-100, 200],
+                            opacity: [0, 1, 0]
+                        }}
+                        transition={{
+                            duration: 2,
+                            repeat: Infinity,
+                            ease: "linear"
+                        }}
+                        className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent skew-x-12"
+                    />
+                    <span className="relative z-10">Review & Publish</span>
+                    <FiArrowRight className="w-5 h-5 relative z-10" />
+                </motion.button>
             </motion.div>
         </div>
     );
