@@ -158,20 +158,36 @@ export default function ModeratorReview({ stepData, onPrev, isModerator }: Moder
                         <div className="badge badge-info">{getWordCount(getCurrentBlog())} words</div>
                         <div className="badge badge-secondary">{getReadingTime(getCurrentBlog())} min read</div>
 
-                        <div className="join">
+                        <div className="flex gap-2">
                             <button
                                 onClick={() => setEditMode(!editMode)}
-                                className={`btn btn-sm join-item ${editMode ? 'btn-active' : ''}`}
+                                className={`group relative px-4 py-2 font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden flex items-center gap-2 ${editMode
+                                    ? "bg-gradient-to-r from-indigo-600 to-purple-600 text-white hover:scale-105"
+                                    : "bg-white text-slate-700 border-2 border-slate-200 hover:border-indigo-300"
+                                    }`}
                             >
-                                <FiEdit className="w-4 h-4" />
-                                {editMode ? 'Editing' : 'Edit'}
+                                {editMode && (
+                                    <div className="absolute inset-0 bg-gradient-to-r from-purple-600 to-indigo-600 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                                )}
+                                <div className="relative flex items-center gap-2">
+                                    <FiEdit className="w-4 h-4" />
+                                    <span>{editMode ? 'Editing' : 'Edit'}</span>
+                                </div>
                             </button>
                             <button
                                 onClick={() => setShowPreview(!showPreview)}
-                                className={`btn btn-sm join-item ${showPreview ? 'btn-active' : ''}`}
+                                className={`group relative px-4 py-2 font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden flex items-center gap-2 ${showPreview
+                                    ? "bg-gradient-to-r from-indigo-600 to-purple-600 text-white hover:scale-105"
+                                    : "bg-white text-slate-700 border-2 border-slate-200 hover:border-indigo-300"
+                                    }`}
                             >
-                                <FiEye className="w-4 h-4" />
-                                {showPreview ? 'Preview' : 'Raw'}
+                                {showPreview && (
+                                    <div className="absolute inset-0 bg-gradient-to-r from-purple-600 to-indigo-600 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                                )}
+                                <div className="relative flex items-center gap-2">
+                                    <FiEye className="w-4 h-4" />
+                                    <span>{showPreview ? 'Preview' : 'Raw'}</span>
+                                </div>
                             </button>
                         </div>
                     </div>
@@ -203,30 +219,123 @@ export default function ModeratorReview({ stepData, onPrev, isModerator }: Moder
             {/* Moderator Checklist */}
             {isModerator && (
                 <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.3 }}
-                    className="bg-warning/10 border border-warning/20 rounded-xl p-6"
+                    initial={{ opacity: 0, y: 20, scale: 0.95 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    transition={{ delay: 0.3, duration: 0.5 }}
+                    className="bg-gradient-to-br from-amber-500/10 via-orange-500/10 to-red-500/10 backdrop-blur-xl border border-amber-500/20 rounded-2xl p-6 relative overflow-hidden"
                 >
-                    <h3 className="font-bold mb-4 flex items-center gap-2">
-                        <FiAlertCircle className="w-5 h-5 text-warning" />
-                        Moderator Checklist
-                    </h3>
+                    {/* Animated background pattern */}
+                    <motion.div
+                        animate={{
+                            background: [
+                                "linear-gradient(45deg, rgba(245, 158, 11, 0.05), rgba(249, 115, 22, 0.05))",
+                                "linear-gradient(45deg, rgba(249, 115, 22, 0.05), rgba(239, 68, 68, 0.05))",
+                                "linear-gradient(45deg, rgba(239, 68, 68, 0.05), rgba(245, 158, 11, 0.05))"
+                            ]
+                        }}
+                        transition={{ duration: 4, repeat: Infinity, ease: "linear" }}
+                        className="absolute inset-0"
+                    />
 
-                    <div className="space-y-3">
-                        {[
-                            "Content is appropriate and family-friendly",
-                            "Information appears accurate and well-researched",
-                            "Blog structure includes proper headings and sections",
-                            "Grammar and language quality meets publication standards",
-                            "Content provides value to readers",
-                            "No plagiarism or copyright concerns"
-                        ].map((item, index) => (
-                            <label key={index} className="flex items-center gap-3 cursor-pointer">
-                                <input type="checkbox" className="checkbox checkbox-sm" />
-                                <span className="text-sm">{item}</span>
-                            </label>
-                        ))}
+                    <div className="relative z-10">
+                        <motion.h3
+                            initial={{ opacity: 0, x: -10 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            className="font-bold text-lg mb-6 flex items-center gap-3"
+                        >
+                            <motion.div
+                                animate={{ rotate: [0, 10, -10, 0] }}
+                                transition={{ duration: 2, repeat: Infinity }}
+                                className="w-7 h-7 bg-gradient-to-r from-amber-500 to-orange-500 rounded-xl flex items-center justify-center shadow-lg"
+                            >
+                                <FiAlertCircle className="w-4 h-4 text-white" />
+                            </motion.div>
+                            <span className="bg-gradient-to-r from-amber-600 to-orange-600 bg-clip-text text-transparent">
+                                Moderator Checklist
+                            </span>
+                        </motion.h3>
+
+                        <motion.p
+                            initial={{ opacity: 0, y: 5 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: 0.1 }}
+                            className="text-sm text-base-content/80 mb-6 leading-relaxed"
+                        >
+                            Please verify each point below before publishing to ensure content quality and compliance.
+                        </motion.p>
+
+                        <div className="space-y-4">
+                            {[
+                                {
+                                    text: "Content is appropriate and family-friendly",
+                                    icon: "👨‍👩‍👧‍👦",
+                                    delay: 0.1
+                                },
+                                {
+                                    text: "Information appears accurate and well-researched",
+                                    icon: "🔍",
+                                    delay: 0.15
+                                },
+                                {
+                                    text: "Blog structure includes proper headings and sections",
+                                    icon: "📝",
+                                    delay: 0.2
+                                },
+                                {
+                                    text: "Grammar and language quality meets publication standards",
+                                    icon: "✍️",
+                                    delay: 0.25
+                                },
+                                {
+                                    text: "Content provides value to readers",
+                                    icon: "💎",
+                                    delay: 0.3
+                                },
+                                {
+                                    text: "No plagiarism or copyright concerns",
+                                    icon: "⚖️",
+                                    delay: 0.35
+                                }
+                            ].map((item, index) => (
+                                <motion.label
+                                    key={index}
+                                    initial={{ opacity: 0, x: -20 }}
+                                    animate={{ opacity: 1, x: 0 }}
+                                    transition={{ delay: item.delay }}
+                                    className="group flex items-center gap-4 cursor-pointer p-3 rounded-xl bg-gradient-to-r from-white/50 to-white/30 backdrop-blur-sm border border-white/20 hover:border-amber-300/40 hover:shadow-lg transition-all duration-300 hover:scale-[1.02]"
+                                >
+                                    <div className="relative">
+                                        <input
+                                            type="checkbox"
+                                            className="w-5 h-5 rounded-lg border-2 border-amber-300 text-amber-600 focus:ring-amber-500 focus:ring-2 focus:ring-offset-0 transition-all duration-200"
+                                        />
+                                        <motion.div
+                                            className="absolute inset-0 bg-gradient-to-r from-amber-500 to-orange-500 rounded-lg opacity-0 group-hover:opacity-20 transition-opacity duration-200"
+                                        />
+                                    </div>
+                                    <div className="flex items-center gap-3 flex-1">
+                                        <span className="text-lg">{item.icon}</span>
+                                        <span className="text-sm font-medium text-base-content/90 group-hover:text-base-content transition-colors duration-200">
+                                            {item.text}
+                                        </span>
+                                    </div>
+                                </motion.label>
+                            ))}
+                        </div>
+
+                        <motion.div
+                            initial={{ opacity: 0, y: 10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: 0.4 }}
+                            className="mt-6 p-4 rounded-xl bg-gradient-to-r from-blue-500/10 to-indigo-500/10 border border-blue-500/20 backdrop-blur-sm"
+                        >
+                            <div className="flex items-center gap-2 text-sm text-blue-600">
+                                <FiCheck className="w-4 h-4" />
+                                <span className="font-medium">
+                                    Complete all checks above before publishing
+                                </span>
+                            </div>
+                        </motion.div>
                     </div>
                 </motion.div>
             )}
@@ -237,8 +346,8 @@ export default function ModeratorReview({ stepData, onPrev, isModerator }: Moder
                     initial={{ opacity: 0, scale: 0.95 }}
                     animate={{ opacity: 1, scale: 1 }}
                     className={`alert ${publishStatus === "publishing" ? "alert-info" :
-                            publishStatus === "success" ? "alert-success" :
-                                "alert-error"
+                        publishStatus === "success" ? "alert-success" :
+                            "alert-error"
                         }`}
                 >
                     {publishStatus === "publishing" && (
@@ -267,19 +376,23 @@ export default function ModeratorReview({ stepData, onPrev, isModerator }: Moder
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.4 }}
-                className="flex justify-between pt-4"
+                className="flex justify-between pt-6"
             >
-                <button
+                <motion.button
+                    whileHover={{ scale: publishStatus === "publishing" ? 1 : 1.05 }}
+                    whileTap={{ scale: 0.98 }}
                     onClick={onPrev}
-                    className="btn btn-outline btn-lg gap-2"
                     disabled={publishStatus === "publishing"}
+                    className="px-8 py-4 bg-white text-slate-700 font-semibold rounded-2xl border-2 border-slate-200 hover:border-indigo-300 transition-all duration-300 hover:shadow-lg flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
                 >
                     <FiArrowLeft className="w-5 h-5" />
                     Back
-                </button>
+                </motion.button>
 
-                <div className="flex gap-3">
-                    <button
+                <div className="flex gap-4">
+                    <motion.button
+                        whileHover={{ scale: publishStatus === "publishing" ? 1 : 1.05 }}
+                        whileTap={{ scale: 0.98 }}
                         onClick={() => {
                             const blob = new Blob([getCurrentBlog()], { type: 'text/markdown' });
                             const url = URL.createObjectURL(blob);
@@ -291,30 +404,35 @@ export default function ModeratorReview({ stepData, onPrev, isModerator }: Moder
                             document.body.removeChild(a);
                             URL.revokeObjectURL(url);
                         }}
-                        className="btn btn-outline btn-lg gap-2"
                         disabled={publishStatus === "publishing"}
+                        className="px-8 py-4 bg-white text-slate-700 font-semibold rounded-2xl border-2 border-slate-200 hover:border-indigo-300 transition-all duration-300 hover:shadow-lg flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
                     >
                         <FiSave className="w-5 h-5" />
                         Save Draft
-                    </button>
+                    </motion.button>
 
-                    <button
+                    <motion.button
+                        whileHover={{ scale: (publishStatus === "publishing" || !getCurrentBlog().trim()) ? 1 : 1.05 }}
+                        whileTap={{ scale: 0.98 }}
                         onClick={handlePublish}
-                        className="btn btn-success btn-lg gap-2"
                         disabled={publishStatus === "publishing" || !getCurrentBlog().trim()}
+                        className="group relative px-8 py-4 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-semibold rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 overflow-hidden disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
                     >
-                        {publishStatus === "publishing" ? (
-                            <>
-                                <div className="loading loading-spinner loading-sm"></div>
-                                Publishing...
-                            </>
-                        ) : (
-                            <>
-                                <FiShare2 className="w-5 h-5" />
-                                Publish Blog
-                            </>
-                        )}
-                    </button>
+                        <div className="absolute inset-0 bg-gradient-to-r from-purple-600 to-indigo-600 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                        <div className="relative flex items-center gap-2">
+                            {publishStatus === "publishing" ? (
+                                <>
+                                    <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                                    Publishing...
+                                </>
+                            ) : (
+                                <>
+                                    <FiShare2 className="w-5 h-5" />
+                                    Publish Blog
+                                </>
+                            )}
+                        </div>
+                    </motion.button>
                 </div>
             </motion.div>
         </div>
