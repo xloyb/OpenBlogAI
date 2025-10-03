@@ -298,8 +298,8 @@ export default function BlogGeneration({
                         <span>{error}</span>
                         <button
                             onClick={generateBlog}
-                            className="btn btn-sm btn-outline"
                             disabled={isLoading}
+                            className="px-6 py-2 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                             Retry
                         </button>
@@ -369,16 +369,21 @@ export default function BlogGeneration({
                                         {getReadingTime(generatedBlog)} min read
                                     </motion.div>
                                     <motion.button
-                                        whileHover={{ scale: 1.05, y: -1 }}
-                                        whileTap={{ scale: 0.95 }}
+                                        whileHover={{ scale: 1.05 }}
+                                        whileTap={{ scale: 0.98 }}
                                         onClick={() => setShowPreview(!showPreview)}
-                                        className={`btn btn-sm gap-2 transition-all duration-300 shadow-md ${showPreview
-                                                ? "bg-gradient-to-r from-violet-500 to-purple-500 text-white border-none hover:from-violet-600 hover:to-purple-600"
-                                                : "bg-gradient-to-r from-slate-100 to-gray-100 text-gray-700 border border-gray-200 hover:from-slate-200 hover:to-gray-200 hover:border-gray-300"
+                                        className={`group relative px-4 py-2 font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden flex items-center gap-2 ${showPreview
+                                            ? "bg-gradient-to-r from-indigo-600 to-purple-600 text-white hover:scale-105"
+                                            : "bg-white text-slate-700 border-2 border-slate-200 hover:border-indigo-300"
                                             }`}
                                     >
-                                        <FiEye className="w-4 h-4" />
-                                        <span className="font-medium">{showPreview ? "Raw" : "Preview"}</span>
+                                        {showPreview && (
+                                            <div className="absolute inset-0 bg-gradient-to-r from-purple-600 to-indigo-600 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                                        )}
+                                        <div className="relative flex items-center gap-2">
+                                            <FiEye className="w-4 h-4" />
+                                            <span>{showPreview ? "Raw" : "Preview"}</span>
+                                        </div>
                                     </motion.button>
                                 </>
                             )}
@@ -433,22 +438,25 @@ export default function BlogGeneration({
                             className="flex gap-4 mt-6"
                         >
                             <motion.button
-                                whileHover={{ scale: 1.02, y: -2 }}
+                                whileHover={{ scale: 1.05 }}
                                 whileTap={{ scale: 0.98 }}
                                 onClick={copyToClipboard}
-                                className="btn btn-sm bg-gradient-to-r from-blue-500 to-indigo-500 text-white border-none hover:from-blue-600 hover:to-indigo-600 gap-2 transition-all duration-300 shadow-lg hover:shadow-xl"
+                                className="px-6 py-3 bg-white text-slate-700 font-semibold rounded-xl border-2 border-slate-200 hover:border-indigo-300 transition-all duration-300 hover:shadow-lg flex items-center gap-2"
                             >
                                 <FiCopy className="w-4 h-4" />
-                                <span className="font-medium">Copy Text</span>
+                                <span>Copy Text</span>
                             </motion.button>
                             <motion.button
-                                whileHover={{ scale: 1.02, y: -2 }}
+                                whileHover={{ scale: 1.05 }}
                                 whileTap={{ scale: 0.98 }}
                                 onClick={downloadBlog}
-                                className="btn btn-sm bg-gradient-to-r from-emerald-500 to-green-500 text-white border-none hover:from-emerald-600 hover:to-green-600 gap-2 transition-all duration-300 shadow-lg hover:shadow-xl"
+                                className="group relative px-6 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 overflow-hidden flex items-center gap-2"
                             >
-                                <FiDownload className="w-4 h-4" />
-                                <span className="font-medium">Download MD</span>
+                                <div className="absolute inset-0 bg-gradient-to-r from-purple-600 to-indigo-600 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                                <div className="relative flex items-center gap-2">
+                                    <FiDownload className="w-4 h-4" />
+                                    <span>Download MD</span>
+                                </div>
                             </motion.button>
                         </motion.div>
                     )}
@@ -503,30 +511,40 @@ export default function BlogGeneration({
 
                                 <div className="flex gap-4">
                                     <motion.button
-                                        whileHover={{ scale: 1.02, y: -2 }}
+                                        whileHover={{ scale: moderatorApproval !== "pending" ? 1 : 1.05 }}
                                         whileTap={{ scale: 0.98 }}
                                         onClick={() => handleModeratorAction("approved")}
-                                        className={`btn btn-sm gap-2 transition-all duration-300 shadow-lg hover:shadow-xl ${moderatorApproval === "approved"
-                                            ? "bg-gradient-to-r from-green-500 to-emerald-500 text-white border-none"
-                                            : "bg-white text-green-600 border-2 border-green-500 hover:bg-green-50 hover:border-green-600"
-                                            }`}
                                         disabled={moderatorApproval !== "pending"}
+                                        className={`group relative px-6 py-3 font-semibold rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 ${moderatorApproval === "approved"
+                                                ? "bg-gradient-to-r from-emerald-600 to-green-600 text-white hover:scale-105"
+                                                : "bg-white text-slate-700 border-2 border-slate-200 hover:border-emerald-300"
+                                            }`}
                                     >
-                                        <FiCheck className="w-4 h-4" />
-                                        <span className="font-semibold">Approve</span>
+                                        {moderatorApproval === "approved" && (
+                                            <div className="absolute inset-0 bg-gradient-to-r from-green-600 to-emerald-600 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                                        )}
+                                        <div className="relative flex items-center gap-2">
+                                            <FiCheck className="w-4 h-4" />
+                                            <span>Approve</span>
+                                        </div>
                                     </motion.button>
                                     <motion.button
-                                        whileHover={{ scale: 1.02, y: -2 }}
+                                        whileHover={{ scale: moderatorApproval !== "pending" ? 1 : 1.05 }}
                                         whileTap={{ scale: 0.98 }}
                                         onClick={() => handleModeratorAction("rejected")}
-                                        className={`btn btn-sm gap-2 transition-all duration-300 shadow-lg hover:shadow-xl ${moderatorApproval === "rejected"
-                                            ? "bg-gradient-to-r from-red-500 to-pink-500 text-white border-none"
-                                            : "bg-white text-red-600 border-2 border-red-500 hover:bg-red-50 hover:border-red-600"
-                                            }`}
                                         disabled={moderatorApproval !== "pending"}
+                                        className={`group relative px-6 py-3 font-semibold rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 ${moderatorApproval === "rejected"
+                                                ? "bg-gradient-to-r from-red-600 to-pink-600 text-white hover:scale-105"
+                                                : "bg-white text-slate-700 border-2 border-slate-200 hover:border-red-300"
+                                            }`}
                                     >
-                                        <FiAlertCircle className="w-4 h-4" />
-                                        <span className="font-semibold">Reject</span>
+                                        {moderatorApproval === "rejected" && (
+                                            <div className="absolute inset-0 bg-gradient-to-r from-pink-600 to-red-600 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                                        )}
+                                        <div className="relative flex items-center gap-2">
+                                            <FiAlertCircle className="w-4 h-4" />
+                                            <span>Reject</span>
+                                        </div>
                                     </motion.button>
                                 </div>
 
@@ -573,10 +591,10 @@ export default function BlogGeneration({
                 className="flex justify-between pt-6"
             >
                 <motion.button
-                    whileHover={{ scale: 1.02, y: -2 }}
+                    whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.98 }}
                     onClick={onPrev}
-                    className="btn btn-outline btn-lg gap-2 bg-gradient-to-r from-base-200/50 to-base-300/50 backdrop-blur-sm border-white/20 hover:from-base-300/60 hover:to-base-200/60 transition-all duration-300 shadow-lg"
+                    className="px-8 py-4 bg-white text-slate-700 font-semibold rounded-2xl border-2 border-slate-200 hover:border-indigo-300 transition-all duration-300 hover:shadow-lg flex items-center gap-2"
                 >
                     <FiArrowLeft className="w-5 h-5" />
                     Back
@@ -584,9 +602,7 @@ export default function BlogGeneration({
 
                 <motion.button
                     whileHover={{
-                        scale: generationStatus === "success" && (!isModerator || moderatorApproval === "approved") ? 1.02 : 1,
-                        y: generationStatus === "success" && (!isModerator || moderatorApproval === "approved") ? -2 : 0,
-                        boxShadow: "0 10px 30px rgba(139, 92, 246, 0.3)"
+                        scale: generationStatus === "success" && (!isModerator || moderatorApproval === "approved") ? 1.05 : 1
                     }}
                     whileTap={{ scale: 0.98 }}
                     onClick={handleNext}
@@ -595,23 +611,13 @@ export default function BlogGeneration({
                         (isModerator && moderatorApproval !== "approved") ||
                         isLoading
                     }
-                    className="btn btn-lg gap-2 bg-gradient-to-r from-purple-600 via-blue-600 to-green-600 hover:from-purple-700 hover:via-blue-700 hover:to-green-700 border-none text-white shadow-xl disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 relative overflow-hidden"
+                    className="group relative px-8 py-4 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-semibold rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 overflow-hidden disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
                 >
-                    {/* Animated shine effect */}
-                    <motion.div
-                        animate={{
-                            x: [-100, 200],
-                            opacity: [0, 1, 0]
-                        }}
-                        transition={{
-                            duration: 2,
-                            repeat: Infinity,
-                            ease: "linear"
-                        }}
-                        className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent skew-x-12"
-                    />
-                    <span className="relative z-10">Review & Publish</span>
-                    <FiArrowRight className="w-5 h-5 relative z-10" />
+                    <div className="absolute inset-0 bg-gradient-to-r from-purple-600 to-indigo-600 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                    <div className="relative flex items-center gap-2">
+                        <span>Review & Publish</span>
+                        <FiArrowRight className="w-5 h-5" />
+                    </div>
                 </motion.button>
             </motion.div>
         </div>
