@@ -1,7 +1,7 @@
 // authMiddleware.ts
 import { Request, Response, NextFunction } from "express";
 import prisma from "@src/utils/client";
-import { JwtPayload, verifyAccessToken  } from "@utils/jwt";
+import { JwtPayload, verifyAccessToken } from "@utils/jwt";
 
 declare global {
   namespace Express {
@@ -16,16 +16,19 @@ export const authenticateJWT = async (
   res: Response,
   next: NextFunction
 ) => {
+  console.log(`[AUTH] ${req.method} ${req.path} - checking authentication`);
   const token = req.header("Authorization")?.split(" ")[1];
+  console.log(`[AUTH] Token: ${token ? token.substring(0, 20) + "..." : "none"}`);
 
   if (!token) {
+    console.log(`[AUTH] No token provided, returning 401`);
     res.status(401).json({ error: "Access token required" });
     return;
   }
 
   try {
-    const decoded = verifyAccessToken (token);
-    
+    const decoded = verifyAccessToken(token);
+
     // Verify user status in database
     const user = await prisma.user.findUnique({
       where: { id: decoded.userId },
