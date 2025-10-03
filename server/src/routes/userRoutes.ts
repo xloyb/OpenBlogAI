@@ -7,7 +7,9 @@ import {
     deleteUserController,
     getUserStatisticsController,
     getBlogStatisticsController,
-    toggleUserStatusController
+    toggleUserStatusController,
+    getUserProfileController,
+    getUserActivityController
 } from "@src/controllers/userController";
 import { authenticateJWT } from "@src/middlewares/authMiddleware";
 
@@ -24,19 +26,23 @@ const adminOnly = (req: any, res: any, next: any) => {
     next();
 };
 
-// Apply auth middleware to all routes
+// Apply auth middleware to protected routes
 router.use(authenticateJWT);
 
-// User CRUD operations (Admin only)
+// User profile routes (Authenticated users only) - MUST come before /:id routes
+router.get("/profile", getUserProfileController);
+router.get("/activity", getUserActivityController);
+
+// User statistics (Admin only) - MUST come before /:id routes
+router.get("/statistics/users", adminOnly, getUserStatisticsController);
+router.get("/statistics/blogs", adminOnly, getBlogStatisticsController);
+
+// User CRUD operations (Admin only) - Parameterized routes come last
 router.post("/", adminOnly, createUserController);
 router.get("/", adminOnly, getAllUsersController);
 router.get("/:id", adminOnly, getUserController);
 router.put("/:id", adminOnly, updateUserController);
 router.delete("/:id", adminOnly, deleteUserController);
 router.patch("/:id/toggle-status", adminOnly, toggleUserStatusController);
-
-// User statistics
-router.get("/statistics/users", adminOnly, getUserStatisticsController);
-router.get("/statistics/blogs", adminOnly, getBlogStatisticsController);
 
 export default router;
