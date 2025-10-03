@@ -267,8 +267,8 @@ export const getPublicBlogs = async (
             visible: 1, // Only visible blogs for public
         };
 
-        // Use cached service for public blogs to improve performance
-        const paginatedBlogs = await cachedBlogService.getBlogsWithPaginationCached(options);
+        // Use cached service for public blogs to improve performance (without user data)
+        const paginatedBlogs = await cachedBlogService.getPublicBlogsWithPaginationCached(options);
 
         // If search term is provided, filter results
         if (search && typeof search === 'string') {

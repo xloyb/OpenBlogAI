@@ -5,6 +5,7 @@ import * as blogService from './blogService';
 // Interface for cached blog service functions
 export interface CachedBlogService {
     getBlogsWithPaginationCached: typeof getBlogsWithPaginationCached;
+    getPublicBlogsWithPaginationCached: typeof getPublicBlogsWithPaginationCached;
     getBlogByIdCached: typeof getBlogByIdCached;
     getBlogBySlugCached: typeof getBlogBySlugCached;
     invalidateAllBlogCaches: typeof invalidateAllBlogCaches;
@@ -41,6 +42,35 @@ export const getBlogsWithPaginationCached = async (
         async () => {
             logger.debug(`Fetching paginated blogs from database: page=${page}, limit=${limit}, sortBy=${sortBy}, sortOrder=${sortOrder}`);
             return blogService.getBlogsWithPagination(options);
+        },
+        CACHE_TTL.PAGINATION,
+        CACHE_TTL.LOCK_TTL
+    );
+};
+
+/**
+ * Get public blogs with pagination (cached version without user data)
+ * This function implements cache stampede prevention for high-traffic scenarios
+ */
+export const getPublicBlogsWithPaginationCached = async (
+    options: Parameters<typeof blogService.getPublicBlogsWithPagination>[0] = {}
+): Promise<ReturnType<typeof blogService.getPublicBlogsWithPagination>> => {
+    const {
+        page = 1,
+        limit = 10,
+        sortBy = 'createdAt',
+        sortOrder = 'desc'
+    } = options;
+
+    // Generate cache key for public blogs
+    const cacheKey = generateCacheKey.blogPagination(1, page, limit, sortBy, sortOrder);
+
+    // Use cache manager with lock-based stampede prevention
+    return cacheManager.getWithLock(
+        cacheKey,
+        async () => {
+            logger.debug(`Fetching public paginated blogs from database: page=${page}, limit=${limit}, sortBy=${sortBy}, sortOrder=${sortOrder}`);
+            return blogService.getPublicBlogsWithPagination(options);
         },
         CACHE_TTL.PAGINATION,
         CACHE_TTL.LOCK_TTL
@@ -287,6 +317,7 @@ export const cacheHealthCheck = async (): Promise<{
 // Export all functions
 export const cachedBlogService = {
     getBlogsWithPaginationCached,
+    getPublicBlogsWithPaginationCached,
     getBlogByIdCached,
     getBlogBySlugCached,
     invalidateAllBlogCaches,

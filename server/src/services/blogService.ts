@@ -200,6 +200,63 @@ export const getBlogsWithPagination = async (options: PaginationOptions = {}): P
   };
 };
 
+// Public blogs function - excludes user data for privacy
+export const getPublicBlogsWithPagination = async (options: PaginationOptions = {}): Promise<PaginatedResponse<any>> => {
+  const {
+    page = 1,
+    limit = 10,
+    sortBy = 'createdAt',
+    sortOrder = 'desc'
+  } = options;
+
+  // Validate pagination parameters
+  const validatedPage = Math.max(1, page);
+  const validatedLimit = Math.min(Math.max(1, limit), 100); // Max 100 items per page
+  const skip = (validatedPage - 1) * validatedLimit;
+
+  // Validate sort parameters
+  const validSortFields = ['createdAt', 'updatedAt', 'subject', 'id'];
+  const validatedSortBy = validSortFields.includes(sortBy) ? sortBy : 'createdAt';
+  const validatedSortOrder = ['asc', 'desc'].includes(sortOrder) ? sortOrder : 'desc';
+
+  // Build where clause for public blogs only
+  const whereClause = { visible: 1 };
+
+  // Get total count for pagination metadata
+  const total = await prisma.blog.count({
+    where: whereClause,
+  });
+
+  // Get paginated data without user information
+  const data = await prisma.blog.findMany({
+    where: whereClause,
+    include: {
+      video: true
+      // Exclude user data for public endpoint
+    },
+    orderBy: { [validatedSortBy]: validatedSortOrder },
+    skip,
+    take: validatedLimit,
+  });
+
+  // Calculate pagination metadata
+  const totalPages = Math.ceil(total / validatedLimit);
+  const hasNextPage = validatedPage < totalPages;
+  const hasPrevPage = validatedPage > 1;
+
+  return {
+    data,
+    meta: {
+      total,
+      page: validatedPage,
+      limit: validatedLimit,
+      totalPages,
+      hasNextPage,
+      hasPrevPage,
+    },
+  };
+};
+
 export const updateBlog = async (id: number, data: {
   subject?: string;
   content?: string;
