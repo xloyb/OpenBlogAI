@@ -1,5 +1,11 @@
 import { Request, Response, NextFunction } from "express";
-import { YoutubeTranscript } from "youtube-transcript";
+import {
+  fetchTranscript,
+  YoutubeTranscriptDisabledError,
+  YoutubeTranscriptNotAvailableError,
+  YoutubeTranscriptVideoUnavailableError,
+  YoutubeTranscriptInvalidVideoIdError
+} from "@egoist/youtube-transcript-plus";
 import axios from "axios";
 import { createTranscript } from "@src/services/transcriptService";
 import { findOrCreateVideo } from "@src/services/videoService";
@@ -27,13 +33,13 @@ export const extractTranscript = async (
     //   return;
     // }
 
-    // Fetch the video title
-    const title = await getVideoTitle(videoId);
-    console.log("title:", title);
+    // Fetch the transcript using @egoist/youtube-transcript-plus
+    const transcriptData = await fetchTranscript(videoId);
 
-    // Fetch the transcript using the youtube-transcript package
-    const transcript = await YoutubeTranscript.fetchTranscript(videoId);
-    const formattedTranscript = transcript.map((entry) => entry.text).join(" ").trim();
+    // Extract title and transcript from response
+    const title = transcriptData.title.replace(" - YouTube", "");
+    const formattedTranscript = transcriptData.segments.map((entry: any) => entry.text).join(" ").trim();
+    console.log("title:", title);
     console.log("formattedTranscript:", formattedTranscript);
 
     // Validate transcript content
@@ -69,23 +75,37 @@ export const extractTranscript = async (
   } catch (error) {
     console.error("Transcript extraction error:", error);
 
-    // Handle specific YouTube transcript errors
-    if (error instanceof Error) {
-      if (error.message.includes('Transcript is disabled') || error.message.includes('No transcript')) {
-        res.status(400).json({
-          error: true,
-          message: "Transcript is not available for this video. Please try a different video with captions enabled."
-        });
-        return;
-      }
+    // Handle specific YouTube transcript errors from @egoist/youtube-transcript-plus
+    if (error instanceof YoutubeTranscriptDisabledError) {
+      res.status(400).json({
+        error: true,
+        message: "Transcript is disabled for this video. Please try a different video with captions enabled."
+      });
+      return;
+    }
 
-      if (error.message.includes('Video unavailable') || error.message.includes('Private video')) {
-        res.status(400).json({
-          error: true,
-          message: "Video is unavailable or private. Please check the video URL and try again."
-        });
-        return;
-      }
+    if (error instanceof YoutubeTranscriptNotAvailableError) {
+      res.status(400).json({
+        error: true,
+        message: "Transcript is not available for this video. Please try a different video with captions enabled."
+      });
+      return;
+    }
+
+    if (error instanceof YoutubeTranscriptVideoUnavailableError) {
+      res.status(400).json({
+        error: true,
+        message: "Video is unavailable or private. Please check the video URL and try again."
+      });
+      return;
+    }
+
+    if (error instanceof YoutubeTranscriptInvalidVideoIdError) {
+      res.status(400).json({
+        error: true,
+        message: "Invalid video ID provided. Please check the video URL and try again."
+      });
+      return;
     }
 
     next(error);
