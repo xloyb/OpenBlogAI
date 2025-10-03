@@ -1,8 +1,19 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { motion } from "framer-motion";
-import { FiCalendar, FiFileText, FiClock, FiEye, FiArrowRight } from "react-icons/fi";
+import {
+  FiCalendar,
+  FiFileText,
+  FiClock,
+  FiEye,
+  FiArrowRight,
+  FiSearch,
+  FiChevronLeft,
+  FiChevronRight,
+  FiArrowUp,
+  FiArrowDown
+} from "react-icons/fi";
 import Link from "next/link";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
@@ -18,7 +29,6 @@ interface Blog {
   updatedAt: string;
   user?: {
     id: string;
-    name: string;
     email: string;
   };
   video?: {
@@ -29,20 +39,59 @@ interface Blog {
   };
 }
 
+interface BlogsResponse {
+  success: boolean;
+  data: Blog[];
+  meta: {
+    total: number;
+    page: number;
+    limit: number;
+    totalPages: number;
+    hasNextPage: boolean;
+    hasPrevPage: boolean;
+  };
+  query: {
+    page: number;
+    limit: number;
+    sortBy: string;
+    sortOrder: string;
+    search: string | null;
+  };
+}
+
+type SortField = 'createdAt' | 'updatedAt' | 'subject' | 'id';
+type SortOrder = 'asc' | 'desc';
+
 export default function PublicBlogsPage() {
-  const [blogs, setBlogs] = useState<Blog[]>([]);
+  const [blogsData, setBlogsData] = useState<BlogsResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  useEffect(() => {
-    fetchPublicBlogs();
-  }, []);
+  // Pagination and filtering state
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize] = useState(9);
+  const [sortBy, setSortBy] = useState<SortField>('createdAt');
+  const [sortOrder, setSortOrder] = useState<SortOrder>('desc');
+  const [searchTerm, setSearchTerm] = useState('');
+  const [searchInput, setSearchInput] = useState('');
 
-  const fetchPublicBlogs = async () => {
+  const fetchPublicBlogs = useCallback(async () => {
     try {
       setLoading(true);
       const baseUrl = process.env.NEXT_PUBLIC_SERVER_URL || 'http://localhost:8082';
-      const response = await fetch(`${baseUrl}/api/blog/public/blogs`, {
+
+      const params = new URLSearchParams({
+        page: currentPage.toString(),
+        limit: pageSize.toString(),
+        sortBy: sortBy,
+        sortOrder: sortOrder,
+      });
+
+      if (searchTerm.trim()) {
+        params.set('search', searchTerm.trim());
+      }
+
+      const response = await fetch(`${baseUrl}/api/blog/public/blogs?${params}`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -53,15 +102,47 @@ export default function PublicBlogsPage() {
         throw new Error(`HTTP ${response.status}: ${response.statusText}`);
       }
 
-      const data = await response.json();
-      const visibleBlogs = data.filter((blog: Blog) => blog.visible === 1);
-      setBlogs(visibleBlogs);
+      const data: BlogsResponse = await response.json();
+      setBlogsData(data);
+      setError('');
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to fetch blogs");
+      setBlogsData(null);
     } finally {
       setLoading(false);
     }
-  };
+  }, [currentPage, pageSize, sortBy, sortOrder, searchTerm]);
+
+  useEffect(() => {
+    fetchPublicBlogs();
+  }, [fetchPublicBlogs]);
+
+  const handleSearch = useCallback((e: React.FormEvent) => {
+    e.preventDefault();
+    setSearchTerm(searchInput);
+    setCurrentPage(1); // Reset to first page when searching
+  }, [searchInput]);
+
+  const handleSortChange = useCallback((field: SortField) => {
+    if (field === sortBy) {
+      setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortBy(field);
+      setSortOrder('desc');
+    }
+    setCurrentPage(1);
+  }, [sortBy, sortOrder]);
+
+  const handlePageChange = useCallback((page: number) => {
+    setCurrentPage(page);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, []);
+
+  const clearSearch = useCallback(() => {
+    setSearchInput('');
+    setSearchTerm('');
+    setCurrentPage(1);
+  }, []);
 
   const getWordCount = (content: string) => {
     return content.split(/\s+/).filter(word => word.length > 0).length;
@@ -109,6 +190,9 @@ export default function PublicBlogsPage() {
       .replace(/\n+/g, ' ') // Replace newlines with spaces
       .trim(); // Remove leading/trailing whitespace
   };
+
+  const blogs = blogsData?.data || [];
+  const meta = blogsData?.meta;
 
   if (loading) {
     return (
@@ -172,35 +256,90 @@ export default function PublicBlogsPage() {
           </p>
         </motion.div>
 
-        {blogs.length > 0 && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.2 }}
-            className="mb-12"
-          >
-            <div className="bg-white/70 backdrop-blur-sm rounded-2xl p-6 border border-slate-200 shadow-lg">
-              <div className="flex items-center justify-center space-x-8">
-                <div className="text-center">
-                  <div className="text-3xl font-bold text-indigo-600">{blogs.length}</div>
-                  <div className="text-sm text-slate-600">Public Blogs</div>
+        {/* Search and Filter Controls */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.2 }}
+          className="mb-8"
+        >
+          <div className="bg-white/70 backdrop-blur-sm rounded-2xl p-6 border border-slate-200 shadow-lg">
+            <div className="flex flex-col lg:flex-row gap-4 items-center">
+              {/* Search Bar */}
+              <form onSubmit={handleSearch} className="flex-1 max-w-md">
+                <div className="relative">
+                  <FiSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-5 h-5" />
+                  <input
+                    type="text"
+                    placeholder="Search blogs..."
+                    value={searchInput}
+                    onChange={(e) => setSearchInput(e.target.value)}
+                    className="w-full pl-10 pr-4 py-3 bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-300"
+                  />
+                  {searchTerm && (
+                    <button
+                      type="button"
+                      onClick={clearSearch}
+                      className="absolute right-3 top-1/2 transform -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
+                    >
+                      ×
+                    </button>
+                  )}
                 </div>
-                <div className="text-center">
-                  <div className="text-3xl font-bold text-purple-600">
-                    {blogs.length > 0 ? Math.round(blogs.reduce((acc, blog) => acc + getWordCount(blog.content), 0) / blogs.length) : 0}
-                  </div>
-                  <div className="text-sm text-slate-600">Avg Words</div>
-                </div>
-                <div className="text-center">
-                  <div className="text-3xl font-bold text-emerald-600">
-                    {blogs.length > 0 ? Math.round(blogs.reduce((acc, blog) => acc + getReadingTime(blog.content), 0) / blogs.length) : 0}
-                  </div>
-                  <div className="text-sm text-slate-600">Avg Read Time</div>
-                </div>
+              </form>
+
+              {/* Sort Controls */}
+              <div className="flex items-center gap-2">
+                <span className="text-sm text-slate-600 mr-2">Sort by:</span>
+                <button
+                  onClick={() => handleSortChange('createdAt')}
+                  className={`px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 flex items-center gap-1 ${sortBy === 'createdAt'
+                      ? 'bg-indigo-100 text-indigo-700'
+                      : 'bg-white text-slate-600 hover:bg-slate-50'
+                    }`}
+                >
+                  Date
+                  {sortBy === 'createdAt' && (
+                    sortOrder === 'desc' ? <FiArrowDown className="w-3 h-3" /> : <FiArrowUp className="w-3 h-3" />
+                  )}
+                </button>
+                <button
+                  onClick={() => handleSortChange('subject')}
+                  className={`px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 flex items-center gap-1 ${sortBy === 'subject'
+                      ? 'bg-indigo-100 text-indigo-700'
+                      : 'bg-white text-slate-600 hover:bg-slate-50'
+                    }`}
+                >
+                  Title
+                  {sortBy === 'subject' && (
+                    sortOrder === 'desc' ? <FiArrowDown className="w-3 h-3" /> : <FiArrowUp className="w-3 h-3" />
+                  )}
+                </button>
               </div>
             </div>
-          </motion.div>
-        )}
+
+            {/* Stats Bar */}
+            {meta && (
+              <div className="flex flex-wrap items-center justify-between mt-4 pt-4 border-t border-slate-200">
+                <div className="flex items-center gap-6 text-sm text-slate-600">
+                  <span>Total: <strong>{meta.total}</strong> blogs</span>
+                  <span>Page: <strong>{meta.page}</strong> of <strong>{meta.totalPages}</strong></span>
+                  {searchTerm && (
+                    <span>Searching for: <strong>&ldquo;{searchTerm}&rdquo;</strong></span>
+                  )}
+                </div>
+                <div className="flex items-center gap-4 text-sm text-slate-600">
+                  {blogs.length > 0 && (
+                    <>
+                      <span>Avg: <strong>{Math.round(blogs.reduce((acc: number, blog: Blog) => acc + getWordCount(blog.content), 0) / blogs.length)}</strong> words</span>
+                      <span><strong>{Math.round(blogs.reduce((acc: number, blog: Blog) => acc + getReadingTime(blog.content), 0) / blogs.length)}</strong> min read</span>
+                    </>
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
+        </motion.div>
 
         {blogs.length === 0 ? (
           <motion.div
@@ -212,82 +351,160 @@ export default function PublicBlogsPage() {
             <div className="w-20 h-20 bg-gradient-to-r from-indigo-100 to-purple-100 rounded-2xl flex items-center justify-center mx-auto mb-6">
               <FiFileText className="w-10 h-10 text-indigo-600" />
             </div>
-            <h2 className="text-3xl font-bold mb-4 text-slate-800">No Public Blogs Yet</h2>
+            <h2 className="text-3xl font-bold mb-4 text-slate-800">
+              {searchTerm ? `No blogs found for "${searchTerm}"` : 'No Public Blogs Yet'}
+            </h2>
             <p className="text-slate-600 text-lg mb-8">
-              Be the first to create and share amazing AI-generated content with the community!
+              {searchTerm
+                ? 'Try adjusting your search terms or clearing the search to see all blogs.'
+                : 'Be the first to create and share amazing AI-generated content with the community!'
+              }
             </p>
-            <Link
-              href="/login"
-              className="inline-flex items-center px-8 py-4 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-semibold rounded-2xl hover:shadow-xl transition-all duration-300 hover:scale-105"
-            >
-              Get Started
-              <FiArrowRight className="ml-2 w-5 h-5" />
-            </Link>
+            {searchTerm ? (
+              <button
+                onClick={clearSearch}
+                className="inline-flex items-center px-8 py-4 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-semibold rounded-2xl hover:shadow-xl transition-all duration-300 hover:scale-105"
+              >
+                Clear Search
+                <FiArrowRight className="ml-2 w-5 h-5" />
+              </button>
+            ) : (
+              <Link
+                href="/login"
+                className="inline-flex items-center px-8 py-4 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-semibold rounded-2xl hover:shadow-xl transition-all duration-300 hover:scale-105"
+              >
+                Get Started
+                <FiArrowRight className="ml-2 w-5 h-5" />
+              </Link>
+            )}
           </motion.div>
         ) : (
-          <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
-            {blogs.map((blog, index) => (
-              <motion.article
-                key={blog.id}
-                initial={{ opacity: 0, y: 30 }}
+          <>
+            {/* Blog Grid */}
+            <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3 mb-12">
+              {blogs.map((blog: Blog, index: number) => (
+                <motion.article
+                  key={blog.id}
+                  initial={{ opacity: 0, y: 30 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.6, delay: index * 0.1 }}
+                  className="group bg-white/70 backdrop-blur-sm rounded-3xl p-8 border border-slate-200 shadow-lg hover:shadow-2xl transition-all duration-500 hover:scale-105 hover:bg-white/80"
+                >
+                  <div className="mb-6">
+                    <h2 className="text-2xl font-bold text-slate-800 mb-4 group-hover:text-indigo-600 transition-colors duration-300 line-clamp-2">
+                      {cleanMarkdown(blog.subject)}
+                    </h2>
+
+                    <div className="flex items-center justify-between text-sm text-slate-500 mb-4">
+                      <div className="flex items-center space-x-4">
+                        <div className="flex items-center">
+                          <FiCalendar className="w-4 h-4 mr-1" />
+                          {formatDate(blog.createdAt)}
+                        </div>
+                        <div className="flex items-center">
+                          <FiClock className="w-4 h-4 mr-1" />
+                          {getReadingTime(blog.content)} min read
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="mb-6">
+                    <div className="text-slate-600 leading-relaxed line-clamp-4 prose prose-slate max-w-none">
+                      <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                        {getPreviewText(blog.content)}
+                      </ReactMarkdown>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center justify-between pt-6 border-t border-slate-200">
+                    <div className="flex items-center space-x-4 text-sm text-slate-500">
+                      <div className="flex items-center">
+                        <FiFileText className="w-4 h-4 mr-1" />
+                        {getWordCount(blog.content)} words
+                      </div>
+                      {blog.video && (
+                        <div className="flex items-center">
+                          <FiEye className="w-4 h-4 mr-1" />
+                          Video Source
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="mt-6">
+                    <Link
+                      href={`/blogs/${createSlug(blog.subject, blog.createdAt)}`}
+                      className="inline-flex items-center text-indigo-600 font-semibold hover:text-indigo-700 transition-colors duration-300 group-hover:scale-105"
+                    >
+                      Read More
+                      <FiArrowRight className="ml-2 w-4 h-4 transform group-hover:translate-x-1 transition-transform duration-300" />
+                    </Link>
+                  </div>
+                </motion.article>
+              ))}
+            </div>
+
+            {/* Pagination */}
+            {meta && meta.totalPages > 1 && (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: index * 0.1 }}
-                className="group bg-white/70 backdrop-blur-sm rounded-3xl p-8 border border-slate-200 shadow-lg hover:shadow-2xl transition-all duration-500 hover:scale-105 hover:bg-white/80"
+                transition={{ duration: 0.6, delay: 0.3 }}
+                className="flex items-center justify-center gap-2"
               >
-                <div className="mb-6">
-                  <h2 className="text-2xl font-bold text-slate-800 mb-4 group-hover:text-indigo-600 transition-colors duration-300 line-clamp-2">
-                    {cleanMarkdown(blog.subject)}
-                  </h2>
+                <button
+                  onClick={() => handlePageChange(currentPage - 1)}
+                  disabled={!meta.hasPrevPage}
+                  className={`p-2 rounded-lg transition-all duration-200 ${meta.hasPrevPage
+                      ? 'bg-white text-slate-600 hover:bg-slate-50 border border-slate-200'
+                      : 'bg-slate-100 text-slate-400 cursor-not-allowed'
+                    }`}
+                >
+                  <FiChevronLeft className="w-5 h-5" />
+                </button>
 
-                  <div className="flex items-center justify-between text-sm text-slate-500 mb-4">
-                    <div className="flex items-center space-x-4">
-                      <div className="flex items-center">
-                        <FiCalendar className="w-4 h-4 mr-1" />
-                        {formatDate(blog.createdAt)}
-                      </div>
-                      <div className="flex items-center">
-                        <FiClock className="w-4 h-4 mr-1" />
-                        {getReadingTime(blog.content)} min read
-                      </div>
-                    </div>
-                  </div>
+                <div className="flex items-center gap-1">
+                  {Array.from({ length: Math.min(7, meta.totalPages) }, (_, i) => {
+                    let pageNum;
+                    if (meta.totalPages <= 7) {
+                      pageNum = i + 1;
+                    } else if (currentPage <= 4) {
+                      pageNum = i + 1;
+                    } else if (currentPage >= meta.totalPages - 3) {
+                      pageNum = meta.totalPages - 6 + i;
+                    } else {
+                      pageNum = currentPage - 3 + i;
+                    }
+
+                    return (
+                      <button
+                        key={pageNum}
+                        onClick={() => handlePageChange(pageNum)}
+                        className={`w-10 h-10 rounded-lg transition-all duration-200 text-sm font-medium ${pageNum === currentPage
+                            ? 'bg-indigo-600 text-white'
+                            : 'bg-white text-slate-600 hover:bg-slate-50 border border-slate-200'
+                          }`}
+                      >
+                        {pageNum}
+                      </button>
+                    );
+                  })}
                 </div>
 
-                <div className="mb-6">
-                  <div className="text-slate-600 leading-relaxed line-clamp-4 prose prose-slate max-w-none">
-                    <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                      {getPreviewText(blog.content)}
-                    </ReactMarkdown>
-                  </div>
-                </div>
-
-                <div className="flex items-center justify-between pt-6 border-t border-slate-200">
-                  <div className="flex items-center space-x-4 text-sm text-slate-500">
-                    <div className="flex items-center">
-                      <FiFileText className="w-4 h-4 mr-1" />
-                      {getWordCount(blog.content)} words
-                    </div>
-                    {blog.video && (
-                      <div className="flex items-center">
-                        <FiEye className="w-4 h-4 mr-1" />
-                        Video Source
-                      </div>
-                    )}
-                  </div>
-                </div>
-
-                <div className="mt-6">
-                  <Link
-                    href={`/blogs/${createSlug(blog.subject, blog.createdAt)}`}
-                    className="inline-flex items-center text-indigo-600 font-semibold hover:text-indigo-700 transition-colors duration-300 group-hover:scale-105"
-                  >
-                    Read More
-                    <FiArrowRight className="ml-2 w-4 h-4 transform group-hover:translate-x-1 transition-transform duration-300" />
-                  </Link>
-                </div>
-              </motion.article>
-            ))}
-          </div>
+                <button
+                  onClick={() => handlePageChange(currentPage + 1)}
+                  disabled={!meta.hasNextPage}
+                  className={`p-2 rounded-lg transition-all duration-200 ${meta.hasNextPage
+                      ? 'bg-white text-slate-600 hover:bg-slate-50 border border-slate-200'
+                      : 'bg-slate-100 text-slate-400 cursor-not-allowed'
+                    }`}
+                >
+                  <FiChevronRight className="w-5 h-5" />
+                </button>
+              </motion.div>
+            )}
+          </>
         )}
       </div>
     </div>
