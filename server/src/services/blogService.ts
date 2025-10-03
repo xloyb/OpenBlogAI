@@ -1,8 +1,31 @@
 import prisma from "@src/utils/client";
 
-export const createBlog = async (data: { subject: string; content: string; userId: string; videoId?: number; visible?: number }) => {
+export const createBlog = async (data: {
+  subject: string;
+  content: string;
+  userId: string;
+  videoId?: number;
+  visible?: number;
+  seoTitle?: string;
+  seoDescription?: string;
+  seoKeywords?: string[];
+  seoFaq?: string[];
+}) => {
   return await prisma.blog.create({
-    data,
+    data: {
+      ...data,
+      seoKeywords: data.seoKeywords || undefined,
+      seoFaq: data.seoFaq || undefined,
+    },
+    include: {
+      user: {
+        select: {
+          id: true,
+          email: true,
+        }
+      },
+      video: true
+    }
   });
 };
 
@@ -177,10 +200,31 @@ export const getBlogsWithPagination = async (options: PaginationOptions = {}): P
   };
 };
 
-export const updateBlog = async (id: number, data: { subject?: string; content?: string; visible?: number }) => {
+export const updateBlog = async (id: number, data: {
+  subject?: string;
+  content?: string;
+  visible?: number;
+  seoTitle?: string;
+  seoDescription?: string;
+  seoKeywords?: string[];
+  seoFaq?: string[];
+}) => {
   return await prisma.blog.update({
     where: { id },
-    data,
+    data: {
+      ...data,
+      seoKeywords: data.seoKeywords !== undefined ? data.seoKeywords : undefined,
+      seoFaq: data.seoFaq !== undefined ? data.seoFaq : undefined,
+    },
+    include: {
+      user: {
+        select: {
+          id: true,
+          email: true,
+        }
+      },
+      video: true
+    }
   });
 };
 

@@ -153,12 +153,19 @@ export const generateBlog = async (
             lines.find(line => line.trim().length > 0)?.substring(0, 100) ||
             "Generated Blog Post";
 
+        // Extract SEO fields from request body if provided
+        const { seoTitle, seoDescription, seoKeywords, seoFaq } = req.body as any;
+
         // Save the blog to the database
         const newBlog = await createBlog({
             subject: title,
             content: rawBlog,
             visible: 1,
             userId: uid,
+            seoTitle,
+            seoDescription,
+            seoKeywords,
+            seoFaq,
         });
 
         // Mark for cache invalidation since we created a new public blog
@@ -328,7 +335,15 @@ export const getSingleBlog = async (
 };
 
 export const updateExistingBlog = async (
-    req: Request<{ id: string }, {}, { subject?: string; content?: string; visible?: number }>,
+    req: Request<{ id: string }, {}, {
+        subject?: string;
+        content?: string;
+        visible?: number;
+        seoTitle?: string;
+        seoDescription?: string;
+        seoKeywords?: string[];
+        seoFaq?: string[];
+    }>,
     res: Response,
     next: NextFunction
 ): Promise<void> => {

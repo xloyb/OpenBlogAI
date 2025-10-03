@@ -60,14 +60,18 @@ model Transcript {
 }
 
 model Blog {
-  id        Int      @id @default(autoincrement())
-  subject   String
-  content   String   @db.LongText
-  visible   Int      @default(1) // Status of the post (1 = visible, 0 = hidden)
-  videoId   Int?     @unique // Relation: A blog can have an associated video (optional)
-  video     Video?   @relation(fields: [videoId], references: [id])
-  userId    String // Relation: Blog belongs to a user
-  user      User     @relation(fields: [userId], references: [id])
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id             Int      @id @default(autoincrement())
+  subject        String
+  content        String   @db.LongText
+  visible        Int      @default(1) // Status of the post (1 = visible, 0 = hidden)
+  videoId        Int?     @unique // Relation: A blog can have an associated video (optional)
+  video          Video?   @relation(fields: [videoId], references: [id])
+  userId         String // Relation: Blog belongs to a user
+  user           User     @relation(fields: [userId], references: [id])
+  seoTitle       String?
+  seoDescription String?  @db.Text
+  seoKeywords    Json? // Array of strings stored as JSON
+  seoFaq         Json? // Array of strings stored as JSON
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
 }
