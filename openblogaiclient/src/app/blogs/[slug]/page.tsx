@@ -1,6 +1,15 @@
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
 import BlogDetailClient from "./BlogDetailClient";
+import {
+  generateStructuredData,
+  generateSEODescription,
+  generateSmartKeywords,
+  generateSocialTitle,
+  calculateReadingTime,
+  countWords,
+  type ModernSEOConfig
+} from "../../../../lib/modern-seo";
 
 interface Blog {
   id: number;
@@ -59,65 +68,175 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     return {
       title: "Blog Not Found - OpenBlogAI",
       description: "The requested blog post could not be found.",
+      robots: { index: false, follow: false }
     };
   }
 
-  // Extract first paragraph or truncate content for description
-  const defaultDescription = blog.content
-    ? blog.content.replace(/[#*`_~\[\]()]/g, '').substring(0, 160).replace(/\s+/g, ' ').trim()
-    : "";
+  // Generate modern SEO data
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://openblogai.com';
+  const readingTime = calculateReadingTime(blog.content);
+  const wordCount = countWords(blog.content);
 
+  // Smart title generation
   const seoTitle = blog.seoTitle || blog.subject || "Blog Post";
-  const seoDescription = blog.seoDescription || defaultDescription;
+  const socialTitle = generateSocialTitle(seoTitle);
   const fullTitle = `${seoTitle} - OpenBlogAI`;
 
-  return {
-    title: fullTitle,
+  // Smart description generation
+  const seoDescription = blog.seoDescription || generateSEODescription(blog.content, 155);
+
+  // Smart keyword generation
+  const smartKeywords = generateSmartKeywords(
+    seoTitle,
+    blog.content,
+    blog.seoKeywords || []
+  );
+
+  // Create SEO config for structured data
+  const seoConfig: ModernSEOConfig = {
+    title: seoTitle,
     description: seoDescription,
-    keywords: blog.seoKeywords?.join(', ') || undefined,
-    authors: blog.user ? [{ name: blog.user.name || blog.user.email }] : undefined,
-    creator: blog.user?.name || blog.user?.email || undefined,
-    publisher: "OpenBlogAI",
-    openGraph: {
-      title: seoTitle,
-      description: seoDescription,
-      type: "article",
+    keywords: smartKeywords,
+    author: blog.user ? {
+      name: blog.user.name || blog.user.email,
+      email: blog.user.email,
+      url: `${baseUrl}/author/${blog.user.id}`
+    } : undefined,
+    article: {
       publishedTime: blog.createdAt,
       modifiedTime: blog.updatedAt,
-      authors: blog.user ? [blog.user.name || blog.user.email] : undefined,
-      section: "Technology",
-      tags: blog.seoKeywords || undefined,
-      siteName: "OpenBlogAI",
+      section: blog.video ? "AI-Generated Content" : "Technology",
+      tags: smartKeywords,
+      readingTime,
+      wordCount
     },
+    faq: blog.seoFaq,
+    canonicalUrl: `${baseUrl}/blogs/${slug}`,
+    slug
+  };
+
+  // Generate comprehensive structured data
+  const structuredData = generateStructuredData(seoConfig);
+
+  return {
+    title: {
+      default: fullTitle,
+      template: "%s - OpenBlogAI"
+    },
+    description: seoDescription,
+    keywords: smartKeywords.join(', '),
+    authors: blog.user ? [{
+      name: blog.user.name || blog.user.email,
+      url: `${baseUrl}/author/${blog.user.id}`
+    }] : undefined,
+    creator: blog.user?.name || blog.user?.email,
+    publisher: "OpenBlogAI",
+    category: "Technology",
+    classification: "Blog Post",
+    referrer: "origin-when-cross-origin",
+    metadataBase: new URL(baseUrl),
+
+    // Open Graph (Facebook, LinkedIn, etc.)
+    openGraph: {
+      type: "article",
+      title: socialTitle,
+      description: seoDescription,
+      url: `/blogs/${slug}`,
+      siteName: "OpenBlogAI",
+      locale: "en_US",
+      publishedTime: blog.createdAt,
+      modifiedTime: blog.updatedAt,
+      expirationTime: undefined,
+      authors: blog.user ? [blog.user.name || blog.user.email] : undefined,
+      section: blog.video ? "AI-Generated Content" : "Technology",
+      tags: smartKeywords,
+      images: [
+        {
+          url: `/api/og-image/${slug}`, // Dynamic OG image
+          width: 1200,
+          height: 630,
+          alt: seoTitle,
+          type: "image/png"
+        }
+      ]
+    },
+
+    // Twitter/X Cards
     twitter: {
       card: "summary_large_image",
-      title: seoTitle,
+      site: "@OpenBlogAI",
+      creator: blog.user ? `@${blog.user.name?.replace(/\s+/g, '') || blog.user.email.split('@')[0]}` : "@OpenBlogAI",
+      title: socialTitle,
       description: seoDescription,
-      creator: blog.user ? `@${blog.user.name || blog.user.email.split('@')[0]}` : undefined,
+      images: [`${baseUrl}/api/og-image/${slug}`]
     },
+
+    // Search Engine Directives
     robots: {
       index: blog.visible === 1,
       follow: blog.visible === 1,
+      nocache: false,
+      googleBot: {
+        index: blog.visible === 1,
+        follow: blog.visible === 1,
+        noimageindex: false,
+        "max-video-preview": -1,
+        "max-image-preview": "large",
+        "max-snippet": -1
+      }
     },
+
+    // Canonical and Alternate URLs
     alternates: {
       canonical: `/blogs/${slug}`,
+      languages: {
+        "en-US": `/blogs/${slug}`,
+        "x-default": `/blogs/${slug}`
+      }
     },
+
+    // Additional metadata
+    applicationName: "OpenBlogAI",
+    generator: "OpenBlogAI Blog Platform",
+
+    // Verification and Analytics
+    verification: {
+      google: process.env.GOOGLE_SITE_VERIFICATION,
+      yandex: process.env.YANDEX_VERIFICATION,
+      yahoo: process.env.YAHOO_VERIFICATION,
+      other: {
+        "msvalidate.01": process.env.BING_VERIFICATION || ""
+      }
+    },
+
+    // Structured Data (JSON-LD)
     other: {
-      // Add structured data for FAQ if available
-      ...(blog.seoFaq && blog.seoFaq.length > 0 && {
-        'application-ld+json': JSON.stringify({
-          "@context": "https://schema.org",
-          "@type": "FAQPage",
-          "mainEntity": blog.seoFaq.map((faq) => ({
-            "@type": "Question",
-            "name": faq,
-            "acceptedAnswer": {
-              "@type": "Answer",
-              "text": `This question is answered in the blog post: ${seoTitle}`
-            }
-          }))
-        })
-      })
+      // Multiple structured data schemas
+      "application-ld+json": JSON.stringify(structuredData),
+
+      // Article specific meta tags
+      "article:published_time": blog.createdAt,
+      "article:modified_time": blog.updatedAt,
+      "article:author": blog.user?.name || blog.user?.email || "OpenBlogAI",
+      "article:section": blog.video ? "AI-Generated Content" : "Technology",
+      "article:tag": smartKeywords.join(","),
+
+      // Dublin Core metadata
+      "DC.title": seoTitle,
+      "DC.description": seoDescription,
+      "DC.creator": blog.user?.name || blog.user?.email || "OpenBlogAI",
+      "DC.publisher": "OpenBlogAI",
+      "DC.date": blog.createdAt,
+      "DC.type": "Blog Post",
+      "DC.format": "text/html",
+      "DC.language": "en-US",
+      "DC.rights": "© OpenBlogAI. All rights reserved.",
+
+      // Additional SEO tags
+      "reading-time": `${readingTime} min read`,
+      "word-count": wordCount.toString(),
+      "content-type": "blog-post",
+      "ai-generated": blog.video ? "true" : "false"
     }
   };
 }

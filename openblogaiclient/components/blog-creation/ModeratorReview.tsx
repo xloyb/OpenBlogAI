@@ -6,7 +6,7 @@ import { FiCheck, FiArrowLeft, FiEdit, FiEye, FiSave, FiShare2, FiAlertCircle, F
 import { useSession } from "next-auth/react";
 import ReactMarkdown from "react-markdown";
 import { blogAPI } from "../../lib/blog-api";
-import SEOFieldsForm from "./SEOFieldsForm";
+import ModernSEOFieldsForm from "./ModernSEOFieldsForm";
 import { SEOFieldsFormData } from "../../types/blog";
 
 interface StepData {
@@ -233,7 +233,7 @@ export default function ModeratorReview({ stepData, onPrev, isModerator }: Moder
             </motion.div>
 
             {/* SEO Fields Form */}
-            <SEOFieldsForm
+            <ModernSEOFieldsForm
                 onSEOFieldsChange={setSeoFields}
                 initialData={seoFields}
             />
