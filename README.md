@@ -1,6 +1,4 @@
-# OpenBlogAI 🤖✍️
-
-> Transform Y## 🎬 Project Showcase
+# OpenBlogAI V1 Beta Release 🤖
 
 Get a quick overview of OpenBlogAI's capabilities through these demonstration videos:
 
@@ -32,7 +30,7 @@ _Discover user profiles, admin controls, and platform statistics_
 
 OpenBlogAI is a full-stack blog generation platform that leverages artificial intelligence to automatically convert YouTube videos into comprehensive, SEO-optimized blog posts. Built with modern web technologies and multiple AI providers for maximum flexibility and performance.
 
-## � Project Journey & V1 Beta Release
+## OpenBlogAI V1 Beta Release
 
 After months of being away due to university commitments, I'm excited to announce the **V1 Beta release** of OpenBlogAI! This project represents a significant milestone in making AI-powered content creation accessible to everyone.
 
