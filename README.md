@@ -1,6 +1,40 @@
 # OpenBlogAI 🤖✍️
 
-> Transform YouTube videos into SEO-optimized blog posts using AI in under 60 seconds
+> Transform Y## 🎬 Project Showcase
+
+Get a quick overview of OpenBlogAI's capabilities through these demonstration videos:
+
+### 📝 Blog Creation Workflow
+
+_See how easy it is to create AI-powered blogs from YouTube videos_
+
+<video width="100%" autoplay muted loop>
+  <source src="https://github.com/xloyb/OpenBlogAI/raw/main/showcase/1.mp4" type="video/mp4">
+  Your browser does not support the video tag.
+</video>
+
+### 🎨 Site Design & Public Features
+
+_Explore the modern, responsive design and public blog browsing_
+
+<video width="100%" autoplay muted loop>
+  <source src="https://github.com/xloyb/OpenBlogAI/raw/main/showcase/2.mp4" type="video/mp4">
+  Your browser does not support the video tag.
+</video>
+
+### 👤 User Dashboard & Admin Panel
+
+_Discover user profiles, admin controls, and platform statistics_
+
+<video width="100%" autoplay muted loop>
+  <source src="https://github.com/xloyb/OpenBlogAI/raw/main/showcase/3.mp4" type="video/mp4">
+  Your browser does not support the video tag.
+</video>
+
+
+## 🌟 Features
+
+### Core Functionalityube videos into SEO-optimized blog posts using AI in under 60 seconds
 
 OpenBlogAI is a full-stack blog generation platform that leverages artificial intelligence to automatically convert YouTube videos into comprehensive, SEO-optimized blog posts. Built with modern web technologies and multiple AI providers for maximum flexibility and performance.
 
