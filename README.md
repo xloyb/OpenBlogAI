@@ -8,28 +8,22 @@ Get a quick overview of OpenBlogAI's capabilities through these demonstration vi
 
 _See how easy it is to create AI-powered blogs from YouTube videos_
 
-<video width="100%" autoplay muted loop>
-  <source src="https://github.com/xloyb/OpenBlogAI/raw/main/showcase/1.mp4" type="video/mp4">
-  Your browser does not support the video tag.
-</video>
+![](https://github.com/xloyb/OpenBlogAI/raw/main/showcase/GIFS/gif-1.gif)
+
 
 ### 🎨 Site Design & Public Features
 
 _Explore the modern, responsive design and public blog browsing_
 
-<video width="100%" autoplay muted loop>
-  <source src="https://github.com/xloyb/OpenBlogAI/raw/main/showcase/2.mp4" type="video/mp4">
-  Your browser does not support the video tag.
-</video>
+![](https://github.com/xloyb/OpenBlogAI/raw/main/showcase/GIFS/gif-2.gif)
+
 
 ### 👤 User Dashboard & Admin Panel
 
 _Discover user profiles, admin controls, and platform statistics_
 
-<video width="100%" autoplay muted loop>
-  <source src="https://github.com/xloyb/OpenBlogAI/raw/main/showcase/3.mp4" type="video/mp4">
-  Your browser does not support the video tag.
-</video>
+![](https://github.com/xloyb/OpenBlogAI/raw/main/showcase/GIFS/gif-3.gif)
+
 
 
 ## 🌟 Features
